@@ -21,7 +21,7 @@ CFLAGS+=	-pedantic-errors -Wall
 # Comment an option out with a # if you want to disable the option
 
 # Enable bounds checking?
-COPTS+=		-DBOUNDS_CHECKING
+DEFS+=		-DBOUNDS_CHECKING
 
 # Enable debug code?
-COPTS+=		-DDEBUG
+DEFS+=		-DDEBUG

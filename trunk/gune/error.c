@@ -39,7 +39,7 @@
 #include <gune/types.h>
 #include <gune/error.h>
 
-static FILE *logfile = stderr;
+static FILE *logfile = NULL;
 
 /**
  * Description strings for the different warning levels
@@ -109,6 +109,9 @@ log_entry(warnlvl lvl, const char *msg, ...)
 	int ret = 0;
 	va_list ap;
 	va_start(ap, msg);
+
+	if (logfile == NULL)
+		logfile = stderr;
 
 	if (fprintf(logfile, warnlvl_descr[lvl]) == -1 ||
 	  fprintf(logfile, ": ") == -1 || vfprintf(logfile, msg, ap) == -1 ||

@@ -268,7 +268,7 @@ sll_append_head(sll ll, gendata data)
 sll
 sll_forward(sll ll, unsigned int nskip)
 {
-	int i;
+	unsigned int i;
 
 	assert(ll != NULL);
 	assert(ll != ERROR_PTR);
@@ -560,7 +560,7 @@ dll_append_head(dll ll, gendata data)
 dll
 dll_forward(dll ll, unsigned int nskip)
 {
-	int i;
+	unsigned int i;
 
 	assert(ll != NULL);
 	assert(ll != ERROR_PTR);
@@ -592,7 +592,7 @@ dll_forward(dll ll, unsigned int nskip)
 dll
 dll_backward(dll ll, unsigned int nskip)
 {
-	int i;
+	unsigned int i;
 
 	assert(ll != NULL);
 	assert(ll != ERROR_PTR);

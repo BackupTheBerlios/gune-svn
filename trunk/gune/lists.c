@@ -38,7 +38,6 @@
 #include <stdlib.h>
 
 #include <gune/lists.h>
-#include <gune/types.h>
 #include <gune/error.h>
 
 sll_t   * const ERROR_SLL   = (void *)error_dummy_func;

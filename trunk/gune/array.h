@@ -41,6 +41,15 @@
 extern "C" {
 #endif
 
+/** Array implementation */
+typedef struct array_t {
+	void *data;
+	int len;
+} array_t, *array;
+
+/** Invalid array, used as error return value */
+extern array_t * const ERROR_ARRAY;
+
 #ifdef __cplusplus
 }
 #endif

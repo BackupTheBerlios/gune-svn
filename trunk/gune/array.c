@@ -37,5 +37,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gune/types.h>
 #include <gune/error.h>
+#include <gune/array.h>
+
+array_t * const ERROR_ARRAY = (void *)error_dummy_func;
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+

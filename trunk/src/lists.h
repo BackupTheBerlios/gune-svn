@@ -60,6 +60,10 @@ bool sll_is_empty(sll);
 sll sll_remove_head(sll);
 sll sll_prepend_head(sll, void *);
 
+/* Accessor functions */
+void *sll_get_data(sll);
+sll sll_forward(sll, unsigned int);
+
 #ifdef DEBUG
 void sll_dump(sll, char *);
 #endif
@@ -84,6 +88,11 @@ bool dll_is_empty(dll);
 dll dll_remove_head(dll);
 dll dll_prepend_head(dll, void *);
 
+/* Accessor functions */
+void *dll_get_data(dll);
+dll dll_forward(dll, unsigned int);
+dll dll_backward(dll, unsigned int);
+
 #ifdef DEBUG
 void dll_dump(dll, char *);
 #endif
@@ -91,19 +100,18 @@ void dll_dump(dll, char *);
 
 /** Stack implementation */
 typedef struct stack_t {
-	void *data;
-	struct stack_t *head;
+	sll top;
 } stack_t, *stack;
 
 /** Invalid stack, used as error return value */
 extern const stack_t * const ERROR_STACK;
 
-stack stack_new(void);
+stack stack_create(void);
 void *stack_pop(stack);
 void *stack_peek(stack);
-stack stack_push(stack, void *);
+void stack_push(stack, void *);
 bool stack_is_empty(stack);
-void stack_free(stack);
+void stack_destroy(stack);
 
 
 /** Queue implementation */
@@ -117,12 +125,12 @@ typedef struct queue_t {
 /** Invalid queue, used as error return value */
 extern const queue_t * const ERROR_QUEUE;
 
-queue queue_new(void);
+queue queue_create(void);
 queue queue_enqueue(queue, void *);
 void *queue_dequeue(queue);
 void *queue_peek(queue);
 bool queue_is_empty(queue);
-void queue_free(queue);
+void queue_destroy(queue);
 
 #ifdef __cplusplus
 }

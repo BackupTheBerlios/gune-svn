@@ -49,10 +49,10 @@ const int list_error_ptr;
  * and allocating memory on the heap for each new type we invent.  This
  * workaround may seem ugly, but it's the only way to get the desired effect.
  */
-const sll_t   * const ERROR_SLL   = (const void * const)&list_error_ptr;
-const dll_t   * const ERROR_DLL   = (const void * const)&list_error_ptr;
-const stack_t * const ERROR_STACK = (const void * const)&list_error_ptr;
-const queue_t * const ERROR_QUEUE = (const void * const)&list_error_ptr;
+const sll_t   * const ERROR_SLL   = (const void *)&list_error_ptr;
+const dll_t   * const ERROR_DLL   = (const void *)&list_error_ptr;
+const stack_t * const ERROR_STACK = (const void *)&list_error_ptr;
+const queue_t * const ERROR_QUEUE = (const void *)&list_error_ptr;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -80,7 +80,7 @@ sll_create(void)
 void
 sll_destroy(sll ll)
 {
-	assert(ll != ERROR_SLL);
+	assert(ll != ERROR_SLL && ll != NULL);
 
 	while (!sll_is_empty(ll))
 		ll = sll_remove_head(ll);
@@ -101,7 +101,7 @@ sll_count(sll ll)
 {
 	int count;
 
-	assert(ll != ERROR_SLL);
+	assert(ll != ERROR_SLL && ll != NULL);
 
 	for (count = 0; ll != NULL; ++count, ll = ll->next)
 		continue;
@@ -154,7 +154,7 @@ sll_remove_head(sll ll)
  * \return  The new linked list or ERROR_SLL in case of error.  Old linked list
  *          has become invalid, unless an error occurred.
  *
- * \sa  sll_append dll_prepend_head
+ * \sa  sll_append_head dll_prepend_head
  */
 sll
 sll_prepend_head(sll ll, void *data)
@@ -163,7 +163,7 @@ sll_prepend_head(sll ll, void *data)
 
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(sll_t))) == NULL)
-		return ERROR_SLL;
+		return (sll)ERROR_SLL;
 	new->data = data;
 
 	/* Prepend to the current list */
@@ -173,30 +173,47 @@ sll_prepend_head(sll ll, void *data)
 
 
 /**
- * Gets the element at the given index from the singly linked list.
+ * Search forward in a singly linked list.
  *
- * \param ll     The singly linked list to look in.
- * \param index  The index of the element to get.
+ * \param ll     The singly linked list to search in.
+ * \param nskip  The number of elements to search forward.
  *
- * \param A pointer to the element.
+ * \return The list at the indexed position, or ERROR_SLL if the index
+ *          is out of bounds.
  *
- * \sa dll_getelem
+ * \sa dll_forward
  */
-void *
-sll_getelem(sll ll, unsigned int index)
+sll
+sll_forward(sll ll, unsigned int nskip)
 {
 	int i;
 
-#ifdef BOUNDS_CHECKING
-	if (index >= sll_count(ll)) {
-		printf("Gune (in sll_getelem): Index %d out of bounds.\n",
-		       index);
-		exit(1);
-	}
-#endif
+	assert(ll != ERROR_SLL && ll != NULL);
 
-	for (i = 0; i < index; ++i)
+	for (i = 0; i < nskip; ++i) {
+		if (ll == NULL)
+			return (sll)ERROR_SLL;
 		ll = ll->next;
+	}
+
+	return ll;
+}
+
+
+/**
+ * Get the data at the current position from a singly linked list.
+ *
+ * \param ll     The singly linked list to look in.
+ *
+ * \return A pointer to the data
+ *
+ * \sa dll_get_data
+ */
+void *
+sll_get_data(sll ll)
+{
+	assert(ll != ERROR_SLL && ll != NULL);
+
 	return ll->data;
 }
 
@@ -323,9 +340,9 @@ dll_remove_head(dll ll)
 dll
 dll_prepend_head(dll ll, void *data)
 {
-	dll_elem *new;
+	dll_t *new;
 
-	if ((new = malloc(sizeof(dll_elem))) == NULL)
+	if ((new = malloc(sizeof(dll_t))) == NULL)
 		return NULL;
 	new->data = data;
 	new->next = ll;
@@ -336,30 +353,75 @@ dll_prepend_head(dll ll, void *data)
 
 
 /**
- * Gets the element at the given index from the doubly linked list.
+ * Search forward in a doubly linked list.
  *
- * \param ll     The doubly linked list to look in.
- * \param index  The index of the element to get.
+ * \param ll     The doubly linked list to search in.
+ * \param nskip  The number of elements to search forward.
  *
- * \param A pointer to the element.
+ * \return The list at the indexed position, or ERROR_DLL if the index
+ *          is out of bounds.
  *
- * \sa dll_getelem
+ * \sa sll_forward, dll_backward
  */
-void *
-dll_getelem(dll ll, unsigned int index)
+dll
+dll_forward(dll ll, unsigned int nskip)
 {
 	int i;
 
-#ifdef BOUNDS_CHECKING
-	if (index >= dll_count(ll)) {
-		printf("Gune (in dll_getelem): Index %d out of bounds.\n",
-		       index);
-		exit(1);
-	}
-#endif
+	assert(ll != ERROR_DLL && ll != NULL);
 
-	for (i = 0; i < index; ++i)
+	for (i = 0; i < nskip; ++i) {
+		if (ll == NULL)
+			return (dll)ERROR_DLL;
 		ll = ll->next;
+	}
+
+	return ll;
+}
+
+
+/**
+ * Search backward in a doubly linked list.
+ *
+ * \param ll     The doubly linked list to search in.
+ * \param nskip  The number of elements to search backward.
+ *
+ * \return The list at the indexed position, or ERROR_DLL if the index
+ *          is out of bounds.
+ *
+ * \sa dll_forward
+ */
+dll
+dll_backward(dll ll, unsigned int nskip)
+{
+	int i;
+
+	assert(ll != ERROR_DLL && ll != NULL);
+
+	for (i = 0; i < nskip; ++i) {
+		if (ll == NULL)
+			return (dll)ERROR_DLL;
+		ll = ll->prev;
+	}
+
+	return ll;
+}
+
+
+/**
+ * Get the data at the current position from a doubly linked list.
+ *
+ * \param ll     The doubly linked list to look in.
+ *
+ * \return A pointer to the data
+ *
+ * \sa sll_get_data
+ */
+void *
+dll_get_data(dll ll)
+{
+	assert(ll != ERROR_DLL && ll != NULL);
+
 	return ll->data;
 }
 
@@ -400,18 +462,26 @@ dll_dump(dll ll, char *fmt)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Create a new, empty, stack and return the pointer to it.
+ * Create a new, empty, stack.
  *
- * \return  The pointer to the new stack object, or NULL if out of memory.
+ * \return  The pointer to the new stack object, or ERROR_STACK if out of
+ *           memory.
  */
 stack
-stack_new(void)
+stack_create(void)
 {
-	stack s;
+	stack_t *s;
 	
-	if ((s = malloc(sizeof(stack_t))) != NULL)
-		s->head = NULL;
-	return s;
+	if ((s = malloc(sizeof(stack_t))) == NULL)
+		return (stack)ERROR_STACK;
+
+	/* XXX: This test is overkill, sll_create always returns NULL.  */
+	if ((s->top = sll_create()) == ERROR_SLL) {
+		free(s);
+		return (stack)ERROR_STACK;
+	}
+
+	return (stack)s;
 }
 
 
@@ -422,23 +492,21 @@ stack_new(void)
  *
  * \return   The element that was popped off.
  *
- * \see stack_peek
+ * \sa stack_peek, stack_push
  */
 void *
 stack_pop(stack s)
 {
 	void *res;
-	stack_elem *hd;
 
-	assert(s != NULL);
+	assert(s != ERROR_STACK && s != NULL);
 
 	if (stack_is_empty(s))
 		log_entry(WARN_ERROR, "Cannot pop from an empty stack.");
 
-	hd = s->head;
-	res = hd->data;
-	s->head = hd->next;
-	free(hd);
+	res = sll_get_data(s->top);
+	s->top = sll_remove_head(s->top);
+
 	return res;
 }
 
@@ -451,55 +519,49 @@ stack_pop(stack s)
  *
  * \return   The element that is on top of the stack.
  *
- * \see stack_pop
+ * \sa stack_pop
  */
 void *
 stack_peek(stack s)
 {
+	assert(s != ERROR_STACK && s != NULL);
+
 	/*
 	 * NOTE: Should we return NULL?  Pop is an illegal operation on
 	 * an empty stack, but peeking isnt (?).
 	 * Also, it currently is possible to push NULL pointers as data,
 	 * so returning NULL on an empty stack would be ambiguous.
 	 */
-	assert(s != NULL);
 
 	if (stack_is_empty(s))
 		log_entry(WARN_ERROR, "Cannot peek at top element of an"
 			   " empty stack.");
 
-	assert(s->head != NULL);
-
-	return s->head->data;
+	return sll_get_data(s->top);
 }
 
 
 /**
- * Push the given data onto the given stack s.
+ * Push data onto a stack.
  *
  * \param s     The stack object to push onto.
  * \param data  The data to push onto the stack.
  * 
  * \return      The given stack s.
+ *
+ * \sa stack_pop
  */
-stack
+void
 stack_push(stack s, void *data)
 {
-	stack_elem *el;
+	/* XXX Must be able to signal an error if sll_prepend_head dies. */
 
-	assert(s != NULL);
-	
-	if ((el = malloc(sizeof(stack_elem))) != NULL) {
-		el->data = data;
-		el->next = s->head;
-		s->head = el;
-	}
-	return s;
+	s->top = sll_prepend_head(s->top, data);
 }
 
 
 /**
- * Check whether the stack is empty.
+ * Check whether a stack is empty.
  *
  * \param s  The stack to check.
  *
@@ -508,31 +570,25 @@ stack_push(stack s, void *data)
 bool
 stack_is_empty(stack s)
 {
-	assert(s != NULL);
+	assert(s != NULL && s != ERROR_STACK);
 
-	return s->head == NULL;
+	return sll_is_empty(s->top);
 }
 
 
 /**
- * Free memory allocated by the given stack. Note that the memory allocated
- * by the elements within the stack are NOT freed by this function.
+ * Free all memory allocated for a stack. Note that the data stored
+ * within the stack is NOT freed.
  *
- * \param s  The stack to free.
+ * \param s  The stack to destroy.
  */
 void
-stack_free(stack s)
+stack_destroy(stack s)
 {
-	stack_elem *el;
+	assert(s != ERROR_STACK && s != NULL);
 
-	assert(s != NULL);
-
-	while (!stack_is_empty(s)) {
-		el = s->head;
-		s->head = s->head->next;
-		free(el);
-	}
-	free(s);
+	sll_destroy(s->top);
+	free((stack_t *)s);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -546,15 +602,15 @@ stack_free(stack s)
 queue
 queue_new(void)
 {
-	queue q;
+	queue_t *q;
 
 	if ((q = malloc(sizeof(queue_t))) == NULL)
-		return ERROR_QUEUE;
+		return (queue)ERROR_QUEUE;
 
 	q->bgn = NULL;
 	q->end = NULL;
 	q->count = 0;
-	return q;
+	return (queue)q;
 }
 
 
@@ -565,28 +621,28 @@ queue_new(void)
  * \param q     The given queue.
  * \param data  The data to add to the queue.
  *
- * \return      The pointer to the given queue.
+ * \return	The queue given as input, or ERROR_QUEUE if out of memory.
  */
 queue
 queue_enqueue(queue q, void *data)
 {
-	queue_elem *el;
+	queue_t *new;
 
-	assert(q != NULL);
+	assert(q != ERROR_QUEUE && q != NULL);
 
-	if ((el = malloc(sizeof(queue_elem))) == NULL)
-		return ERROR_QUEUE;
+	if ((new = malloc(sizeof(queue_t))) == NULL)
+		return (queue)ERROR_QUEUE;
 
-	el->data = data;
+	new->data = data;
 	/*
-	 * The next statement is not necessary, since `el' will be the new
-	 *  q->end.
+	 * The next statement is not necessary, since `new' will become the
+	 *  new q->end.
 	 */
-	/* el->next = NULL */
+	/* new->next = NULL */
 
 	assert(q->end != NULL);
-	q->end->next = el;
-	q->end = el;
+	q->end->next = new;
+	q->end = new;
 	++q->count;
 
 	return q;
@@ -602,25 +658,25 @@ queue_enqueue(queue q, void *data)
  *
  * \return   The data dequeued from the queue.
  *
- * \see queue_empty, queue_peek
+ * \sa queue_empty, queue_peek
  */
 void *
 queue_dequeue(queue q)
 {
 	void *res;
-	queue_elem *el;
+	queue_t *old;
 
-	assert(q != NULL);
+	assert(q != ERROR_QUEUE && q != NULL);
 
 	if (queue_is_empty(q))
 		log_entry(WARN_ERROR, "Cannot dequeue from an empty queue.");
 
-	el = q->bgn;
-	assert(el != NULL);
+	old = q->bgn;
+	assert(old != NULL);
 
-	res = el->data;
+	res = old->data;
 	q->bgn = q->bgn->next;
-	free(el);
+	free(old);
 	--q->count;
 
 	return res;
@@ -637,7 +693,7 @@ queue_dequeue(queue q)
  *
  * \return   The data at the head of the queue.
  *
- * \see queue_empty, queue_dequeue
+ * \sa queue_empty, queue_dequeue
  */
 void *
 queue_peek(queue q)
@@ -648,7 +704,7 @@ queue_peek(queue q)
 	 * Also, it currently is possible to enqueue NULL pointers as data,
 	 * so returning NULL on an empty queue would be ambiguous.
 	 */
-	assert(q != NULL);
+	assert(q != ERROR_QUEUE && q != NULL);
 
 	if (queue_is_empty(q))
 		log_entry(WARN_ERROR, "Cannot peek at the head of an "
@@ -658,6 +714,7 @@ queue_peek(queue q)
 
 	return q->bgn->data;
 }
+
 
 /**
  * Check whether the queue is empty.
@@ -669,7 +726,7 @@ queue_peek(queue q)
 bool
 queue_is_empty(queue q)
 {
-	assert(q != NULL);
+	assert(q != ERROR_QUEUE && q != NULL);
 
 	return q->count == 0;
 }
@@ -682,17 +739,12 @@ queue_is_empty(queue q)
  * \param q  The queue to free.
  */
 void
-queue_free(queue q)
+queue_destroy(queue q)
 {
-	queue_elem *el;
+	assert(q != ERROR_QUEUE && q != NULL);
 
-	assert(q != NULL);
+	while (!queue_is_empty(q))
+		queue_dequeue(q);
 
-	while (!queue_is_empty(q)) {
-		el = q->bgn;
-		q->bgn = q->bgn->next;
-		--q->count;
-		free(el);
-	}
-	free(q);
+	free((queue_t *)q);
 }

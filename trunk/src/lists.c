@@ -42,20 +42,21 @@
 #include "error.h"
 
 /* Hmm... Must have created this in my sleep! */
-int list_error_ptr;
+void error_dummy_func(void) { }
 
 /*
- * No seriously, we need some constant pointer for defining error values
- * and allocating memory on the heap for each new type we invent.  This
- * workaround may seem ugly, but it's the only way to get the desired effect.
- *
- * This memory should really be declared `const', but that does not work
- * when returning them from a function, resulting in lint warnings.
+ * No seriously, we need some constant pointer for defining error values.
+ * The problem here is, that we want to return a pointer to `const' memory
+ * in case of error, but not in the normal case.  This is of course not
+ * possible in C.  Since in protected systems the program text is marked
+ * read-only, we get an immediate segfault on write to this memory space.
+ * This is the desired behaviour, since we do not want to erroneously
+ * continue working with wrong pointers but get an error.
  */
-sll_t   * const ERROR_SLL   = (void *)&list_error_ptr;
-dll_t   * const ERROR_DLL   = (void *)&list_error_ptr;
-stack_t * const ERROR_STACK = (void *)&list_error_ptr;
-queue_t * const ERROR_QUEUE = (void *)&list_error_ptr;
+sll_t   * const ERROR_SLL   = (void *)error_dummy_func;
+dll_t   * const ERROR_DLL   = (void *)error_dummy_func;
+stack_t * const ERROR_STACK = (void *)error_dummy_func;
+queue_t * const ERROR_QUEUE = (void *)error_dummy_func;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

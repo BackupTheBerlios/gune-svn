@@ -41,6 +41,8 @@
 
 ht_t * const ERROR_HT = (void *)error_dummy_func;
 
+static ht ht_insert_internal(ht, gendata, gendata, eq_func, free_func, int);
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
@@ -49,7 +51,8 @@ ht_t * const ERROR_HT = (void *)error_dummy_func;
  * \param range  The range of the key function (0 <= x < range).
  * \param hash   The hashing function to use on keys.
  *
- * \return       A new empty hash table object, or ERROR_HT if out of memory.
+ * \return  A new empty hash table object, or ERROR_HT if out of memory.
+ *	     errno = ENOMEM if out of memory.
  *
  * \sa ht_destroy
  */
@@ -127,25 +130,16 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
 }
 
 
-/**
- * Add a data element to the hash table with the given key or replace an
- *  existing element with the same key.
- *
- * \param t           The hash table to insert the data in.
- * \param key         The key of the data.
- * \param value       The data to insert.
- * \param eq          The equals predicate for two keys.
- * \param free_value  The function used to free the old value's data if it
- *		       needs to be replaced, or NULL if the data does not
- *		       need to be freed.
- *
- * \return      The original hash table, or ERROR_HT if the data could not be
- *               inserted.  Original hash table is still valid in case of error.
- *
- * \sa ht_delete
+/*
+ * Internal function which ht_insert and ht_insert_uniq call.
+ * Argument list is the same as these two functions, except for an extra
+ * integer tacked onto the end.  This integer is nonzero if existing
+ * key entries are not allowed.  If existing key entries are allowed, the
+ * value of that key is overwritten.
  */
-ht
-ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
+static ht
+ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
+		   free_func free_value, int uniq)
 {
 	unsigned int bucketnr;
 	alist al;
@@ -164,7 +158,10 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
 #endif
 
 	al = *(t->buckets + bucketnr);
-	al = alist_insert(al, key, value, eq, free_value);
+	if (uniq)
+		al = alist_insert_uniq(al, key, value, eq, free_value);
+	else
+		al = alist_insert(al, key, value, eq, free_value);
 
 	if (al == ERROR_ALIST)
 		t = ERROR_HT;
@@ -177,6 +174,60 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
 
 
 /**
+ * Add a data element to the hash table with the given key or replace an
+ *  existing element with the same key.
+ *
+ * \param t           The hash table to insert the data in.
+ * \param key         The key of the data.
+ * \param value       The data to insert.
+ * \param eq          The equals predicate for two keys.
+ * \param free_value  The function used to free the old value's data if it
+ *		       needs to be replaced, or NULL if the data does not
+ *		       need to be freed.
+ *
+ * \return  The original hash table, or ERROR_HT if the data could not be
+ *           inserted.  Original hash table is still valid in case of error.
+ *	    errno = ENOMEM if out of memory.
+ *
+ * \sa ht_insert_uniq, ht_delete
+ */
+ht
+ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
+{
+	return ht_insert_internal(t, key, value, eq, free_value, 0);
+}
+
+
+/**
+ * Add a data element to the hash table with the given key or replace an
+ *  existing element with the same key.
+ * Add a data element to the hash table with the given key.  If there already
+ * is an element with the same key in the table, it is regarded as an error.
+ *
+ * \param t           The hash table to insert the data in.
+ * \param key         The key of the data.
+ * \param value       The data to insert.
+ * \param eq          The equals predicate for two keys.
+ * \param free_value  The function used to free the old value's data if it
+ *		       needs to be replaced, or NULL if the data does not
+ *		       need to be freed.
+ *
+ * \return  The original hash table, or ERROR_HT if the data could not be
+ *           inserted.  Original hash table is still valid in case of error.
+ *          errno = EINVAL if the key is already in the table.
+ *	    errno = ENOMEM if out of memory.
+ *
+ * \sa ht_insert, ht_delete
+ */
+ht
+ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq,
+	       free_func free_value)
+{
+	return ht_insert_internal(t, key, value, eq, free_value, 1);
+}
+
+
+/**
  * Lookup an element in the hash table.
  *
  * \param t     The hashtable which contains the element.
@@ -185,9 +236,10 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
- * \return      0 if the element could not be found, nonzero if it could.
+ * \return  The hash table, or ERROR_HT if the key could not be found.
+ *	     errno = EINVAL if the key could not be found.
  */
-int
+ht
 ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
 {
 	unsigned int bucketnr;
@@ -207,7 +259,10 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
 #endif
 
 	al = *(t->buckets + bucketnr);
-	return alist_lookup(al, key, eq, data);
+	if (alist_lookup(al, key, eq, data) == ERROR_ALIST)
+		return ERROR_HT;
+
+	return t;
 }
 
 
@@ -222,11 +277,12 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
  * \param value_free  The function which is used to free the value data, or
  *			NULL if no action should be taken on the value data.
  *
- * \return      0 if the element could not be found, nonzero if it was deleted.
+ * \return  The hash table, or ERROR_HT if the key could not be found.
+ *	     errno = EINVAL if the key could not be found.
  *
  * \sa ht_insert
  */
-int
+ht
 ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 	  free_func value_free)
 {
@@ -247,7 +303,10 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 #endif
 
 	al = *(t->buckets + bucketnr);
-	return alist_delete(al, key, eq, key_free, value_free);
+	if (alist_delete(al, key, eq, key_free, value_free) == ERROR_ALIST)
+		return ERROR_HT;
+
+	return t;
 }
 
 

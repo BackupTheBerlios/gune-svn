@@ -34,6 +34,7 @@
  * Queue implementation
  */
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 
 #include <gune/queue.h>
@@ -47,6 +48,7 @@ queue_t * const ERROR_QUEUE = (void *)error_dummy_func;
  * Create a new, empty, queue.
  *
  * \return  A new empty queue object, or ERROR_QUEUE if out of memory.
+ *	      errno = ENOMEM if out of memory.
  */
 queue
 queue_create(void)
@@ -57,6 +59,7 @@ queue_create(void)
 		return (queue)ERROR_QUEUE;
 
 	q->head = sll_create();
+	/* XXX: This test is overkill, sll_create always returns NULL.  */
 	if (q->head == ERROR_SLL) {
 		free(q);
 		return (queue)ERROR_QUEUE;
@@ -74,7 +77,8 @@ queue_create(void)
  * \param q     The given queue.
  * \param data  The data to add to the tail of the queue.
  *
- * \return	The queue given as input, or ERROR_QUEUE if out of memory.
+ * \return  The queue given as input, or ERROR_QUEUE if out of memory.
+ *	      errno = ENOMEM if out of memory.
  */
 queue
 queue_enqueue(queue q, gendata data)
@@ -158,6 +162,7 @@ queue_peek(queue q)
 	 * an empty queue, but peeking isnt (?).
 	 * Also, it currently is possible to enqueue NULL pointers as data,
 	 * so returning NULL on an empty queue would be ambiguous.
+	 * Perhaps we should do the same as with alists.
 	 */
 	assert(q != ERROR_QUEUE);
 	assert(q != NULL);

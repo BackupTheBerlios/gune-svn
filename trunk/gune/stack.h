@@ -53,7 +53,7 @@ extern stack_t * const ERROR_STACK;
 stack stack_create(void);
 gendata stack_pop(stack);
 gendata stack_peek(stack);
-void stack_push(stack, gendata);
+stack stack_push(stack, gendata);
 int stack_empty(stack);
 void stack_destroy(stack, free_func);
 

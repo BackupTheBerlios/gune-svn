@@ -34,6 +34,7 @@
  * Association list implementation
  */
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,13 +49,17 @@ typedef struct alist_entry {
 
 alist_t * const ERROR_ALIST = (void *)error_dummy_func;
 
+static alist alist_insert_internal(alist, gendata, gendata, eq_func,
+				   free_func, int);
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 /**
  * Create a new, empty, association list.
  *
- * \return       A new empty alist object, or ERROR_ALIST if out of memory.
+ * \return  A new empty alist object, or ERROR_ALIST if out of memory.
+ *	     errno = ENOMEM if out of memory.
  *
  * \sa alist_destroy
  */
@@ -76,7 +81,7 @@ alist_create(void)
  * Free all memory allocated for an association list.  The data within the
  * list is freed by calling a user-supplied free function.
  * If the same data is included multiple times in the list, the free function
- * gets called that many times. <- XXX This is impossible, currently
+ * gets called that many times.
  *
  * \param al          The association list to destroy.
  * \param key_free    The function which is used to free the key data, or
@@ -114,26 +119,16 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
 }
 
 
-/**
- * Add a data element to the association list with the given key or replace
- * an existing element with the same key.
- *
- * \param al	      The association list to insert the data in.
- * \param key	      The key of the data.
- * \param value	      The data to insert.
- * \param eq          The equals predicate for two keys.
- * \param free_value  The function used to free the old value's data if it
- *		       needs to be replaced, or NULL if the data does not
- *		       need to be freed.
- *
- * \return      The original alist, or ERROR_ALIST if the data could not be
- *               inserted.  Original alist is still valid in case of error.
- *
- * \sa alist_delete
+/*
+ * Internal function which alist_insert and alist_insert_uniq call.
+ * Argument list is the same as these two functions, except for an extra
+ * integer tacked onto the end.  This integer is nonzero if existing
+ * key entries are not allowed.  If existing key entries are allowed, the
+ * value of that key is overwritten.
  */
-alist
-alist_insert(alist al, gendata key, gendata value, eq_func eq,
-	     free_func free_value)
+static alist
+alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
+		      free_func free_value, int uniq)
 {
 	sll new_head;
 	alist_entry e;
@@ -148,11 +143,17 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
 
 	/*
 	 * We'll have to check if there's already a value with the same key.
-	 * If there is, overwrite that value.
+	 * If there is, overwrite that value unless uniq.
 	 */
 	while (!sll_empty(l)) {
 		e = sll_get_data(l).ptr;
 		if (eq(key, e->key)) {
+			/* Duplicates not allowed? */
+			if (uniq) {
+				errno = EINVAL;
+				return ERROR_ALIST;
+			}
+
 			/* Free old data */
 			if (free_value != NULL)
 				free_value(sll_get_data(l).ptr);
@@ -184,6 +185,60 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
 
 
 /**
+ * Add a data element to the association list with the given key or replace
+ * an existing element with the same key.
+ *
+ * \param al	      The association list to insert the data in.
+ * \param key	      The key of the data.
+ * \param value	      The data to insert.
+ * \param eq          The equals predicate for two keys.
+ * \param free_value  The function used to free the old value's data if it
+ *		       needs to be replaced, or NULL if the data does not
+ *		       need to be freed.
+ *
+ * \return  The original alist, or ERROR_ALIST if the data could not be
+ *           inserted.  Original alist is still valid in case of error.
+ *	    errno = ENOMEM if out of memory.
+ *
+ * \sa alist_insert_uniq, alist_delete
+ */
+alist
+alist_insert(alist al, gendata key, gendata value, eq_func eq,
+	     free_func free_value)
+{
+	return alist_insert_internal(al, key, value, eq, free_value, 0);
+}
+
+
+/**
+ * Add a data element to the association list with the given key.  If there
+ * already is an element with the same key in the list, it is regarded
+ * as an error.
+ *
+ * \param al	      The association list to insert the data in.
+ * \param key	      The key of the data.
+ * \param value	      The data to insert.
+ * \param eq          The equals predicate for two keys.
+ * \param free_value  The function used to free the old value's data if it
+ *		       needs to be replaced, or NULL if the data does not
+ *		       need to be freed.
+ *
+ * \return  The original alist, or ERROR_ALIST if the data could not be
+ *            inserted.  Original alist is still valid in case of error.
+ *          errno = EINVAL if the key is already in the list.
+ *	    errno = ENOMEM if out of memory.
+ *
+ * \sa alist_insert, alist_delete
+ */
+alist
+alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq,
+	          free_func free_value)
+{
+	return alist_insert_internal(al, key, value, eq, free_value, 1);
+}
+
+
+/**
  * Lookup an element in the association list.
  *
  * \param al    The association list which contains the element.
@@ -192,9 +247,11 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
- * \return      0 if the element could not be found, nonzero if it could.
+ * \return  The alist if the key was found, or ERROR_ALIST if the key
+ *	     could not be found.
+ *	    errno = EINVAL if the key could not be found.
  */
-int
+alist
 alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
 {
 	sll l;
@@ -210,12 +267,13 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
 		e = sll_get_data(l).ptr;
 		if (eq(key, e->key)) {
 			*data = e->value;
-			return 1;
+			return al;
 		}
 		l = sll_next(l);
 	}
 
-	return 0;
+	errno = EINVAL;
+	return ERROR_ALIST;
 }
 
 
@@ -230,11 +288,12 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
  * \param value_free  The function which is used to free the value data, or
  *			NULL if no action should be taken on the value data.
  *
- * \return     0 if the element could not be found, nonzero if it was deleted.
+ * \return  The alist, or ERROR_ALIST if the key could not be found.
+ *	      errno = EINVAL if the key could not be found.
  *
  * \sa alist_insert
  */
-int
+alist
 alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 	     free_func value_free)
 {
@@ -247,8 +306,10 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 
 	l = al->list;
 
-	if (sll_empty(l))
-		return 0;
+	if (sll_empty(l)) {
+		errno = EINVAL;
+		return ERROR_ALIST;
+	}
 
 	/*
 	 * The first entry is a special case.  Doubly linked lists might
@@ -261,7 +322,7 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 		if (value_free != NULL)
 			value_free(e->value.ptr);
 		sll_remove_head(l);
-		return 1;
+		return al;
 	}
 	n = sll_next(l);
 
@@ -269,13 +330,14 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 		e = sll_get_data(n).ptr;
 		if (eq(key, e->key)) {
 			sll_remove_next(l);
-			return 1;
+			return al;
 		}
 		l = sll_next(l);
 		n = sll_next(l);
 	}
 
-	return 0;
+	errno = EINVAL;
+	return ERROR_ALIST;
 }
 
 

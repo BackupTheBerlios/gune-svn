@@ -50,6 +50,7 @@ array_t * const ERROR_ARRAY = (void *)error_dummy_func;
  * Creates a new empty array.
  *
  * \return  A new empty array, or ERROR_ARRAY if out of memory.
+ *	     errno = ENOMEM if out of memory.
  *
  * \sa array_destroy
  */
@@ -125,8 +126,9 @@ array_size(array ar)
  * \param ar    The array to resize.
  * \param size  The new (absolute) size of the array.
  *
- * \return	The array given as input, or ERROR_ARRAY if out of memory.
- *              The old array is still valid.
+ * \return  The array given as input, or ERROR_ARRAY if out of memory.
+ *          The old array is still valid.
+ *	      errno = ENOMEM if out of memory.
  *
  * \sa array_grow, array_shrink, array_compact
  */
@@ -146,12 +148,13 @@ array_resize(array ar, unsigned int size)
 	 */
 	if (size > ar->capacity) {
 		newsize = ar->capacity * 2;
-		if ((newptr = realloc(ar->data, newsize * sizeof(gendata))) == NULL)
+		if ((newptr = realloc(ar->data, newsize * sizeof(gendata)))
+		    == NULL)
 			return ERROR_ARRAY;
 		ar->data = newptr;
 		ar->capacity = newsize;
 	}
-		
+
 	ar->size = size;
 
 	return ar;
@@ -213,15 +216,17 @@ array_set_data(array ar, unsigned int index, gendata value)
 
 
 /**
- * \brief Compactise the array.
+ * \brief Compactise an array.
  *
- * Use this function when the array has been very big in the past, and you wish to make
- *  sure the memory used is freed to fit the new array more tightly.
+ * Use this function when the array has been very big in the past, and you
+ * wish to make sure the memory used is freed to fit the new array more
+ * tightly.
  *
  * \param ar  The array to compact.
  *
  * \return    The supplied array, or ERROR_ARRAY if an error occurred during
  *            resize.  The old array is still valid.
+ *		errno = ENOMEM if out of memory.
  */
 array
 array_compact(array ar)
@@ -254,6 +259,7 @@ array_compact(array ar)
  *
  * \return    The supplied array, or ERROR_ARRAY if an error occurred during
  *            resize.  The old array is still valid.
+ *		errno = ENOMEM if out of memory.
  *
  * \sa array_shrink, array_resize
  */
@@ -273,13 +279,15 @@ array_grow(array ar, int amount)
 /**
  * \brief Shrink an array by n items.
  *
- * This does not actually free any memory.  Use array_compact to accomplish this.
+ * This does not actually free any memory.  Use array_compact to accomplish
+ *  this.
  *
  * \param ar      The array to shrink.
  * \param amount  The amount to shrink.
  *
  * \return    The supplied array, or ERROR_ARRAY if an error occurred during
  *            resize.  The old array is still valid.
+ *		errno = ENOMEM if out of memory.
  *
  * \sa array_grow, array_resize
  */
@@ -309,6 +317,7 @@ array_shrink(array ar, int amount)
  *
  * \return    The supplied array, or ERROR_ARRAY if an error occurred during
  *            resize.  The old array is still valid.
+ *		errno = ENOMEM if out of memory.
  *
  * \sa array_remove
  */
@@ -332,6 +341,7 @@ array_add(array ar, gendata value)
  *
  * \return    The supplied array, or ERROR_ARRAY if an error occurred during
  *            resize.  The old array is still valid.
+ *		errno = ENOMEM if out of memory.
  *
  * \sa array_add
  */

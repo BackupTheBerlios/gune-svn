@@ -8,12 +8,13 @@
 #
 - Think about thread safety (like locking lists when adding/removing).
 - Test implementation of queues and write test harness for it.
-- Check out if there's a way to detect if the compiler supports -ansi -pedantic
-   -Wall -Werror flags.
-- Write something for associative arrays
-- Add checks for when malloc fails!!!
+- Test doubly linked lists.  These have had no usage and almost no testing.
 - Bounds checking necessary?  If yes, error messages necessary or just NULL?
-
-- Have a look at http://www.eterna.com.au/bozohttpd, they do not use configure.
-   They use BSD Make only, like we do.  Look at how it does installation and
-   handles non-NetBSD OSes.
+- Should we change array_size to array_count???  Or just #define it?
+- Do a thorough audit for Doxygen documentation consistency and completeness.
+- Think about whether it is bad for alists to have a FILO order when using the
+    walk function.
+- Add conversion functions between the different types.
+- Add sorting functions for the types on which it is meaningful.
+- Implement a tree data type.
+- Fix installation.

@@ -34,6 +34,7 @@
  * Linked lists implementation
  */
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -132,7 +133,7 @@ sll_empty(sll ll)
  *
  * \return  A pointer to the new singly linked list.
  *
- * \sa  dll_remove
+ * \sa  sll_remove_next, dll_remove_head, sll_empty
  */
 sll
 sll_remove_head(sll ll)
@@ -159,9 +160,10 @@ sll_remove_head(sll ll)
  * \param ll  The singly linked list.
  *
  * \return  A pointer to the new singly linked list, or ERROR_SSL if the
- *	      next item does not exist.
+ *	     next item does not exist.
+ *	     errno = EINVAL if the next item does not exist.
  *
- * \sa  sll_remove_head
+ * \sa  sll_remove_head, sll_empty
  */
 sll
 sll_remove_next(sll ll)
@@ -175,8 +177,11 @@ sll_remove_next(sll ll)
 	begin = ll;
 	ll = ll->next;
 
-	if (ll == NULL)
+	if (ll == NULL) {
+		/* Should've checked with sll_empty before calling this func */
+		errno = EINVAL;
 		return ERROR_SLL;
+	}
 
 	begin->next = ll->next;
 
@@ -193,9 +198,11 @@ sll_remove_next(sll ll)
  * \param ll    The singly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or ERROR_SLL in case of error.
+ * \return  The new linked list or ERROR_SLL in case of error.  The old linked
+ *	     list is still valid in case of error.
+ *	      errno = ENOMEM if out of memory.
  *
- * \sa  sll_append_head dll_prepend_head
+ * \sa  sll_append_head, dll_prepend_head
  */
 sll
 sll_prepend_head(sll ll, gendata data)
@@ -221,7 +228,9 @@ sll_prepend_head(sll ll, gendata data)
  * \param ll    The singly linked list to append the element at.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or ERROR_SLL in case of error.
+ * \return  The old(!) linked list or ERROR_SLL in case of error.  The old
+ *	      linked list is still valid in case of error.
+ *	      errno = ENOMEM if out of memory.
  *
  * \sa  sll_prepend_head dll_append_head
  */
@@ -255,6 +264,7 @@ sll_append_head(sll ll, gendata data)
  *
  * \return The list at the indexed position, or ERROR_SLL if the index
  *          is out of bounds.
+ *	     errno = EINVAL if the index is out of bounds.
  *
  * \sa dll_forward
  */
@@ -267,12 +277,10 @@ sll_forward(sll ll, unsigned int nskip)
 	assert(ll != ERROR_SLL);
 
 	for (i = 0; i < nskip; ++i) {
-		/*
-		 * XXX: Maybe instead of this, we should do something with
-		 *      bounds checking...
-		 */
-		if (ll == NULL)
+		if (ll == NULL) {
+			errno = EINVAL;
 			return (sll)ERROR_SLL;
+		}
 		ll = ll->next;
 	}
 
@@ -469,9 +477,10 @@ dll_remove_head(dll ll)
  * \param ll    The doubly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or NULL in case of error.
+ * \return  The new linked list or ERROR_DLL in case of error.
+ *	      errno = ENOMEM if out of memory.
  *
- * \sa  dll_append sll_prepend_head
+ * \sa  dll_append_head sll_prepend_head
  */
 dll
 dll_prepend_head(dll ll, gendata data)
@@ -487,7 +496,6 @@ dll_prepend_head(dll ll, gendata data)
 	new->next = ll;
 
 	/* Prepend to the current list */
-	/* XXX: Test this on boundary values! */
 	if (ll != NULL) {
 		new->prev = ll->prev;
 		ll->prev = new;
@@ -507,9 +515,11 @@ dll_prepend_head(dll ll, gendata data)
  * \param ll    The doubly linked list to prepend the element at.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or NULL in case of error.
+ * \return  The old(!) linked list or ERROR_DLL in case of error.  The old
+ *	     list is still valid in case of error.
+ *	      errno = ENOMEM if out of memory.
  *
- * \sa  dll_append sll_prepend_head
+ * \sa  sll_append_head dll_prepend_head
  */
 dll
 dll_append_head(dll ll, gendata data)
@@ -523,7 +533,6 @@ dll_append_head(dll ll, gendata data)
 	new->data = data;
 	new->prev = ll;
 
-	/* XXX: Test this on boundary values! */
 	if (ll != NULL) {
 		new->next = ll->next;
 		new->prev = ll;
@@ -547,6 +556,7 @@ dll_append_head(dll ll, gendata data)
  *
  * \return The list at the indexed position, or ERROR_DLL if the index
  *          is out of bounds.
+ *	     errno = EINVAL if the index is out of bounds.
  *
  * \sa sll_forward dll_backward
  */
@@ -559,12 +569,10 @@ dll_forward(dll ll, unsigned int nskip)
 	assert(ll != ERROR_DLL);
 
 	for (i = 0; i < nskip; ++i) {
-		/*
-		 * XXX: Maybe instead of this, we should do something with
-		 *      bounds checking...
-		 */
-		if (ll == NULL)
+		if (ll == NULL) {
+			errno = EINVAL;
 			return (dll)ERROR_DLL;
+		}
 		ll = ll->next;
 	}
 
@@ -580,6 +588,7 @@ dll_forward(dll ll, unsigned int nskip)
  *
  * \return The list at the indexed position, or ERROR_DLL if the index
  *          is out of bounds.
+ *	    errno = EINVAL if the index is out of bounds.
  *
  * \sa dll_forward
  */
@@ -592,12 +601,10 @@ dll_backward(dll ll, unsigned int nskip)
 	assert(ll != ERROR_DLL);
 
 	for (i = 0; i < nskip; ++i) {
-		/*
-		 * XXX: Maybe instead of this, we should do something with
-		 *      bounds checking...
-		 */
-		if (ll == NULL)
+		if (ll == NULL) {
+			errno = EINVAL;
 			return (dll)ERROR_DLL;
+		}
 		ll = ll->prev;
 	}
 

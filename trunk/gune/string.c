@@ -34,8 +34,9 @@
  * String manipulation
  */
 
-#include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <gune/string.h>
 
 
@@ -49,14 +50,17 @@
  * \param a  The first part of the new string.
  * \param b  The second part of the new string.
  *
- * \return  If all went right, a pointer to the newly allocated string.
- *          Otherwise, NULL.
+ * \return  A pointer to the newly allocated string or NULL if out of memory.
+ *	      errno = ENOMEM if out of memory.
  */
 char *
 str_cat(const char *a, const char *b)
 {
 	size_t l;
 	char *x;
+
+	assert(a != NULL);
+	assert(b != NULL);
 
 	if ((x = malloc(strlen(a) + strlen(b) + 1)) == NULL)
 		return NULL;
@@ -100,6 +104,7 @@ str_n_cpy(char *dst, const char *src, size_t len)
  * \param s  The string to copy.
  *
  * \return   The copy of the original string, or NULL if out of memory.
+ *	       errno = ENOMEM if out of memory.
  *
  * \sa str_n_cpy
  */
@@ -107,6 +112,8 @@ char *
 str_cpy(const char *s)
 {
 	char *x;
+
+	assert(s != NULL);
 
 	if ((x = malloc(strlen(s) + 1)) == NULL)
 		return NULL;
@@ -157,5 +164,7 @@ str_hash(gendata key, unsigned int range)
 int
 str_eq(gendata s1, gendata s2)
 {
+	assert(s1.ptr != NULL);
+	assert(s2.ptr != NULL);
 	return !strcmp(s1.ptr, s2.ptr);
 }

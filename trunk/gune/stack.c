@@ -34,6 +34,7 @@
  * Stack implementation
  */
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,6 +49,7 @@ stack_t * const ERROR_STACK = (void *)error_dummy_func;
  * Create a new, empty, stack.
  *
  * \return  A new empty stack object, or ERROR_STACK if out of memory.
+ *	     errno = ENOMEM if out of memory.
  */
 stack
 stack_create(void)
@@ -116,6 +118,7 @@ stack_peek(stack s)
 	 * an empty stack, but peeking isnt (?).
 	 * Also, it currently is possible to push NULL pointers as data,
 	 * so returning NULL on an empty stack would be ambiguous.
+	 * Perhaps we should do the same as with alists.
 	 */
 
 	if (stack_empty(s))
@@ -132,16 +135,22 @@ stack_peek(stack s)
  * \param s     The stack object to push onto.
  * \param data  The data to push onto the stack.
  * 
- * \return      The given stack s.
+ * \return  The given stack s, or ERROR_STACK in case of an error.  The old
+ *	     stack is still valid in case of an error.
+ *	      errno = ENOMEM if out of memory.
  *
  * \sa stack_pop
  */
-void
+stack
 stack_push(stack s, gendata data)
 {
-	/* XXX Must be able to signal an error if sll_prepend_head dies. */
+	sll l;
 
-	s->top = sll_prepend_head(s->top, data);
+	if ((l = sll_prepend_head(s->top, data)) == ERROR_SLL)
+		return ERROR_STACK;
+
+	s->top = l;
+	return s;
 }
 
 

@@ -1,7 +1,7 @@
 /*
  * $Id$
  *
- * Copyright (c) 2003-2004 Peter Bex and Vincent Driessen
+ * Copyright (c) 2004 Peter Bex and Vincent Driessen
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,39 +29,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Custom types
+/**
+ * \file version.h
+ * Definitions for Gune's version number and version convenience functions.
  */
-#ifndef GUNE_TYPES_H
-#define GUNE_TYPES_H
+#ifndef GUNE_VERSION_H
+#define GUNE_VERSION_H
 
-/** Boolean implementation */
-/* Some other packages may define bool themselves. */
-#ifdef bool
-#undefine bool
-#endif
-#define bool	int
+#define GUNE_MINOR_VERSION	1	/** Gune's minor version number */
+#define GUNE_MAJOR_VERSION	0	/** Gune's major version number */
 
-#ifdef false
-#undefine false
-#endif
-#define false	0
+/** Gune's long version number (major, underscore, minor.  Example: 1_0). */
+#define GUNE_VERSION		GEN_VERSION(GUNE_MAJOR_VERSION, GUNE_MINOR_VERSION)
 
-#ifdef true
-#undefine true
-#endif
-#define true	(!false)
-
-/** Generic data type to put in lists, stacks etc. */
-/*
- * Note: We can't use the names of C (char, int), so we have to be a little
- * creative here.
+/**
+ * Generate a preprocessor definition like 2_0 from the major version number
+ * and the minor version number, which can both be proprocessor definitions.
+ *
+ * Example:
+ * #define MYAPP_MAJOR		1
+ * #define MYAPP_MINOR		0
+ * #define MYAPP_VERSION GEN_VERSION(MYAPP_MAJOR, MYAPP_MINOR)
+ * is identical to:
+ * #define MYAPP_VERSION	1_0
+ *
+ * XXX: Check if this looks ok in Doxygen's output.
  */
-typedef union gendata {
-	int		num;		/* Number */
-	unsigned int	posnum;		/* Positive number */
-	char		sym;		/* Symbol */
-	void *		ptr;		/* Pointer */
-} gendata;
+#define GEN_VERSION(a, b)	GEN_VERSION_INTERN(a, b)
 
-#endif /* GUNE_TYPES_H */
+/*
+ * We need this extra step in case a and b are macro definitions.
+ * Example: GEN_VERSION_INTERN(MAJOR, MINOR) gives us `MAJOR_MINOR', but
+ * instead we want something that looks like `1_0'.
+ */
+#define GEN_VERSION_INTERN(a, b)	a##_##b
+
+
+/** Get the string value of token.  Example: PP_STR(1) => "1". */
+#define PP_STR(a)			PP_STR_INTERN(a)
+
+/* Again, we need internal PP_STR if the parameter is a macro definition. */
+#define PP_STR_INTERN(a)		#a
+
+#endif /* GUNE_VERSION_H */

@@ -92,7 +92,8 @@ usage(void)
 	printf("-s num	Do a stack stress test on `num' stack items.\n");
 	printf("-e lvl  Print an error on the specified level (0-3).\n");
 	printf("-l log  Use log as a file to write messages to.\n");
-	printf("-c      Test string copy routines.\n");
+	printf("-c str  Test string copy routines.\n");
+	printf("-v      Gune version we are testing.\n");
 }
 
 
@@ -118,7 +119,7 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	while ((ch = getopt(argc, argv, "n:s:l:e:c:")) != -1)
+	while ((ch = getopt(argc, argv, "n:s:l:e:c:v")) != -1)
 		switch (ch) {
 		case 'n':
 			loop = atoi(optarg);
@@ -145,6 +146,10 @@ main(int argc, char **argv)
 			str = optarg;
 			idle = 0;
 			break;
+		case 'v':
+			printf("Using Gune version: %s (from macro defition)\n",
+				PP_STR(GUNE_VERSION));
+			return 0;
 		default:
 			usage();
 			return 1;

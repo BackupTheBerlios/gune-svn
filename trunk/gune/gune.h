@@ -33,11 +33,12 @@
 #define GUNE_GUNE_H
 
 #include <gune/error.h>
-#include <gune/string.h>
 #include <gune/types.h>
+#include <gune/string.h>
 #include <gune/lists.h>
 #include <gune/stack.h>
 #include <gune/queue.h>
 #include <gune/array.h>
+#include <gune/version.h>
 
 #endif /* GUNE_GUNE_H */

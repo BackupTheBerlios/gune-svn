@@ -66,13 +66,11 @@ sll sll_append_head(sll, gendata);
 gendata sll_get_data(sll);
 sll sll_set_data(sll, gendata);
 sll sll_forward(sll, unsigned int);
+void sll_dump(sll, const char *);
 
 /** Quick macro to go forward one item in the list */
 #define sll_next(l)	(sll_forward((l), 1))
 
-#ifdef DEBUG
-void sll_dump(sll, const char *);
-#endif
 
 /** \brief Doubly linked list implementation */
 typedef struct dll_t {
@@ -97,15 +95,12 @@ gendata dll_get_data(dll);
 dll dll_set_data(dll, gendata);
 dll dll_forward(dll, unsigned int);
 dll dll_backward(dll, unsigned int);
+void dll_dump(dll, const char *);
 
 /** Quick macro to go forward one item in the list */
 #define dll_next(l)	(dll_forward((l), 1))
 /** Quick macro to go backward one item in the list */
 #define dll_prev(l)	(dll_backward((l), 1))
-
-#ifdef DEBUG
-void dll_dump(dll, const char *);
-#endif
 
 #ifdef __cplusplus
 }

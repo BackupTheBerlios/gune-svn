@@ -102,10 +102,11 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
 	assert(al != NULL);
 
 	/*
-	 * XXX: What we would really like to do is just call
+	 * What we would really like to do is just call
 	 * sll_destroy(*p, f);
 	 * Problem is we can't pass a function which knows
-	 * about the {key, value}_free functions.
+	 * about the * {key, value}_free functions. (you can't do
+	 * currying in C)
 	 */
 	while (!sll_empty(al->list)) {
 		e = sll_get_data(al->list).ptr;

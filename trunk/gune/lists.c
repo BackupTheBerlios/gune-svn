@@ -353,12 +353,6 @@ sll_set_data(sll ll, gendata data)
 }
 
 
-/*
- * FIXME Should we really do this on DEBUG only?  This is not only useful for
- *   debugging gune itself, but also for those quick debug dumps in programs,
- *   or calling from GDB, even if gune itself hasn't been built with -g.
- */
-#ifdef DEBUG
 /**
  * \brief Print a dump of a singly linked list.
  *
@@ -387,7 +381,6 @@ sll_dump(sll ll, const char *fmt)
 	}
 	printf("(EOL)\n");
 }
-#endif /* DEBUG */
 
 
 /**
@@ -700,7 +693,6 @@ dll_set_data(dll ll, gendata data)
 }
 
 
-#ifdef DEBUG
 /**
  * \brief Print a dump of a doubly linked list.
  *
@@ -740,4 +732,3 @@ dll_dump(dll ll, const char *fmt)
 	}
 	printf("(EOL)\n");
 }
-#endif /* DEBUG */

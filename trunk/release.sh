@@ -59,7 +59,7 @@ bumpmajor ()
 {
 	getversion
 	NEWMAJOR=`${EXPR} ${MAJOR} + 1`
-	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMINOR}/;minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
+	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMAJOR}/;s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
 	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
 }
 

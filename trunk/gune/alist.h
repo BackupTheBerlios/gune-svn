@@ -1,7 +1,7 @@
 /*
  * $Id$
  *
- * Copyright (c) 2003-2004 Peter Bex and Vincent Driessen
+ * Copyright (c) 2004 Peter Bex and Vincent Driessen
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,30 +30,35 @@
  */
 
 /*
- * Custom types
+ * Association List
  */
-#ifndef GUNE_TYPES_H
-#define GUNE_TYPES_H
+#ifndef GUNE_ALIST_H
+#define GUNE_ALIST_H
 
-/** Generic data type to put in lists, stacks etc. */
-/*
- * Note: We can't use the names of C (char, int), so we have to be a little
- * creative here.
- */
-typedef union gendata {
-	int		num;		/* Number */
-	unsigned int	posnum;		/* Positive number */
-	char		sym;		/* Symbol */
-	void *		ptr;		/* Pointer */
-} gendata;
+#include <gune/lists.h>
+#include <gune/types.h>
 
-/** Function type to be supplied to the _destroy functions to free data. */
-typedef void (*free_func) (void *);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * Equals predicate function for comparing keys (for association lists,
- * hash tables etc)
- */
-typedef int (* eq_func) (gendata, gendata);
+/** Association list implementation */
+typedef struct alist_t {
+	sll list;
+	eq_func eq;
+} alist_t, *alist;
 
-#endif /* GUNE_TYPES_H */
+/** Invalid association list, used as error return value */
+extern alist_t * const ERROR_ALIST;
+
+alist alist_create(eq_func);
+void alist_destroy(alist, free_func, free_func);
+alist alist_insert(alist, gendata, gendata, free_func);
+int alist_lookup(alist, gendata, gendata *);
+int alist_delete(alist, gendata, free_func, free_func);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* GUNE_ALIST_H */

@@ -39,12 +39,6 @@
 #include <gune/error.h>
 #include <gune/ht.h>
 
-/** Hash table entry (stored in the linked list) */
-typedef struct ht_entry_t {
-	gendata key;
-	gendata value;
-} ht_entry_t, * ht_entry;
-
 ht_t * const ERROR_HT = (void *)error_dummy_func;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -71,14 +65,13 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
 		return (ht)ERROR_HT;
 
 	t->range = range;
-	t->eq = eq;
 	t->hash = hash;
 
 	/*
 	 * We could use a Gune array, but we're not resizing so we would just
 	 * be introducing unnecessary overhead.
 	 */
-	if ((t->table = (sll *)malloc(range * sizeof(sll_t))) == NULL) {
+	if ((t->buckets = (alist *)malloc(range * sizeof(alist))) == NULL) {
 		free(t);
 		return (ht)ERROR_HT;
 	}
@@ -89,10 +82,10 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
 	 * not be the bottleneck of any sane program.
 	 */
 	for (i = 0; i < range; ++i) {
-		if ((*(t->table + i) = sll_create()) == ERROR_SLL) {
+		if ((*(t->buckets + i) = alist_create(eq)) == ERROR_ALIST) {
 			/* Creation went wrong halfway?  Destroy all previous */
 			for (j = 0; j < i; ++j)
-				sll_destroy(*(t->table + j), NULL);
+				alist_destroy(*(t->buckets + j), NULL, NULL);
 
 			free(t);
 			return (ht)ERROR_HT;
@@ -120,31 +113,13 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
 void
 ht_destroy(ht t, free_func key_free, free_func value_free)
 {
-	sll *p;
-	ht_entry e;
+	alist *al;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 
-	for (p = t->table; p < (t->table + t->range); ++p) {
-		if (p != NULL) {
-			/*
-			 * XXX: What we would really like to do is just call
-			 * sll_destroy(*p, f);
-			 * Problem is we can't pass a function which knows
-			 * about the {key, value}_free functions.
-			 */
-			while (!sll_empty(*p)) {
-				e = sll_get_data(*p).ptr;
-				if (key_free != NULL)
-					key_free(e->key.ptr);
-				if (value_free != NULL)
-					value_free(e->value.ptr);
-				free(e);
-				*p = sll_remove_head(*p);
-			}
-		}
-	}
+	for (al = t->buckets; al < (t->buckets + t->range); ++al)
+		alist_destroy(*al, key_free, value_free);
 
 	free(t);
 }
@@ -154,65 +129,43 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
  * Add a data element to the hash table with the given key or replace an
  *  existing element with the same key.
  *
- * \param t      The hash table to insert the data in.
- * \param key    The key of the data.
- * \param value  The data to insert.
+ * \param t           The hash table to insert the data in.
+ * \param key         The key of the data.
+ * \param value       The data to insert.
+ * \param free_value  The function used to free the old value's data if it
+ *		       needs to be replaced, or NULL if the data does not
+ *		       need to be freed.
  *
  * \return      The original hash table, or ERROR_HT if the data could not be
  *               inserted.  Original hash table is still valid in case of error.
  */
 ht
-ht_insert(ht t, gendata key, gendata value)
+ht_insert(ht t, gendata key, gendata value, free_func free_value)
 {
-	sll new_head;
-	unsigned int bucket;
-	sll ll;
-	ht_entry e;
-	gendata e_data;
+	unsigned int bucketnr;
+	alist al;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 	assert(t->hash != NULL);
 
-	bucket = t->hash(key, t->range);
+	bucketnr = t->hash(key, t->range);
 
 #ifdef BOUNDS_CHECKING
-	if (bucket >= t->range)
-		log_entry(WARN_ERROR, "Gune: ht_insert: Key hash (%u) out of range",
-			  bucket);
+	if (bucketnr >= t->range)
+		log_entry(WARN_ERROR, "Gune: ht_insert: Key hash (%u) "
+			  "out of range", bucketnr);
 #endif
 
-	ll = *(t->table + bucket);
+	al = *(t->buckets + bucketnr);
+	al = alist_insert(al, key, value, free_value);
 
-	/*
-	 * We'll have to check if there's already a value with the same key.
-	 * If it is, overwrite that value.
-	 */
-	while (!sll_empty(ll)) {
-		e = sll_get_data(ll).ptr;
-		if (t->eq(key, e->key)) {
-			e->value = value;
-			e_data.ptr = e;
-			sll_set_data(ll, e_data);
-			return t;
-		}
-	}
+	if (al == ERROR_ALIST)
+		t = ERROR_HT;
+	else
+		/* Strictly not needed */
+		*(t->buckets + bucketnr) = al;
 
-	/* If we got here, the key does not occur in the table yet */
-	if ((e = malloc(sizeof(ht_entry_t))) == NULL)
-		return ERROR_HT;
-
-	e->key = key;
-	e->value = value;
-	e_data.ptr = e;
-
-	new_head = sll_prepend_head(*(t->table + bucket), e_data);
-	if (new_head == ERROR_SLL) {
-		free(e);
-		return ERROR_HT;
-	}
-
-	*(t->table + bucket) = new_head;
 	return t;
 }
 
@@ -230,90 +183,56 @@ ht_insert(ht t, gendata key, gendata value)
 int
 ht_lookup(ht t, gendata key, gendata *data)
 {
-	sll l;
-	ht_entry e;
-	unsigned int bucket;
+	unsigned int bucketnr;
+	alist al;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
-	assert(t->eq != NULL);
 	assert(t->hash != NULL);
 
-	bucket = t->hash(key, t->range);
+	bucketnr = t->hash(key, t->range);
 
 #ifdef BOUNDS_CHECKING
-	if (bucket >= t->range)
-		log_entry(WARN_ERROR, "Gune: ht_lookup: Key hash (%u) out of range",
-			  bucket);
+	if (bucketnr >= t->range)
+		log_entry(WARN_ERROR, "Gune: ht_lookup: Key hash (%u) "
+			  "out of range", bucketnr);
 #endif
 
-	l = *(t->table + bucket);
-	while (!sll_empty(l)) {
-		e = sll_get_data(l).ptr;
-		if (t->eq(key, e->key)) {
-			*data = e->value;
-			return 1;
-		}
-		l = sll_next(l);
-	}
-
-	return 0;
+	al = *(t->buckets + bucketnr);
+	return alist_lookup(al, key, data);
 }
 
 
 /**
  * Delete an element from the hash table.
  *
- * \param t     The hashtable which contains the element to delete.
- * \param key   The key to the element to delete.
+ * \param t           The hashtable which contains the element to delete.
+ * \param key         The key to the element to delete.
+ * \param key_free    The function which is used to free the key data, or
+ *			NULL if no action should be taken on the key data.
+ * \param value_free  The function which is used to free the value data, or
+ *			NULL if no action should be taken on the value data.
  *
  * \return      0 if the element could not be found, nonzero if it was deleted.
  */
 int
-ht_delete(ht t, gendata key)
+ht_delete(ht t, gendata key, free_func key_free, free_func value_free)
 {
-	sll l, n;
-	ht_entry e;
-	unsigned int bucket;
+	unsigned int bucketnr;
+	alist al;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
-	assert(t->eq != NULL);
 	assert(t->hash != NULL);
 
-	bucket = t->hash(key, t->range);
+	bucketnr = t->hash(key, t->range);
 
 #ifdef BOUNDS_CHECKING
-	if (bucket >= t->range)
-		log_entry(WARN_ERROR, "Gune: ht_lookup: Key hash (%u) out of range",
-			  bucket);
+	if (bucketnr >= t->range)
+		log_entry(WARN_ERROR, "Gune: ht_lookup: Key hash (%u) out "
+			  "of range", bucketnr);
 #endif
 
-	l = *(t->table + bucket);
-
-	if (sll_empty(l))
-		return 0;
-
-	/*
-	 * The first entry is a special case.  Doubly linked lists might
-	 *  be easier, but it's not convenience we are after in here.
-	 */
-	e = sll_get_data(l).ptr;
-	if (t->eq(key, e->key)) {
-		sll_remove_head(l);
-		return 1;
-	}
-	n = sll_next(l);
-
-	while (!sll_empty(n)) {
-		e = sll_get_data(n).ptr;
-		if (t->eq(key, e->key)) {
-			sll_remove_next(l);
-			return 1;
-		}
-		l = sll_next(l);
-		n = sll_next(l);
-	}
-
-	return 0;
+	al = *(t->buckets + bucketnr);
+	return alist_delete(al, key, key_free, value_free);
 }

@@ -36,23 +36,20 @@
 #define GUNE_HT_H
 
 #include <gune/lists.h>
+#include <gune/alist.h>
 #include <gune/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Equals predicate function for comparing keys */
-typedef int (* eq_func) (gendata, gendata);
-
 /** Hashing function */
 typedef unsigned int (* hash_func) (gendata, unsigned int);
 
 /** Hash table implementation */
 typedef struct ht_t {
-	sll *table;
+	alist *buckets;
 	unsigned int range;
-	eq_func eq;
 	hash_func hash;
 } ht_t, *ht;
 
@@ -61,9 +58,9 @@ extern ht_t * const ERROR_HT;
 
 ht ht_create(unsigned int, hash_func, eq_func);
 void ht_destroy(ht, free_func, free_func);
-ht ht_insert(ht, gendata, gendata);
+ht ht_insert(ht, gendata, gendata, free_func);
 int ht_lookup(ht, gendata, gendata *);
-int ht_delete(ht, gendata);
+int ht_delete(ht, gendata, free_func, free_func);
 
 #ifdef __cplusplus
 }

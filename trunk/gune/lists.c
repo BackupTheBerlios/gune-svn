@@ -31,7 +31,7 @@
 
 /**
  * \file lists.c
- * Linked list, queue and stack implementation
+ * Linked lists implementation
  */
 #include <assert.h>
 #include <stdio.h>

@@ -36,9 +36,13 @@
 #ifndef GUNE_MISC_H
 #define GUNE_MISC_H
 
+#include <gune/types.h>
+
 #define SWAP(t,a,b)	{ t tmp = (a); (a) = (b); (b) = tmp;}
 
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
+
+int ptr_eq(gendata, gendata);
 
 #endif /* GUNE_MISC_H */

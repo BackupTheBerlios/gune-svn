@@ -144,11 +144,13 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
 	assert(al != NULL);
 	assert(eq != NULL);
 
+	l = al->list;
+
 	/*
 	 * We'll have to check if there's already a value with the same key.
 	 * If there is, overwrite that value.
 	 */
-	while (!sll_empty(l = al->list)) {
+	while (!sll_empty(l)) {
 		e = sll_get_data(l).ptr;
 		if (eq(key, e->key)) {
 			/* Free old data */

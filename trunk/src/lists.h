@@ -41,27 +41,22 @@
 extern "C" {
 #endif
 
-/** Singly linked list implementation */
-typedef struct sll_elem {
+/** Elements for use in singly linked lists */
+typedef struct sll_elem_t {
 	void *data;
 	struct sll_elem *next;
-} sll_elem;
+} *sll_elem;
 
-/* In stead of this:
-typedef sll_elem *	sll;
-typedef sll_elem *	sll_iter;
-, we get this: */
+/** Singly linked list implementation */
 typedef struct sll_t {
 	void *data;
-	struct sll_elem *next;
+	sll_elem next;
 } *sll;
 
-/* And the next line can be slightly different.  From this:
-extern const (sll_elem const *) ERROR_SLL;
-we get this: */
+typedef sll_elem *sll_iter;
 
 /** Invalid linked list, used as error return value */
-extern const (sll_t const *) ERROR_SLL;
+extern const struct sll_t * const ERROR_SLL;
 
 /** SLL creation/deletion functions */
 sll sll_create(void);
@@ -88,17 +83,24 @@ void sll_set_data(sll_iter);
 void sll_dump(sll, char *);
 #endif
 
-/** Doubly linked list implementation */
-typedef struct dll_elem {
+/** Elements for use in doubly linked lists */
+typedef struct dll_elem_t {
 	void *data;
 	struct dll_elem *prev;
 	struct dll_elem *next;
-} dll_elem;
-typedef dll_elem *	dll;
-typedef dll_elem *	dll_iter;
+} *dll_elem;
+
+/** Doubly linked list implementation */
+typedef struct dll_t {
+	void *data;
+	struct dll_elem *prev;
+	struct dll_elem *next;
+} *dll;
+
+typedef dll_elem *dll_iter;
 
 /** Invalid linked list, used as error return value */
-extern const dll ERROR_DLL;
+extern const struct dll_t *const ERROR_DLL;
 
 /** DLL creation/deletion functions */
 dll dll_create(void);
@@ -127,17 +129,13 @@ void dll_dump(dll, char *);
 
 
 /** Stack implementation */
-typedef struct stack_elem {
-	void *data;
-	struct stack_elem *next;
-} stack_elem;
-
 typedef struct stack_t {
-	struct stack_elem *head;
-} stack_t, *stack;
+	void *data;
+	struct stack_t *head;
+} stack_t, *stack, const *stack_c;
 
 /** Invalid stack, used as error return value */
-extern const stack ERROR_STACK;
+extern const stack_c ERROR_STACK;
 
 stack stack_new(void);
 void *stack_pop(stack);
@@ -148,19 +146,15 @@ void stack_free(stack);
 
 
 /** Queue implementation */
-typedef struct queue_elem {
-	void *data;
-	struct queue_elem *next;
-} queue_elem;
-
 typedef struct queue_t {
-	struct queue_elem *bgn;
-	struct queue_elem *end;
+	void *data;
+	struct queue_t *bgn;
+	struct queue_t *end;
 	int count;
-} queue_t, *queue;
+} queue_t, *queue, const *queue_c;
 
 /** Invalid queue, used as error return value */
-extern const (queue_t const *) ERROR_QUEUE;
+extern const queue_c ERROR_QUEUE;
 
 queue queue_new(void);
 queue queue_enqueue(queue, void *);

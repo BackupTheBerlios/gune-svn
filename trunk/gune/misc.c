@@ -85,6 +85,9 @@ ptr_eq(gendata p1, gendata p2)
  * the key's data it is highly recommended to write a more specific hashing
  * function.
  *
+ * Also, the range may \b not be larger than the maximum value of a pointer
+ * on the target machine.  In practice, this restriction will rarely matter.
+ *
  * \param key    The pointer to hash.
  * \param range  The range of the hash table.  This should be a prime value
  *		  for this function to ensure all hash table buckets are
@@ -103,6 +106,7 @@ ptr_hash(gendata key, unsigned int range)
 	 * since we're counting modulo anyway.  So the pointers can get
 	 * truncated all they want.
 	 */
+	/* LINTED */
 	unsigned int p = (unsigned int)key.ptr;
 
 	return p % range;

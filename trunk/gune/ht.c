@@ -107,24 +107,42 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
  * Free all memory allocated for a hash table.  The data within the table is
  * freed by calling a user-supplied free function.
  * If the same data is included multiple times in the table, the free function
- * gets called that many times. <- XXX This is impossible, currently, unless really
- * strange things have been going on! (like, say, a random hashing function)
+ * gets called that many times. <- XXX This is impossible, currently, unless
+ * really strange things have been going on! (like, say, a random hashing
+ * function)
  *
- * \param t  The hash table to destroy.
- * \param f  The function which is used to free the data.
+ * \param t           The hash table to destroy.
+ * \param key_free    The function which is used to free the key data.
+ * \param value_free  The function which is used to free the value data.
  */
 void
-ht_destroy(ht t, free_func f)
+ht_destroy(ht t, free_func key_free, free_func value_free)
 {
-/* XXX Free elements, and keys/values IN elements */
 	sll *p;
+	ht_entry e;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
-	assert(f != NULL);
+	assert(key_free != NULL);	/* Or just not call the func if NULL? */
+	assert(value_free != NULL);
 
-	for (p = t->table; p < (t->table + t->range); ++p)
-		sll_destroy(*p, f);
+	for (p = t->table; p < (t->table + t->range); ++p) {
+		if (p != NULL) {
+			/*
+			 * XXX: What we would really like to do is just call
+			 * sll_destroy(*p, f);
+			 * Problem is we can't pass a function which knows
+			 * about the {key, value}_free functions.
+			 */
+			while (!sll_empty(*p)) {
+				e = sll_get_data(*p).ptr;
+				key_free(e->key.ptr);
+				value_free(e->value.ptr);
+				free(e);
+				*p = sll_remove_head(*p);
+			}
+		}
+	}
 
 	free(t);
 }
@@ -144,8 +162,9 @@ ht_free(ht t)
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 
+	/* We /do/ free the ht_entry things, just not the key/value pairs */
 	for (p = t->table; p < (t->table + t->range); ++p)
-		sll_free(*p);
+		sll_destroy(*p, free);
 
 	free(t);
 }

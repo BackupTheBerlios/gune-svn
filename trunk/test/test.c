@@ -61,7 +61,7 @@ stress_test_stack(int num)
 	*x = 13;
 
 	/* Create a new stack */
-	s = stack_new();
+	s = stack_create();
 
 	/* Fill it up, and remove items again */
 	printf("Filling a stack with %d items...\n", num);
@@ -80,7 +80,7 @@ stress_test_stack(int num)
 	assert(stack_is_empty(s) == false);
 
 	/* ...and free it */
-	stack_free(s);
+	stack_destroy(s);
 	free(x);
 }
 

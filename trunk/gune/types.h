@@ -35,23 +35,6 @@
 #ifndef GUNE_TYPES_H
 #define GUNE_TYPES_H
 
-/** Boolean implementation */
-/* Some other packages may define bool themselves. */
-#ifdef bool
-#undef bool
-#endif
-#define bool	int
-
-#ifdef false
-#undef false
-#endif
-#define false	0
-
-#ifdef true
-#undef true
-#endif
-#define true	(!false)
-
 /** Generic data type to put in lists, stacks etc. */
 /*
  * Note: We can't use the names of C (char, int), so we have to be a little

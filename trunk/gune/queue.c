@@ -177,9 +177,9 @@ queue_peek(queue q)
  *
  * \param q  The queue to check for emptiness.
  *
- * \return   Whether the queue is empty.
+ * \return   Non-zero if the queue is empty, 0 if it is not.
  */
-bool
+int
 queue_is_empty(queue q)
 {
 	assert(q != ERROR_QUEUE);

@@ -150,9 +150,9 @@ stack_push(stack s, gendata data)
  *
  * \param s  The stack to check.
  *
- * \return   Whether or not the stack is empty.
+ * \return   Non-zero if the stack is empty, 0 if it is not.
  */
-bool
+int
 stack_is_empty(stack s)
 {
 	assert(s != NULL);

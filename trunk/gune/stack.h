@@ -54,7 +54,7 @@ stack stack_create(void);
 gendata stack_pop(stack);
 gendata stack_peek(stack);
 void stack_push(stack, gendata);
-bool stack_is_empty(stack);
+int stack_is_empty(stack);
 void stack_destroy(stack);
 
 #ifdef __cplusplus

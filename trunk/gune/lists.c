@@ -103,11 +103,11 @@ sll_count(sll ll)
  *
  * \param ll  The singly linked list to check.
  *
- * \return  A boolean indicating whether the linked list is empty.
+ * \return  Non-zero if the list is empty, 0 if it is not.
  *
  * \sa  dll_is_empty
  */
-bool
+int
 sll_is_empty(sll ll)
 {
 	assert(ll != ERROR_SLL);
@@ -342,11 +342,11 @@ dll_count(dll ll)
  *
  * \param ll  The doubly linked list to check.
  *
- * \return  A boolean indicating whether the linked list is empty.
+ * \return    Non-zero if the list is empty, 0 if it is not.
  *
  * \sa  sll_is_empty
  */
-bool
+int
 dll_is_empty(dll ll)
 {
 	assert(ll != ERROR_DLL);

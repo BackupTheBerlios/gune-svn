@@ -55,7 +55,7 @@ queue queue_create(void);
 queue queue_enqueue(queue, gendata);
 gendata queue_dequeue(queue);
 gendata queue_peek(queue);
-bool queue_is_empty(queue);
+int queue_is_empty(queue);
 void queue_destroy(queue);
 
 #ifdef __cplusplus

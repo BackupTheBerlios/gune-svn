@@ -54,7 +54,7 @@ extern sll_t * const ERROR_SLL;
 sll sll_create(void);
 void sll_destroy(sll);
 unsigned int sll_count(sll);
-bool sll_is_empty(sll);
+int sll_is_empty(sll);
 
 /* SLL exceptions for head */
 sll sll_remove_head(sll);
@@ -83,7 +83,7 @@ extern dll_t * const ERROR_DLL;
 dll dll_create(void);
 void dll_destroy(dll);
 unsigned int dll_count(dll);
-bool dll_is_empty(dll);
+int dll_is_empty(dll);
 
 /* DLL exceptions for head */
 dll dll_remove_head(dll);

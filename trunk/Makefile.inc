@@ -12,11 +12,10 @@
 PREFIX?=	/usr/local
 LIBDIR=		${PREFIX}/lib
 MANDIR=		${PREFIX}/share/man
+HTMLDIR=	${PREFIX}/share/doc
 
-# Treat C and lint warnings as errors.
-CFLAGS+=	-g -ansi -pedantic-errors -W -Wall -Werror -Wpointer-arith
-CFLAGS+=	-Wconversion -Wcast-align
-LINTFLAGS+=	-w
+# Uncomment this to install HTML files too (currently not implemented)
+#INSTALL_HTML=yes
 
 ########################
 # Compile-time options #
@@ -28,4 +27,9 @@ LINTFLAGS+=	-w
 DEFS+=		-DBOUNDS_CHECKING
 
 # Enable debug code?
-DEFS+=		-DDEBUG
+#DEFS+=		-DDEBUG
+
+# Add debug symbols? (GCC specific)
+#CFLAGS+=	-g
+
+.-include "Makefile.devel"

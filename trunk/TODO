@@ -19,5 +19,3 @@
 - Find out if it is possible to make a macro or something for errno values
    lists for Doxygen.  These things always look the same, so it should be
    possible if Doxygen supports it.
-- Make manpages (or find out how to generate decent ones with Doxygen)
-- Go over everything once more for consistency.

@@ -6,7 +6,7 @@
 #  as BSD Makefile structure is extremely elegant.
 #
 
-SUBDIR=		gune test
+SUBDIR=		gune test docs
 
 testall: all
 	test/test -a

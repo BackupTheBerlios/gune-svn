@@ -81,6 +81,8 @@ str_cat(const char *a, const char *b)
  * \param len  The number of bytes to copy, maximum.
  *
  * \return     The destination buffer.
+ *
+ * \sa str_cpy
  */
 char *
 str_n_cpy(char *dst, const char *src, size_t len)
@@ -98,6 +100,8 @@ str_n_cpy(char *dst, const char *src, size_t len)
  * \param s  The string to copy.
  *
  * \return   The copy of the original string, or NULL if out of memory.
+ *
+ * \sa str_n_cpy
  */
 char *
 str_cpy(const char *s)
@@ -117,6 +121,8 @@ str_cpy(const char *s)
  * \param range  The range of the hash table.
  *
  * \return  The hash of the supplied string, in the range [0..range-1].
+ *
+ * \sa str_eq
  */
 unsigned int
 str_hash(gendata key, unsigned int range)
@@ -148,6 +154,8 @@ str_hash(gendata key, unsigned int range)
  * \return  An integer greater than, equal to, or less than 0, according to
  *	      whether s1 is greater than, equal to, or less than s2.  Exact
  *	      values depend on your C library's strcmp implementation.
+ *
+ * \sa str_hash
  */
 int
 str_eq(gendata s1, gendata s2)

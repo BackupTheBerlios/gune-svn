@@ -50,6 +50,8 @@ ht_t * const ERROR_HT = (void *)error_dummy_func;
  * \param hash   The hashing function to use on keys.
  *
  * \return       A new empty hash table object, or ERROR_HT if out of memory.
+ *
+ * \sa ht_destroy
  */
 ht
 ht_create(unsigned int range, hash_func hash)
@@ -107,6 +109,8 @@ ht_create(unsigned int range, hash_func hash)
  *			NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
  *			NULL if no action should be taken on the value data.
+ *
+ * \sa ht_create
  */
 void
 ht_destroy(ht t, free_func key_free, free_func value_free)
@@ -137,6 +141,8 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
  *
  * \return      The original hash table, or ERROR_HT if the data could not be
  *               inserted.  Original hash table is still valid in case of error.
+ *
+ * \sa ht_delete
  */
 ht
 ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
@@ -217,6 +223,8 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
  *			NULL if no action should be taken on the value data.
  *
  * \return      0 if the element could not be found, nonzero if it was deleted.
+ *
+ * \sa ht_insert
  */
 int
 ht_delete(ht t, gendata key, eq_func eq, free_func key_free,

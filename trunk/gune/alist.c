@@ -55,6 +55,8 @@ alist_t * const ERROR_ALIST = (void *)error_dummy_func;
  * Create a new, empty, association list.
  *
  * \return       A new empty alist object, or ERROR_ALIST if out of memory.
+ *
+ * \sa alist_destroy
  */
 alist
 alist_create(void)
@@ -81,6 +83,8 @@ alist_create(void)
  *			NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
  *			NULL if no action should be taken on the value data.
+ *
+ * \sa alist_create
  */
 void
 alist_destroy(alist al, free_func key_free, free_func value_free)
@@ -124,6 +128,8 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
  *
  * \return      The original alist, or ERROR_ALIST if the data could not be
  *               inserted.  Original alist is still valid in case of error.
+ *
+ * \sa alist_delete
  */
 alist
 alist_insert(alist al, gendata key, gendata value, eq_func eq,
@@ -223,6 +229,8 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
  *			NULL if no action should be taken on the value data.
  *
  * \return     0 if the element could not be found, nonzero if it was deleted.
+ *
+ * \sa alist_insert
  */
 int
 alist_delete(alist al, gendata key, eq_func eq, free_func key_free,

@@ -259,3 +259,61 @@ ht_lookup(ht t, gendata key, gendata *data)
 
 	return 0;
 }
+
+
+/**
+ * Delete an element from the hash table.
+ *
+ * \param t     The hashtable which contains the element to delete.
+ * \param key   The key to the element to delete.
+ *
+ * \return      0 if the element could not be found, nonzero if it was deleted.
+ */
+int
+ht_delete(ht t, gendata key)
+{
+	sll l, n;
+	ht_entry e;
+	unsigned int bucket;
+
+	assert(t != ERROR_HT);
+	assert(t != NULL);
+	assert(t->eq != NULL);
+	assert(t->hash != NULL);
+
+	bucket = t->hash(key);
+
+#ifdef BOUNDS_CHECKING
+	if (bucket >= t->range)
+		log_entry(WARN_ERROR, "Gune: ht_lookup: Key hash (%u) out of range",
+			  bucket);
+#endif
+
+	l = *(t->table + bucket);
+
+	if (sll_empty(l))
+		return 0;
+
+	/*
+	 * The first entry is a special case.  Doubly linked lists might
+	 *  be easier, but it's not convenience we are after in here.
+	 */
+	e = sll_get_data(l).ptr;
+	if (t->eq(key, e->key)) {
+		sll_remove_head(l);
+		return 1;
+	}
+	n = sll_next(l);
+
+	while (!sll_empty(n)) {
+		e = sll_get_data(n).ptr;
+		if (t->eq(key, e->key)) {
+			sll_remove_next(l);
+			return 1;
+		}
+		l = sll_next(l);
+		n = sll_next(l);
+	}
+
+	return 0;
+}

@@ -153,6 +153,41 @@ sll_remove_head(sll ll)
 
 
 /**
+ * Removes the next item after the head from a singly linked list.  The data
+ * stored in the linked list is NOT freed.
+ *
+ * \param ll  The singly linked list.
+ *
+ * \return  A pointer to the new singly linked list, or ERROR_SSL if the
+ *	      next item does not exist.
+ *
+ * \sa  sll_remove_head
+ */
+sll
+sll_remove_next(sll ll)
+{
+	sll begin;
+	
+	assert(ll != NULL);
+	assert(ll != ERROR_SLL);
+
+	/* Move the ll pointer to the next element */
+	begin = ll;
+	ll = ll->next;
+
+	if (ll == NULL)
+		return ERROR_SLL;
+
+	begin->next = ll->next;
+
+	/* Free up used space by the removed element */
+	free(ll);
+
+	return ll;
+}
+
+
+/**
  * Prepends the given element to the head of the singly linked list.
  *
  * \param ll    The singly linked list to prepend the element to.

@@ -63,6 +63,7 @@ ht ht_create(unsigned int, hash_func, eq_func);
 void ht_destroy(ht, free_func, free_func);
 ht ht_insert(ht, gendata, gendata);
 int ht_lookup(ht, gendata, gendata *);
+int ht_delete(ht, gendata);
 
 #ifdef __cplusplus
 }

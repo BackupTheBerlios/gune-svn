@@ -58,6 +58,7 @@ int sll_empty(sll);
 
 /* SLL exceptions for head */
 sll sll_remove_head(sll);
+sll sll_remove_next(sll);
 sll sll_prepend_head(sll, gendata);
 sll sll_append_head(sll, gendata);
 

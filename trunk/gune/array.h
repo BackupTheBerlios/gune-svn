@@ -43,12 +43,25 @@ extern "C" {
 
 /** Array implementation */
 typedef struct array_t {
-	void *data;
-	int len;
+	void **data;
+	unsigned int size;
+	unsigned int capacity;
 } array_t, *array;
 
 /** Invalid array, used as error return value */
 extern array_t * const ERROR_ARRAY;
+
+array array_create(void);
+void array_destroy(array);
+unsigned int array_size(array);
+array array_resize(array, unsigned int);
+void *array_get_data(array, unsigned int);
+array array_set_data(array, unsigned int, void *);
+array array_compact(array);
+array array_grow(array, int);
+array array_shrink(array, int);
+array array_add(array, void *);
+array array_remove(array);
 
 #ifdef __cplusplus
 }

@@ -565,15 +565,15 @@ dll_dump(dll ll, char *fmt)
 
 #ifdef BOUNDS_CHECKING
 	if (ll->prev != NULL)
-		fprintf(stderr, "Gune: dll_dump: First element of doubly "
-			"linked list has non-NULL prev pointer\n");
+		log_entry(WARN_ERROR, "Gune: dll_dump: First element of doubly "
+			  "linked list has non-NULL prev pointer");
 #endif
 
 	for (; ll != NULL; ll = ll->next) {
 #ifdef BOUNDS_CHECKING
 		if (ll->prev != NULL && ll->prev->next != ll)
-			fprintf(stderr, "Gune: dll_dump: Linked list is not "
-				"consistent\n");
+			log_entry(WARN_ERROR, "Gune: dll_dump: Linked list is not "
+				  "consistent");
 #endif
 		printf(fmt, (int)ll->data);
 		printf(" -> ");

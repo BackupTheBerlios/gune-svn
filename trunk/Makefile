@@ -8,12 +8,14 @@
 
 SUBDIR=		gune test docs
 
-.PHONY: testall doc
+.PHONY: testall doc release
 
 testall: all
 	test/test -a
 
 doc:
 	cd gune && ${MAKE} doc
+
+release: doc
 
 .include <bsd.subdir.mk>

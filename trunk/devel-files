@@ -1,0 +1,7 @@
+#
+# $Id$
+#
+# Files to be removed when creating a release tarball
+#
+release.sh
+Makefile.devel

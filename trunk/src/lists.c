@@ -151,7 +151,7 @@ sll_remove_head(sll ll)
  * \param ll    The singly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or NULL in case of error.  Old linked list
+ * \return  The new linked list or ERROR_SLL in case of error.  Old linked list
  *          has become invalid, unless an error occurred.
  *
  * \sa  sll_append dll_prepend_head
@@ -159,11 +159,14 @@ sll_remove_head(sll ll)
 sll
 sll_prepend_head(sll ll, void *data)
 {
-	sll_elem *new;
+	sll_t *new;
 
-	if ((new = malloc(sizeof(sll_elem))) == NULL)
-		return NULL;
+	/* Allocate the new element */
+	if ((new = malloc(sizeof(sll_t))) == NULL)
+		return ERROR_SLL;
 	new->data = data;
+
+	/* Prepend to the current list */
 	new->next = ll;
 	return (sll)new;
 }

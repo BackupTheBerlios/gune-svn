@@ -269,7 +269,7 @@ sll_forward(sll ll, unsigned int nskip)
  *
  * \return       The data in the list.
  *
- * \sa dll_get_data
+ * \sa sll_set_data dll_get_data
  */
 gendata
 sll_get_data(sll ll)
@@ -278,6 +278,28 @@ sll_get_data(sll ll)
 	assert(ll != ERROR_SLL);
 
 	return ll->data;
+}
+
+
+/**
+ * Set the data at the current position from a singly linked list.
+ *
+ * \param ll     The singly linked list to store the data in.
+ * \param data   The data to store.
+ *
+ * \return       The supplied list, with modified data.
+ *
+ * \sa sll_get_data dll_set_data
+ */
+sll
+sll_set_data(sll ll, gendata data)
+{
+	assert(ll != NULL);
+	assert(ll != ERROR_SLL);
+
+	ll->data = data;
+
+	return ll;
 }
 
 
@@ -584,7 +606,7 @@ dll_backward(dll ll, unsigned int nskip)
  *
  * \return       The data in the list.
  *
- * \sa sll_get_data
+ * \sa dll_set_data sll_get_data
  */
 gendata
 dll_get_data(dll ll)
@@ -593,6 +615,28 @@ dll_get_data(dll ll)
 	assert(ll != ERROR_DLL);
 
 	return ll->data;
+}
+
+
+/**
+ * Set the data at the current position from a doubly linked list.
+ *
+ * \param ll     The doubly linked list to store the data in.
+ * \param data   The data to store.
+ *
+ * \return       The supplied list, with modified data.
+ *
+ * \sa dll_get_data sll_set_data
+ */
+dll
+dll_set_data(dll ll, gendata data)
+{
+	assert(ll != NULL);
+	assert(ll != ERROR_DLL);
+
+	ll->data = data;
+
+	return ll;
 }
 
 

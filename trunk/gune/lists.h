@@ -64,7 +64,10 @@ sll sll_append_head(sll, gendata);
 
 /* Accessor functions */
 gendata sll_get_data(sll);
+sll sll_set_data(sll, gendata);
 sll sll_forward(sll, unsigned int);
+
+#define sll_next(l)	(sll_forward((l), 1))
 
 #ifdef DEBUG
 void sll_dump(sll, char *);
@@ -94,8 +97,12 @@ dll dll_append_head(dll, gendata);
 
 /* Accessor functions */
 gendata dll_get_data(dll);
+dll dll_set_data(dll, gendata);
 dll dll_forward(dll, unsigned int);
 dll dll_backward(dll, unsigned int);
+
+#define dll_next(l)	(dll_forward((l), 1))
+#define dll_prev(l)	(dll_backward((l), 1))
 
 #ifdef DEBUG
 void dll_dump(dll, char *);

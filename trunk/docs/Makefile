@@ -4,7 +4,7 @@
 
 SUBDIR=		man
 
-.if "${INSTALL_HTML}" == "yes"
+.if defined(INSTALL_HTML) && ${INSTALL_HTML} == "yes"
 SUBDIR+= html
 .endif
 

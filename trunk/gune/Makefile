@@ -17,9 +17,10 @@ LINTFLAGS+=	-I.. ${DEFS}
 doc:
 	doxygen
 
-install: includes
-
-includes:
+# Make sure includes are installed too on install target
+beforeinstall:
 	${INSTALL_DIR} ${INCSDIR}
+
+afterinstall: includes
 
 .include <bsd.lib.mk>

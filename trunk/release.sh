@@ -131,17 +131,25 @@ then
 fi
 
 #
-# Order is important here (eg, don't printinfo before we bumpmajor/bumpminor)
+# Init all to 0
 #
+tag=0
+tar=0
+min=0
+maj=0
+upd=0
+inf=0
+
+
 while getopts prtvVHh opt
 do
 	case "${opt}" in
-		t) createtag ;;
-		r) maketar ;;
-		v) bumpminor; updateheader ;;
-		V) bumpmajor; updateheader ;;
-		H) updateheader ;;
-		p) printinfo ;;
+		t) tag=1 ;;
+		r) tar=1 ;;
+		v) min=1; upd=1 ;;
+		V) maj=1; upd=1 ;;
+		H) upd=1 ;;
+		p) inf=1 ;;
 		h) usage; exit ;;
 		?) usage; exit ;;
 	esac
@@ -151,3 +159,31 @@ done
 # Shift arguments beyond options, so $1 will be the arg after the last option
 #
 shift `${EXPR} ${OPTIND} - 1`
+
+#
+# Order is important here (eg, don't printinfo before we bumpmajor/bumpminor)
+#
+if [ $tag -eq 1 ]
+then
+	createtag
+fi
+if [ $tar -eq 1 ]
+then
+	maketar
+fi
+if [ $min -eq 1 ]
+then
+	bumpminor
+fi
+if [ $maj -eq 1 ]
+then
+	bumpmajor
+fi
+if [ $upd -eq 1 ]
+then
+	updateheader
+fi
+if [ $inf -eq 1 ]
+then
+	printinfo
+fi

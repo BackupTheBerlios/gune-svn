@@ -231,6 +231,7 @@ sll_prepend_head(sll ll, gendata data)
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(sll_t))) == NULL)
 		return NULL;
+
 	new->data = data;
 
 	/* Prepend to the current list */
@@ -245,8 +246,9 @@ sll_prepend_head(sll ll, gendata data)
  * \param ll    The singly linked list to append the element to.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or \c NULL in case of error.  The old
- *	      linked list is still valid in case of error.
+ * \return  Either the old(!) linked list or the list with the new element
+ *            if the old list was empty, or \c NULL in case of error.  The
+ *            old linked list is still valid in case of error.
  *
  * \par Errno values:
  * - \b ENOMEM if out of memory.
@@ -264,16 +266,18 @@ sll_append_head(sll ll, gendata data)
 	if ((new = malloc(sizeof(sll_t))) == NULL)
 		return NULL;
 
-	if (!sll_empty(ll))
-		new->next = ll->next;
-	else
-		new->next = CONST_PTR;
-
 	new->data = data;
 
-	/* Append at the current list */
-	ll->next = new;
-	return (sll)new;
+	if (!sll_empty(ll)) {
+		new->next = ll->next;
+		/* Append at the current list */
+		ll->next = new;
+	} else {
+		new->next = CONST_PTR;
+		ll = new;
+	}
+
+	return ll;
 }
 
 
@@ -481,7 +485,7 @@ dll
 dll_remove_head(dll ll, free_func f)
 {
 	dll begin;
-	
+
 	assert(ll != NULL);
 	assert(!dll_empty(ll));
 
@@ -491,7 +495,12 @@ dll_remove_head(dll ll, free_func f)
 	/* Move the ll pointer to the next element */
 	begin = ll;
 	ll = ll->next;
-	ll->prev = begin->prev;
+
+	if (!dll_empty(ll))
+		ll->prev = begin->prev;
+
+	if (!dll_empty(begin->prev))
+		begin->prev->next = ll;
 
 	/* Free up used space by the head element */
 	free(begin);
@@ -570,13 +579,13 @@ dll_append_head(dll ll, gendata data)
 
 	if (!dll_empty(ll)) {
 		new->next = ll->next;
-		new->prev = ll;
 		ll->next = new;
 
 		if (!dll_empty(new->next))
 			new->next->prev = new;
 	} else {
 		new->next = CONST_PTR;
+		ll = new;
 	}
 
 	return ll;

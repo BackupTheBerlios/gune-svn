@@ -35,11 +35,14 @@
 #include <unistd.h>
 #include <gune/gune.h>
 
+#define DEFNUM			100
+#define DEFLOOPCOUNT		10
+
 void
 strcat_tester(char *s)
 {
 	/* Try it */
-	printf("%s...\n", str_cat(s, s));
+	printf("'%s'\n", str_cat(s, s));
 }
 
 
@@ -51,45 +54,132 @@ err_tester(warnlvl wrn)
 }
 
 
+void stress_test_dll(int amt)
+{
+	dll l;
+	gendata x, y;
+	int i;
+
+	l = dll_create();
+	assert(dll_empty(l));
+
+	printf("Filling a dll with 2 * %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
+		l = dll_prepend_head(l, x);
+		assert(!dll_empty(l));
+		l = dll_append_head(l, x);
+		assert(!dll_empty(l));
+	}
+
+	/* Do some funky inserting at a `random' position. */
+	dll_append_head(dll_forward(l, 1), x);
+	/* assert(x.num == dll_get_data(dll_forward(l, 1)).num); */
+	dll_remove_head(dll_forward(l, 2), NULL);
+
+	assert(dll_count(l) == (unsigned int)(2 * amt));
+
+	printf("Removing 2 * %d items from the dll...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		assert(!dll_empty(l));
+		x = dll_get_data(l);
+		l = dll_remove_head(l, NULL);
+		assert(!dll_empty(l));
+		y = dll_get_data(l);
+		l = dll_remove_head(l, NULL);
+
+		/*
+		 * We have to count backwards in this check, since we're
+		 * using the list like a stack, prepending all the time.
+		 */
+		assert(x.num == amt - i - 1);
+		assert(x.num == y.num);
+	}
+	assert(dll_empty(l));
+}
+
+
 void
-stress_test_stack(int num)
+stress_test_stack(int amt)
 {
 	int i;
-	gendata x;
+	gendata x, y;
 	stack s;
 	
-	x.num = 13;
-
-	/* Create a new stack */
 	s = stack_create();
+	assert(stack_empty(s));
 
 	/* Fill it up, and remove items again */
-	printf("Filling a stack with %d items...\n", num);
-	for (i = 0; i < num; ++i)
+	printf("Filling a stack with %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
 		stack_push(s, x);
-	printf("Emptying stack of %d items...\n", num);
-	for (i = 0; i < num; ++i)
-		x = stack_pop(s);
+		assert(x.num == stack_peek(s).num);
+		assert(!stack_empty(s));
+	}
+	printf("Popping/peeking stack of %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		assert(!stack_empty(s));
+		x = stack_peek(s);
+		y = stack_pop(s);
+
+		assert(x.num == amt - i - 1);
+		assert(x.num == y.num);
+	}
 
 	assert(stack_empty(s));
 
 	/* Now, again, fill up the stack... */
-	for (i = 0; i < num; ++i)
+	printf("Refilling a stack with %d items...\n", amt);
+	for (i = 0; i < amt; ++i)
 		stack_push(s, x);
 
 	assert(!stack_empty(s));
 
+	printf("Destroying a stack with %d items...\n", amt);
 	/* ...and free it */
 	stack_destroy(s, NULL);
+}
+
+
+void stress_test_queue(int amt)
+{
+	int i;
+	queue q;
+	gendata x, y;
+
+	q = queue_create();
+	assert(queue_empty(q));
+
+	/* Fill the queue */
+	printf("Enqueueing a queue with %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
+		q = queue_enqueue(q, x);
+		assert(!queue_empty(q));
+	}
+	printf("Dequeueing a queue with %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		assert(!queue_empty(q));
+		x = queue_peek(q);
+		y = queue_dequeue(q);
+		assert(x.num == y.num);
+		assert(x.num == i);
+	}
+	assert(queue_empty(q));
 }
 
 
 void
 usage(void)
 {
-	printf("usage: test [-n num] [-l log] -s num | -e lvl\n");
-	printf("-n num	Perform each test `num' times. Default is 10.\n");
-	printf("-s num	Do a stack stress test on `num' stack items.\n");
+	printf("usage: test [-n num] [-l log] -s amt | -e lvl | "
+		"-d amt -q amt -a\n");
+	printf("-n num	Perform selected tests `num' times. Default is 10.\n");
+	printf("-a      Perform every test, using %i for `amt'\n", DEFNUM);
+	printf("-s amt	Do a stack stress test on `amt' stack items.\n");
+	printf("-d amt  Do a Doubly Linked List (dll) stress test.\n");
+	printf("-q amt  Do a queue stress test.\n");
 	printf("-e lvl  Print an error on the specified level (0-3).\n");
 	printf("-l log  Use log as a file to write messages to.\n");
 	printf("-c str  Test string copy routines.\n");
@@ -103,15 +193,27 @@ main(int argc, char **argv)
 	extern char *optarg;
 	char *str = NULL;
 	int ch;
+	extern char *malloc_options;
+	int i, loop, stack_test, queue_test, dll_test, err_test;
+	int strcat_test, idle;
 
 	warnlvl wrn = WARN_NOTIFY;
 
+	/*
+	 * Set malloc options to init memory to zero and always have realloc
+	 * actually reallocate memory.  Also, all warnings become fatal.
+	 * Alloc of size 0 will always return NULL.  Always dump core on
+	 * errors in malloc family functions.
+	 */
+	malloc_options = "ZAVX";
+
 	/* Default options */
-	int i, loop, stack_test, err_test, strcat_test, idle;
 	stack_test = 0;
+	dll_test = 0;
 	err_test = 0;
 	strcat_test = 0;
-	loop = 10;
+	queue_test = 0;
+	loop = DEFLOOPCOUNT;
 	idle = 1;	/* Set idle, unless a test should be run */
 
 	if (argc <= 1) {
@@ -119,56 +221,84 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	while ((ch = getopt(argc, argv, "n:s:l:e:c:v")) != -1)
+	while ((ch = getopt(argc, argv, "ac:d:e:l:n:q:s:v")) != -1)
 		switch ((char)ch) {
-		case 'n':
-			loop = atoi(optarg);
-			break;
-		case 's':
-			stack_test = atoi(optarg);
-			idle = 0;
-			break;
-		case 'l':
-			set_logfile(fopen(optarg, "a"));
-			break;
-		case 'e':
-			if (atoi(optarg) >= 0 && atoi(optarg) < NUM_WARNLVLS)
-				wrn = atoi(optarg);
-			else {
-				fprintf(stderr, "Please specifify a number between 0 and 4.\n");
-				exit(1);
-			}
-			idle = 0;
-			err_test = 1;
-			break;
-		case 'c':
-			strcat_test = 1;
-			str = optarg;
-			idle = 0;
-			break;
-		case 'v':
-			printf("Using the following Gune version...\n");
-			printf("Preprocessor value:     \t%s\n",
-				PP_STR(GUNE_VERSION));
-			printf("Human-readable notation:\t%s\n",
-				GUNE_VERSION_STRING);
-			return 0;
-		default:
-			usage();
-			return 1;
+			case 'a':
+				dll_test = stack_test = queue_test = DEFNUM;
+				idle = 0;
+				break;
+			case 'c':
+				strcat_test = 1;
+				str = optarg;
+				idle = 0;
+				break;
+			case 'd':
+				dll_test = atoi(optarg);
+				idle = 0;
+				break;
+			case 'e':
+				if (atoi(optarg) >= 0 &&
+				    atoi(optarg) < NUM_WARNLVLS)
+					wrn = atoi(optarg);
+				else {
+					fprintf(stderr,
+						"Please specifify a "
+						"number between 0 and 4.\n");
+					exit(1);
+				}
+				idle = 0;
+				err_test = 1;
+				break;
+			case 'l':
+				set_logfile(fopen(optarg, "a"));
+				break;
+			case 'n':
+				loop = atoi(optarg);
+				break;
+			case 'q':
+				queue_test = atoi(optarg);
+				idle = 0;
+				break;
+			case 's':
+				stack_test = atoi(optarg);
+				idle = 0;
+				break;
+			case 'v':
+				printf("Using the following Gune version...\n");
+				printf("Preprocessor value:     \t%s\n",
+					PP_STR(GUNE_VERSION));
+				printf("Human-readable notation:\t%s\n",
+					GUNE_VERSION_STRING);
+				return 0;
+			default:
+				usage();
+				return 1;
 		}
 
 	/* Perform `n' tests of each kind */
 	if (idle == 0)
 		for (i = 0; i < loop; ++i) {
 			printf("========= RUNNING TEST %d =========\n", i + 1);
-			if (stack_test > 0)
+			if (dll_test > 0) {
+				printf("\n----> DLL <----\n");
+				stress_test_dll(dll_test);
+			}
+			if (stack_test > 0) {
+				printf("\n----> STACK <----\n");
 				stress_test_stack(stack_test);
-			printf("\n");
-			if (err_test > 0)
+			}
+			if (err_test > 0) {
+				printf("\n----> ERR <----\n");
 				err_tester(wrn);
-			if (strcat_test > 0)
+			}
+			if (queue_test > 0) {
+				printf("\n----> QUEUE <----\n");
+				stress_test_queue(queue_test);
+			}
+			if (strcat_test > 0) {
+				printf("\n----> STR_CAT <----\n");
 				strcat_tester(str);
+			}
 		}
 
 	printf("Done\n");

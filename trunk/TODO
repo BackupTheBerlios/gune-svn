@@ -7,11 +7,8 @@
 # are any longer than 80 characters.
 #
 - Think about thread safety (like locking lists when adding/removing).
-- Test implementation of queues and write test harness for it.
-- Test doubly linked lists.  These have had no usage and almost no testing.
 - Bounds checking necessary?  If yes, error messages necessary or just NULL?
 - Should we change array_size to array_count???  Or just #define it?
-- Do a thorough audit for Doxygen documentation consistency and completeness.
 - Think about whether it is bad for alists to have a FILO order when using the
     walk function.
 - Add conversion functions between the different types.
@@ -23,3 +20,4 @@
    lists for Doxygen.  These things always look the same, so it should be
    possible if Doxygen supports it.
 - Make manpages (or find out how to generate decent ones with Doxygen)
+- Go over everything once more for consistency.

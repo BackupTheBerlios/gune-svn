@@ -97,7 +97,14 @@ queue_enqueue(queue q, gendata data)
 	if (new == NULL)
 		return NULL;
 
-	q->tail = new;
+	/*
+	 * If the input list is not empty, sll_append_head returns the old
+	 * head of the list.  Select the newly created item.
+	 */
+	if (!sll_empty(q->tail))
+		q->tail = sll_next(new);
+	else
+		q->tail = new;
 
 	/* If we were empty before, we now have a head again */
 	if (sll_empty(q->head))

@@ -8,4 +8,7 @@
 
 SUBDIR=		gune test
 
+testall: test/test
+	test/test -a
+
 .include <bsd.subdir.mk>

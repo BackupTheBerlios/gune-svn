@@ -147,8 +147,11 @@ main(int argc, char **argv)
 			idle = 0;
 			break;
 		case 'v':
-			printf("Using Gune version: %s (from macro defition)\n",
+			printf("Using the following Gune version...\n");
+			printf("Preprocessor value:     \t%s\n",
 				PP_STR(GUNE_VERSION));
+			printf("Human-readable notation:\t%s\n",
+				GUNE_VERSION_STRING);
 			return 0;
 		default:
 			usage();

@@ -42,6 +42,9 @@
 /** Gune's long version number (major, underscore, minor.  Example: 1_0). */
 #define GUNE_VERSION		GEN_VERSION(GUNE_MAJOR_VERSION, GUNE_MINOR_VERSION)
 
+#define GUNE_VERSION_STRING	\
+		GEN_VERSION_STR(GUNE_MAJOR_VERSION, GUNE_MINOR_VERSION)
+
 /**
  * Generate a preprocessor definition like 2_0 from the major version number
  * and the minor version number, which can both be proprocessor definitions.
@@ -65,10 +68,18 @@
 #define GEN_VERSION_INTERN(a, b)	a##_##b
 
 
-/** Get the string value of token.  Example: PP_STR(1) => "1". */
+/** Get the string value of a token.  Example: PP_STR(1) => "1". */
 #define PP_STR(a)			PP_STR_INTERN(a)
 
 /* Again, we need internal PP_STR if the parameter is a macro definition. */
 #define PP_STR_INTERN(a)		#a
+
+/**
+ * Generate a version string from two integers using the preprocessor.
+ *
+ * Example:
+ * GEN_VERSION_STR(1, 0)	==> ("1.0")
+ */
+#define GEN_VERSION_STR(a, b)		(PP_STR(a) "." PP_STR(b))
 
 #endif /* GUNE_VERSION_H */

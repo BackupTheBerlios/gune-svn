@@ -47,5 +47,5 @@ d" ${FILE} >> ${TARGET}
 
 done
 
-# Empty line because last line has a \
-echo "" >> ${TARGET}
+# Also, add our main manpage
+echo "	gune		gune.h${MANEXT}" >> ${TARGET}

@@ -73,11 +73,17 @@ stack_create(void)
 /**
  * \brief Pop the top element off a stack.
  *
+ * \attention
+ * This function logs an error at WARN_ERROR level if the stack is empty
+ * (which will exit the application).
+ * Therefore, always check with the stack_empty() function to see whether
+ * a stack is empty or not.
+ *
  * \param s  The stack object to pop the element off.
  *
  * \return   The element that was popped off.
  *
- * \sa stack_peek, stack_push
+ * \sa stack_peek, stack_push, stack_empty
  */
 gendata
 stack_pop(stack s)
@@ -99,6 +105,12 @@ stack_pop(stack s)
 
 /**
  * \brief Peek at the top element on a stack, without actually popping it.
+ *
+ * \attention
+ * This function logs an error at WARN_ERROR level if the stack is empty
+ * (which will exit the application).
+ * Therefore, always check with the stack_empty() function to see whether
+ * a stack is empty or not.
  *
  * \param s  The stack object to peek at.
  *

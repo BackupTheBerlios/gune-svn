@@ -1,0 +1,17 @@
+#
+# $Id$
+#
+# Developer-only Makefile.  Not contained in a release build.
+#
+
+MKMAN=		no
+DEFS+=		-DDEBUG
+CFLAGS+=	-g
+
+#
+# Treat C and lint warnings as errors.
+# This should really be in Makefile.inc, but this is all rather gcc/xlint-only.
+#
+CFLAGS+=	-ansi -pedantic-errors -W -Wall -Werror -Wpointer-arith
+CFLAGS+=	-Wconversion -Wcast-align
+LINTFLAGS+=	-w

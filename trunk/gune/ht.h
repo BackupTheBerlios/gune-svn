@@ -65,10 +65,6 @@ ht ht_insert(ht, gendata, gendata);
 int ht_lookup(ht, gendata, gendata *);
 int ht_delete(ht, gendata);
 
-/* General-purpose hashing functions */
-unsigned int str_hash(gendata, unsigned int);
-int str_eq(gendata, gendata);
-
 #ifdef __cplusplus
 }
 #endif

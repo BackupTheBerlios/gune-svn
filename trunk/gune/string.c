@@ -35,7 +35,7 @@
  */
 
 #include <stdlib.h>
-
+#include <assert.h>
 #include <gune/string.h>
 
 
@@ -107,4 +107,50 @@ str_cpy(const char *s)
 	if ((x = malloc(strlen(s) + 1)) == NULL)
 		return NULL;
 	return strcpy(x, s);
+}
+
+
+/**
+ * Generate hash from a string.
+ *
+ * \param key    The string to hash.
+ * \param range  The range of the hash table.
+ *
+ * \return  The hash of the supplied string, in the range [0..range-1].
+ */
+unsigned int
+str_hash(gendata key, unsigned int range)
+{
+	char *s = (char *)key.ptr;
+	unsigned int h = 0;				/* This is variable */
+
+	assert(s != NULL);
+
+	/*
+	 * Refer to "Performance in Practice of String Hashing Functions"
+	 * by M.V. Ramakrishna & Justin Zobel for rationale on this particular
+	 * hashing function.
+	 */
+	while (*s != '\0')
+		h ^= ((h << 5) + (h >> 2) + *s++);	/* 5, 2 are variable */
+
+	return h % range;
+}
+
+
+/**
+ * String comparison function for hash tables.  Simply a wrapper for strcmp(3),
+ *  to pick the ptr from gendata.
+ *
+ * \param s1  The string to compare to s2.
+ * \param s2  The string to compare to s1.
+ *
+ * \return  An integer greater than, equal to, or less than 0, according to
+ *	      whether s1 is greater than, equal to, or less than s2.  Exact
+ *	      values depend on your C library's strcmp implementation.
+ */
+int
+str_eq(gendata s1, gendata s2)
+{
+	return strcmp(s1.ptr, s2.ptr);
 }

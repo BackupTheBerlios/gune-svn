@@ -39,12 +39,17 @@
 extern "C" {
 #endif
 
+#include <gune/types.h>
+
 /* For size_t */
 #include <string.h>
 
 char *str_cat(const char *, const char *);
 char *str_n_cpy(char *, const char *, size_t);
 char *str_cpy(const char *);
+
+unsigned int str_hash(gendata, unsigned int);
+int str_eq(gendata, gendata);
 
 #ifdef __cplusplus
 }

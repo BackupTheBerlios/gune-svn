@@ -134,3 +134,41 @@ ht_free(ht t)
 
 	free(t);
 }
+
+
+/**
+ * Add a data element to the hash table with the given key.
+ *
+ * \param t     The hash table to insert the data in.
+ * \param data  The data to insert.
+ * \param key   The key of the data.
+ *
+ * \return      The original hash table, or ERROR_HT if the data could not be
+ *               inserted.  Original hash table is still valid in case of error.
+ */
+ht
+ht_insert(ht t, gendata data, unsigned int key)
+{
+	sll replace;
+
+	assert(ht != ERROR_HT);
+	assert(ht != NULL);
+
+#ifdef BOUNDS_CHECKING
+	if (key >= range)
+		log_entry(WARN_ERROR, "Gune: ht_insert: Key (%u) out of range",
+			  key);
+#endif
+
+	/*
+	 * There's no reason why we should append the data at the end of the
+	 * list, so we just lazily prepend it at to front.
+	 */
+	replace = sll_prepend_head(*(t->data + key), data);
+	if (replace == ERROR_SLL)
+		return ERROR_HT;
+
+	*(t->data + key) = replace;
+
+	return t;
+}

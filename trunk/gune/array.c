@@ -193,7 +193,8 @@ array_get_data(array ar, unsigned int index)
 
 #ifdef BOUNDS_CHECKING
 	if (index > ar->size)
-		log_entry(WARN_ERROR, "Gune: array_get_data: Index (%u) out of bounds");
+		log_entry(WARN_ERROR, "Gune: array_get_data: Index (%u) "
+			  "out of bounds", index);
 #endif
 
 	return *(ar->data + index);
@@ -219,7 +220,8 @@ array_set_data(array ar, unsigned int index, gendata value)
 
 #ifdef BOUNDS_CHECKING
 	if (index > ar->size)
-		log_entry(WARN_ERROR, "Gune: array_get_data: Index (%u) out of bounds");
+		log_entry(WARN_ERROR, "Gune: array_get_data: Index (%u) "
+			  "out of bounds", index);
 #endif
 
 	*(ar->data + index) = value;

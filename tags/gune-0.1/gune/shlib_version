@@ -1,0 +1,8 @@
+#
+# $Id$
+#
+# This file is needed so BSD Make knows which version the shared library has.
+# Without it, it will /not/ build shared libraries at all.
+#
+major=0
+minor=1

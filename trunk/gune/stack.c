@@ -163,41 +163,22 @@ stack_empty(stack s)
 
 
 /**
- * Destroy a stack by deleting each element.  The data stored in the stack is
- * not freed!
- *
- * \param s  The stack to destroy.
- *
- * \sa stack_create stack_destroy
- */
-void
-stack_free(stack s)
-{
-	assert(s != ERROR_STACK);
-	assert(s != NULL);
-
-	sll_free(s->top);
-	free((stack_t *)s);
-}
-
-
-/**
  * Destroy a stack by deleting each element.  The data is freed by calling a
  * user-supplied function on it.
  * If the same data is included multiple times in the stack, the free function
  * gets called that many times.
  *
  * \param s  The stack to destroy.
- * \param f  The function which is used to free the data.
+ * \param f  The function which is used to free the data, or NULL if no action
+ *	      should be taken to free the data.
  *
- * \sa stack_create stack_free
+ * \sa stack_create
  */
 void
 stack_destroy(stack s, free_func f)
 {
 	assert(s != ERROR_STACK);
 	assert(s != NULL);
-	assert(f != NULL);
 
 	sll_destroy(s->top, f);
 	free((stack_t *)s);

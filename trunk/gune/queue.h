@@ -57,7 +57,6 @@ gendata queue_dequeue(queue);
 gendata queue_peek(queue);
 int queue_empty(queue);
 void queue_destroy(queue, free_func);
-void queue_free(queue);
 
 #ifdef __cplusplus
 }

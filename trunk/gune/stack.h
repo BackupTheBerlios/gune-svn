@@ -56,7 +56,6 @@ gendata stack_peek(stack);
 void stack_push(stack, gendata);
 int stack_empty(stack);
 void stack_destroy(stack, free_func);
-void stack_free(stack);
 
 #ifdef __cplusplus
 }

@@ -66,38 +66,21 @@ sll_create(void)
  * gets called that many times.
  *
  * \param ll  The list to destroy.
- * \param f  The function which is used to free the data.
+ * \param f   The function which is used to free the data, or NULL if no
+ *		action should be taken to free the data.
  *
- * \sa  sll_create sll_free dll_destroy
+ * \sa  sll_create dll_destroy
  */
 void
 sll_destroy(sll ll, free_func f)
 {
 	assert(ll != ERROR_SLL);
-	assert(f != NULL);
 
 	while (!sll_empty(ll)) {
-		f(ll->data.ptr);
+		if (f != NULL)
+			f(ll->data.ptr);
 		ll = sll_remove_head(ll);
 	}
-}
-
-
-/**
- * Destroy a singly linked list by deleting each element.  The data stored in
- * the linked list is not freed!
- *
- * \param ll  The list to destroy.
- *
- * \sa  sll_create sll_destroy dll_free
- */
-void
-sll_free(sll ll)
-{
-	assert(ll != ERROR_SLL);
-
-	while (!sll_empty(ll))
-		ll = sll_remove_head(ll);
 }
 
 
@@ -353,38 +336,21 @@ dll_create(void)
  * gets called that many times.
  *
  * \param ll  The list to destroy.
- * \param f   The function which is used to free the data.
+ * \param f   The function which is used to free the data, or NULL if no
+ *		action should be taken to free the data.
  *
- * \sa  dll_create dll_free sll_destroy
+ * \sa  dll_create sll_destroy
  */
 void
 dll_destroy(dll ll, free_func f)
 {
 	assert(ll != ERROR_DLL);
-	assert(f != NULL);
 
 	while (!dll_empty(ll)) {
-		f(ll->data.ptr);
+		if (f != NULL)
+			f(ll->data.ptr);
 		ll = dll_remove_head(ll);
 	}
-}
-
-
-/**
- * Destroy a doubly linked list by deleting each element.  The data stored
- * in the linked list is NOT freed.
- *
- * \param ll  The list to destroy.
- *
- * \sa  dll_create dll_destroy sll_destroy
- */
-void
-dll_free(dll ll)
-{
-	assert(ll != ERROR_DLL);
-
-	while (!dll_empty(ll))
-		ll = dll_remove_head(ll);
 }
 
 

@@ -92,7 +92,7 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
 		if ((*(t->table + i) = sll_create()) == ERROR_SLL) {
 			/* Creation went wrong halfway?  Destroy all previous */
 			for (j = 0; j < i; ++j)
-				sll_free(*(t->table + j));
+				sll_destroy(*(t->table + j), NULL);
 
 			free(t);
 			return (ht)ERROR_HT;
@@ -112,8 +112,10 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
  * function)
  *
  * \param t           The hash table to destroy.
- * \param key_free    The function which is used to free the key data.
- * \param value_free  The function which is used to free the value data.
+ * \param key_free    The function which is used to free the key data, or
+ *			NULL if no action should be taken on the key data.
+ * \param value_free  The function which is used to free the value data, or
+ *			NULL if no action should be taken on the value data.
  */
 void
 ht_destroy(ht t, free_func key_free, free_func value_free)
@@ -123,8 +125,6 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
-	assert(key_free != NULL);	/* Or just not call the func if NULL? */
-	assert(value_free != NULL);
 
 	for (p = t->table; p < (t->table + t->range); ++p) {
 		if (p != NULL) {
@@ -136,35 +136,15 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
 			 */
 			while (!sll_empty(*p)) {
 				e = sll_get_data(*p).ptr;
-				key_free(e->key.ptr);
-				value_free(e->value.ptr);
+				if (key_free != NULL)
+					key_free(e->key.ptr);
+				if (value_free != NULL)
+					value_free(e->value.ptr);
 				free(e);
 				*p = sll_remove_head(*p);
 			}
 		}
 	}
-
-	free(t);
-}
-
-
-/**
- * Free all memory allocated for a hash table. The data stored within the
- * table is NOT freed.
- *
- * \param t  The hash table to destroy.
- */
-void
-ht_free(ht t)
-{
-	sll *p;
-
-	assert(t != ERROR_HT);
-	assert(t != NULL);
-
-	/* We /do/ free the ht_entry things, just not the key/value pairs */
-	for (p = t->table; p < (t->table + t->range); ++p)
-		sll_destroy(*p, free);
 
 	free(t);
 }

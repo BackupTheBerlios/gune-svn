@@ -39,6 +39,7 @@
 #include <gune/stack.h>
 #include <gune/queue.h>
 #include <gune/array.h>
+#include <gune/ht.h>
 #include <gune/version.h>
 #include <gune/misc.h>
 

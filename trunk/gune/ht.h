@@ -46,7 +46,7 @@ extern "C" {
 typedef int (* eq_func) (gendata, gendata);
 
 /** Hashing function */
-typedef unsigned int (* hash_func) (gendata);
+typedef unsigned int (* hash_func) (gendata, unsigned int);
 
 /** Hash table implementation */
 typedef struct ht_t {
@@ -64,6 +64,10 @@ void ht_destroy(ht, free_func, free_func);
 ht ht_insert(ht, gendata, gendata);
 int ht_lookup(ht, gendata, gendata *);
 int ht_delete(ht, gendata);
+
+/* General-purpose hashing functions */
+unsigned int str_hash(gendata, unsigned int);
+int str_eq(gendata, gendata);
 
 #ifdef __cplusplus
 }

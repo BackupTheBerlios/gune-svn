@@ -91,7 +91,7 @@ stack_pop(stack s)
 		log_entry(WARN_ERROR, "Cannot pop from an empty stack.");
 
 	res = sll_get_data(s->top);
-	s->top = sll_remove_head(s->top);
+	s->top = sll_remove_head(s->top, NULL);
 
 	return res;
 }

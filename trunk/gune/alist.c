@@ -113,8 +113,7 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
 			key_free(e->key.ptr);
 		if (value_free != NULL)
 			value_free(e->value.ptr);
-		free(e);
-		al->list = sll_remove_head(al->list);
+		al->list = sll_remove_head(al->list, free);
 	}
 
 	free(al);
@@ -329,15 +328,21 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 			key_free(e->key.ptr);
 		if (value_free != NULL)
 			value_free(e->value.ptr);
-		sll_remove_head(l);
+		sll_remove_head(l, free);
 		return al;
 	}
+
+	/* n is always one ahead of l (so, n == l->next) */
 	n = sll_next(l);
 
 	while (!sll_empty(n)) {
 		e = sll_get_data(n).ptr;
 		if (eq(key, e->key)) {
-			sll_remove_next(l);
+			if (key_free != NULL)
+				key_free(e->key.ptr);
+			if (value_free != NULL)
+				value_free(e->value.ptr);
+			sll_remove_next(l, free);
 			return al;
 		}
 		l = sll_next(l);

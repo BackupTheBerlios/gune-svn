@@ -81,11 +81,8 @@ sll_destroy(sll ll, free_func f)
 {
 	assert(ll != NULL);
 
-	while (!sll_empty(ll)) {
-		if (f != NULL)
-			f(ll->data.ptr);
-		ll = sll_remove_head(ll);
-	}
+	while (!sll_empty(ll))
+		ll = sll_remove_head(ll, f);
 }
 
 
@@ -132,28 +129,29 @@ sll_empty(sll ll)
 /**
  * \brief Remove the head from a singly linked list.
  *
- * The data stored in the linked list is \e not freed.
- *
  * \attention
  * The head actually has to be the real \e first item of a linked list, since
  * there is no way to re-link the \c next element of the item before the
  * head of the supplied list.
  *
- * XXX: It probably is a good idea to provide an extra free_func arg
- *
  * \param ll  The singly linked list.
+ * \param f   The function which is used to free the data elements of the
+ *		list, or \c NULL if no action is to be taken to free the data.
  *
  * \return  A pointer to the new (headless) singly linked list.
  *
  * \sa  sll_remove_next, dll_remove_head, sll_empty
  */
 sll
-sll_remove_head(sll ll)
+sll_remove_head(sll ll, free_func f)
 {
 	sll begin;
 
 	assert(ll != NULL);
 	assert(!sll_empty(ll));
+
+	if (f != NULL)
+		f(ll->data.ptr);
 
 	/* Move the ll pointer to the next element */
 	begin = ll;
@@ -168,11 +166,9 @@ sll_remove_head(sll ll)
 /**
  * \brief Remove the next item after the head from a singly linked list.
  *
- * The data stored in the linked list is \e not freed.
- *
- * XXX: It probably is a good idea to provide an extra free_func arg
- *
  * \param ll  The singly linked list.
+ * \param f   The function which is used to free the data elements of the
+ *		list, or \c NULL if no action is to be taken to free the data.
  *
  * \return  A pointer to the new singly linked list, or \c NULL if the
  *	     next item does not exist.
@@ -183,12 +179,15 @@ sll_remove_head(sll ll)
  * \sa  sll_remove_head, sll_empty
  */
 sll
-sll_remove_next(sll ll)
+sll_remove_next(sll ll, free_func f)
 {
 	sll begin;
 	
 	assert(ll != NULL);
 	assert(!sll_empty(ll));
+
+	if (f != NULL)
+		f(ll->data.ptr);
 
 	/* Move the ll pointer to the next element */
 	begin = ll;
@@ -427,11 +426,8 @@ dll_destroy(dll ll, free_func f)
 {
 	assert(ll != NULL);
 
-	while (!dll_empty(ll)) {
-		if (f != NULL)
-			f(ll->data.ptr);
-		ll = dll_remove_head(ll);
-	}
+	while (!dll_empty(ll))
+		ll = dll_remove_head(ll, f);
 }
 
 
@@ -481,23 +477,24 @@ dll_empty(dll ll)
  * This function honours the prev element of the list, so the `head' does
  * not necessarily have to be the first element of a total list.
  *
- * The data stored in the linked list is \e not freed.
- *
- * XXX: Also, we should possibly have an extra free_func arg.
- *
  * \param ll  The doubly linked list.
+ * \param f   The function which is used to free the data elements of the
+ *		list, or \c NULL if no action is to be taken to free the data.
  *
  * \return  A pointer to the new doubly linked list.
  *
  * \sa  sll_remove
  */
 dll
-dll_remove_head(dll ll)
+dll_remove_head(dll ll, free_func f)
 {
 	dll begin;
 	
 	assert(ll != NULL);
 	assert(!dll_empty(ll));
+
+	if (f != NULL)
+		f(ll->data.ptr);
 
 	/* Move the ll pointer to the next element */
 	begin = ll;

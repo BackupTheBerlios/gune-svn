@@ -57,8 +57,8 @@ unsigned int sll_count(sll);
 int sll_empty(sll);
 
 /* SLL exceptions for head */
-sll sll_remove_head(sll);
-sll sll_remove_next(sll);
+sll sll_remove_head(sll, free_func);
+sll sll_remove_next(sll, free_func);
 sll sll_prepend_head(sll, gendata);
 sll sll_append_head(sll, gendata);
 
@@ -88,7 +88,7 @@ unsigned int dll_count(dll);
 int dll_empty(dll);
 
 /* DLL exceptions for head */
-dll dll_remove_head(dll);
+dll dll_remove_head(dll, free_func);
 dll dll_prepend_head(dll, gendata);
 dll dll_append_head(dll, gendata);
 

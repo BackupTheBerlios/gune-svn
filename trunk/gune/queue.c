@@ -135,7 +135,7 @@ queue_dequeue(queue q)
 
 	res = (sll_get_data(q->head));
 
-	q->head = sll_remove_head(q->head);
+	q->head = sll_remove_head(q->head, NULL);
 
 	/*
 	 * Make sure our tail pointer doesn't cling to some old list that

@@ -253,7 +253,9 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 
 /**
  * Walk a hash table, using a user-specified function on the table's pairs.
- * While using this function, the hash table should not be altered in any way.
+ * While using this function, it is not allowed to remove entries other than
+ * the current entry.  It is allowed to change the contents of the key and
+ * value, as long as the key's hash will not be affected.
  *
  * \param t     The hash table to walk
  * \param walk  The function which will process the hash pairs

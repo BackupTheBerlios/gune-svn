@@ -13,3 +13,7 @@
 - Write something for associative arrays
 - Add checks for when malloc fails!!!
 - Bounds checking necessary?  If yes, error messages necessary or just NULL?
+
+- Have a look at http://www.eterna.com.au/bozohttpd, they do not use configure.
+   They use BSD Make only, like we do.  Look at how it does installation and
+   handles non-NetBSD OSes.

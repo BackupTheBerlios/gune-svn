@@ -51,7 +51,7 @@
  *
  * \hideinitializer
  */
-#define SWAP(t,a,b)	{ t tmp = (a); (a) = (b); (b) = tmp;}
+#define SWAP(t,a,b)	{ t __GUNE_SWAP_TMP = (a); (a) = (b); (b) = __GUNE_SWAP_TMP; }
 
 /**
  * Determine the maximum of two variables.

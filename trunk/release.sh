@@ -29,13 +29,12 @@ usage ()
 {
 	echo "Usage: release.sh [options]"
 	echo "Options:"
-	echo "-r   Make release tarball"
-	echo "-t   Create a tag in subversion"
-	echo "-v   Bump minor version number (and update header)"
-	echo "-V   Bump major version number (and update header)"
-	echo "-H   Update header files to reflect shlib_version"
-	echo "-h   Show this help"
-	echo "-p   Print version numbers and repos"
+	echo "-r dir  Make release tarball from REPOS_PATH/dir"
+	echo "-v      Bump minor version number (and update header)"
+	echo "-V      Bump major version number (and update header)"
+	echo "-H      Update header files to reflect shlib_version"
+	echo "-h      Show this help"
+	echo "-p      Print version numbers and repos"
 	echo
 	echo "release.sh will look at ${SHLIB_VERSION} for major/minor"
 	echo "version numbers.  For svn, it will call svn info on the current"
@@ -44,7 +43,7 @@ usage ()
 
 getrepos ()
 {
-	REPOS=`svn info | ${GREP} URL | ${SED} "s/URL:[[:space:]]*//" | ${SED} "s,/trunk,,`
+	REPOS=`svn info | ${GREP} URL | ${SED} "s/URL:[[:space:]]*//" | ${SED} "s,/(trunk|branches/.*|tags/.*),,`
 }
 
 getversion ()
@@ -59,16 +58,16 @@ bumpmajor ()
 {
 	getversion
 	NEWMAJOR=`${EXPR} ${MAJOR} + 1`
-	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMAJOR}/;s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
-	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
+	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMAJOR}/;s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new || exit
+	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION} || exit
 }
 
 bumpminor ()
 {
 	getversion
 	NEWMINOR=`${EXPR} ${MINOR} + 1`
-	${SED} "s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
-	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
+	${SED} "s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new || exit
+	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION} || exit
 }
 
 updateheader ()
@@ -93,30 +92,22 @@ printinfo ()
 #
 cleanup ()
 {
-	${SED} "/^(#.*)?$/d" devel-files | ${XARGS_RM}
-	${RM} devel-files
+	${SED} "/^(#.*)?$/d" devel-files | ${XARGS_RM} || exit
+	${RM} devel-files || exit
 }
 
 maketar ()
 {
 	getrepos
 	getversion
-	cd ..
-	svn export "${REPOS}/trunk" "${BASENAME}"
+	cd .. || exit
+	svn export "${REPOS}/${dir}" "${BASENAME}" || exit
 
-	cd ${BASENAME}
-	${MAKE} release
+	cd ${BASENAME} || exit
+	${MAKE} release || exit
 	cleanup
-	cd ..
-	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}"
-}
-
-
-createtag ()
-{
-	getrepos
-	getversion
-	svn cp "${REPOS}/trunk" "${REPOS}/tags/${BASENAME}"
+	cd .. || exit
+	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}" || exit
 }
 
 
@@ -134,7 +125,6 @@ fi
 #
 # Init all to 0
 #
-tag=0
 tar=0
 min=0
 maj=0
@@ -142,11 +132,10 @@ upd=0
 inf=0
 
 
-while getopts prtvVHh opt
+while getopts pr:vVHh opt
 do
 	case "${opt}" in
-		t) tag=1 ;;
-		r) tar=1 ;;
+		r) tar=1; dir=${OPTARG} ;;
 		v) min=1; upd=1 ;;
 		V) maj=1; upd=1 ;;
 		H) upd=1 ;;
@@ -164,10 +153,6 @@ shift `${EXPR} ${OPTIND} - 1`
 #
 # Order is important here (eg, don't printinfo before we bumpmajor/bumpminor)
 #
-if [ $tag -eq 1 ]
-then
-	createtag
-fi
 if [ $tar -eq 1 ]
 then
 	maketar

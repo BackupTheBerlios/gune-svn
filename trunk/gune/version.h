@@ -63,8 +63,10 @@
 		GEN_VERSION_STR(GUNE_MAJOR_VERSION, GUNE_MINOR_VERSION)
 
 /**
- * Generate a preprocessor definition like 2_0 from the major version number
- * and the minor version number, which can both be proprocessor definitions.
+ * \brief Generate a preprocessor definition from the major version number
+ * and the minor version number.
+ *
+ * The major/minor version numbers can both be proprocessor definitions.
  *
  * Example:
  * \code
@@ -97,7 +99,7 @@
 
 
 /**
- * Get the string value of a token.
+ * \brief Get the string value of a token.
  *
  * Example:
  * \code
@@ -114,7 +116,7 @@
 #define PP_STR_INTERN(a)		#a
 
 /**
- * Generate a version string from two integers using the preprocessor.
+ * \brief Generate a version string from two integers using the preprocessor.
  *
  * Example:
  * \code

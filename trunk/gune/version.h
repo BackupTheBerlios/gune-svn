@@ -39,11 +39,11 @@
 #define GUNE_VERSION_H
 
 /** \brief Gune's minor version number */
-#define GUNE_MINOR_VERSION	
+#define GUNE_MINOR_VERSION	1
 
 /** \brief Gune's major version number
  */
-#define GUNE_MAJOR_VERSION	
+#define GUNE_MAJOR_VERSION	0
 
 /**
  * \brief Gune's long version number

@@ -48,4 +48,4 @@ d" ${FILE} >> ${TARGET}
 done
 
 # Also, add our main manpage
-echo "	gune.h${MANEXT}	gune" >> ${TARGET}
+echo "	gune.h${MANEXT}	gune${MANEXT}" >> ${TARGET}

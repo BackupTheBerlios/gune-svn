@@ -83,7 +83,9 @@ array_create(void)
 void
 array_destroy(array ar)
 {
-	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
+	assert(ar->data != NULL);
 
 	free(ar->data);
 	free(ar);
@@ -122,7 +124,9 @@ array_resize(array ar, unsigned int size)
 	int newsize;		/* Do not corrupt old array in case of error */
 	gendata *newptr;
 
-	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
+	assert(ar->data != NULL);
 
 	/*
 	 * Use buddy algorithm to resize data buffer if we resized beyond old
@@ -153,7 +157,9 @@ array_resize(array ar, unsigned int size)
 gendata
 array_get_data(array ar, unsigned int index)
 {
-	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
+	assert(ar->data != NULL);
 
 #ifdef BOUNDS_CHECKING
 	if (index > ar->size)
@@ -176,7 +182,10 @@ array_get_data(array ar, unsigned int index)
 array
 array_set_data(array ar, unsigned int index, gendata value)
 {
-	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
+	assert(ar->data != NULL);
+
 
 #ifdef BOUNDS_CHECKING
 	if (index > ar->size)
@@ -206,7 +215,10 @@ array_compact(array ar)
 	gendata *newptr;
 	unsigned int newsize = 1;
 
-	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
+	assert(ar->data != NULL);
+
 
 	for (; newsize < ar->size; newsize *= 2);
 
@@ -237,7 +249,8 @@ array_grow(array ar, int amount)
 	if (amount < 0)
 		return array_shrink(ar, 0 - amount);
 
-	assert(ar != ERROR_ARRAY && ar != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
 
 	return array_resize(ar, ar->size + (unsigned int)amount);
 }
@@ -262,7 +275,8 @@ array_shrink(array ar, int amount)
 	if (amount < 0)
 		return array_grow(ar, 0 - amount);
 
-	assert(ar != ERROR_ARRAY && ar != NULL);
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
 
 #ifdef BOUNDS_CHECKING
 	if (ar->size - amount < 0)

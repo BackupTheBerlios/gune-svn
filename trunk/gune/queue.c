@@ -81,8 +81,10 @@ queue_enqueue(queue q, gendata data)
 {
 	sll new;
 
-	assert(q != ERROR_QUEUE && q != NULL);
-	assert(q->head != ERROR_SLL && q->tail != ERROR_SLL);
+	assert(q != ERROR_QUEUE);
+	assert(q != NULL);
+	assert(q->head != ERROR_SLL);
+	assert(q->tail != ERROR_SLL);
 
 	new = sll_append_head(q->tail, data);
 
@@ -115,7 +117,8 @@ queue_dequeue(queue q)
 {
 	gendata res;
 
-	assert(q != ERROR_QUEUE && q != NULL);
+	assert(q != ERROR_QUEUE);
+	assert(q != NULL);
 
 	if (queue_is_empty(q))
 		log_entry(WARN_ERROR, "Cannot dequeue from an empty queue.");
@@ -156,7 +159,8 @@ queue_peek(queue q)
 	 * Also, it currently is possible to enqueue NULL pointers as data,
 	 * so returning NULL on an empty queue would be ambiguous.
 	 */
-	assert(q != ERROR_QUEUE && q != NULL);
+	assert(q != ERROR_QUEUE);
+	assert(q != NULL);
 
 	if (queue_is_empty(q))
 		log_entry(WARN_ERROR, "Cannot peek at the head of an "
@@ -178,7 +182,8 @@ queue_peek(queue q)
 bool
 queue_is_empty(queue q)
 {
-	assert(q != ERROR_QUEUE && q != NULL);
+	assert(q != ERROR_QUEUE);
+	assert(q != NULL);
 
 	/*
 	 * If the queue's head is an empty list, we sure as hell don't have
@@ -197,7 +202,8 @@ queue_is_empty(queue q)
 void
 queue_destroy(queue q)
 {
-	assert(q != ERROR_QUEUE && q != NULL);
+	assert(q != ERROR_QUEUE);
+	assert(q != NULL);
 
 	sll_destroy(q->head);
 

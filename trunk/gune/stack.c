@@ -81,7 +81,8 @@ stack_pop(stack s)
 {
 	gendata res;
 
-	assert(s != ERROR_STACK && s != NULL);
+	assert(s != ERROR_STACK);
+	assert(s != NULL);
 	assert(s->top != ERROR_SLL);
 
 	if (stack_is_empty(s))
@@ -107,7 +108,8 @@ stack_pop(stack s)
 gendata
 stack_peek(stack s)
 {
-	assert(s != ERROR_STACK && s != NULL);
+	assert(s != ERROR_STACK);
+	assert(s != NULL);
 
 	/*
 	 * NOTE: Should we return NULL?  Pop is an illegal operation on
@@ -153,7 +155,8 @@ stack_push(stack s, gendata data)
 bool
 stack_is_empty(stack s)
 {
-	assert(s != NULL && s != ERROR_STACK);
+	assert(s != NULL);
+	assert(s != ERROR_STACK);
 
 	return sll_is_empty(s->top);
 }
@@ -168,7 +171,8 @@ stack_is_empty(stack s)
 void
 stack_destroy(stack s)
 {
-	assert(s != ERROR_STACK && s != NULL);
+	assert(s != ERROR_STACK);
+	assert(s != NULL);
 
 	sll_destroy(s->top);
 	free((stack_t *)s);

@@ -107,6 +107,7 @@ maketar ()
 	cd ${BASENAME}
 	${MAKE} release
 	cleanup
+	cd ..
 	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}"
 }
 

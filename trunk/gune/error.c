@@ -98,7 +98,7 @@ set_logfile(FILE *log)
  * \sa warnlvl set_logfile
  */
 int
-log_entry(warnlvl lvl, char *msg, ...)
+log_entry(warnlvl lvl, const char *msg, ...)
 {
 	int ret = 0;
 	va_list ap;

@@ -333,7 +333,7 @@ sll_set_data(sll ll, gendata data)
  * \sa dll_dump
  */
 void
-sll_dump(sll ll, char *fmt)
+sll_dump(sll ll, const char *fmt)
 {
 	if (ll == ERROR_SLL) {
 		printf("ERROR_SLL\n");
@@ -653,7 +653,7 @@ dll_set_data(dll ll, gendata data)
  * \sa sll_dump
  */
 void
-dll_dump(dll ll, char *fmt)
+dll_dump(dll ll, const char *fmt)
 {
 	if (ll == ERROR_DLL) {
 		printf("ERROR_DLL\n");

@@ -51,7 +51,7 @@ typedef enum {
 } warnlvl;
 
 void set_logfile(FILE *);
-int log_entry(warnlvl, char *, ...);
+int log_entry(warnlvl, const char *, ...);
 
 void error_dummy_func(void);
 

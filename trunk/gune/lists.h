@@ -70,7 +70,7 @@ sll sll_forward(sll, unsigned int);
 #define sll_next(l)	(sll_forward((l), 1))
 
 #ifdef DEBUG
-void sll_dump(sll, char *);
+void sll_dump(sll, const char *);
 #endif
 
 /** Doubly linked list implementation */
@@ -104,7 +104,7 @@ dll dll_backward(dll, unsigned int);
 #define dll_prev(l)	(dll_backward((l), 1))
 
 #ifdef DEBUG
-void dll_dump(dll, char *);
+void dll_dump(dll, const char *);
 #endif
 
 #ifdef __cplusplus

@@ -30,10 +30,10 @@
  */
 
 /*
- * Lists, queues and stacks
+ * Arrays
  */
-#ifndef GUNE_LISTS_H
-#define GUNE_LISTS_H
+#ifndef GUNE_ARRAY_H
+#define GUNE_ARRAY_H
 
 #include <gune/types.h>
 
@@ -41,100 +41,8 @@
 extern "C" {
 #endif
 
-/** Singly linked list implementation */
-typedef struct sll_t {
-	void *data;
-	struct sll_t *next;
-} sll_t, *sll;
-
-/** Invalid linked list, used as error return value */
-extern sll_t * const ERROR_SLL;
-
-/* SLL creation/deletion functions */
-sll sll_create(void);
-void sll_destroy(sll);
-unsigned int sll_count(sll);
-bool sll_is_empty(sll);
-
-/* SLL exceptions for head */
-sll sll_remove_head(sll);
-sll sll_prepend_head(sll, void *);
-sll sll_append_head(sll, void *);
-
-/* Accessor functions */
-void *sll_get_data(sll);
-sll sll_forward(sll, unsigned int);
-
-#ifdef DEBUG
-void sll_dump(sll, char *);
-#endif
-
-/** Doubly linked list implementation */
-typedef struct dll_t {
-	void *data;
-	struct dll_t *prev;
-	struct dll_t *next;
-} dll_t, *dll;
-
-/** Invalid linked list, used as error return value */
-extern dll_t * const ERROR_DLL;
-
-/* DLL creation/deletion functions */
-dll dll_create(void);
-void dll_destroy(dll);
-unsigned int dll_count(dll);
-bool dll_is_empty(dll);
-
-/* DLL exceptions for head */
-dll dll_remove_head(dll);
-dll dll_prepend_head(dll, void *);
-dll dll_append_head(dll, void *);
-
-/* Accessor functions */
-void *dll_get_data(dll);
-dll dll_forward(dll, unsigned int);
-dll dll_backward(dll, unsigned int);
-
-#ifdef DEBUG
-void dll_dump(dll, char *);
-#endif
-
-
-/** Stack implementation */
-typedef struct stack_t {
-	sll top;
-} stack_t, *stack;
-
-/** Invalid stack, used as error return value */
-extern stack_t * const ERROR_STACK;
-
-stack stack_create(void);
-void *stack_pop(stack);
-void *stack_peek(stack);
-void stack_push(stack, void *);
-bool stack_is_empty(stack);
-void stack_destroy(stack);
-
-
-/** Queue implementation */
-typedef struct queue_t {
-	void *data;
-	sll head;
-	sll tail;
-} queue_t, *queue;
-
-/** Invalid queue, used as error return value */
-extern queue_t * const ERROR_QUEUE;
-
-queue queue_create(void);
-queue queue_enqueue(queue, void *);
-void *queue_dequeue(queue);
-void *queue_peek(queue);
-bool queue_is_empty(queue);
-void queue_destroy(queue);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* GUNE_LISTS_H */
+#endif /* GUNE_ARRAY_H */

@@ -14,7 +14,8 @@ LIBDIR=		${PREFIX}/lib
 MANDIR=		${PREFIX}/share/man
 
 # Treat C and lint warnings as errors.
-CFLAGS+=	-g -ansi -pedantic-errors -Wall -Werror
+CFLAGS+=	-g -ansi -pedantic-errors -W -Wall -Werror -Wpointer-arith
+CFLAGS+=	-Wconversion -Wcast-align
 LINTFLAGS+=	-w
 
 ########################

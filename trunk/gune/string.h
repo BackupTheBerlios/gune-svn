@@ -39,7 +39,11 @@
 extern "C" {
 #endif
 
+/* For size_t */
+#include <string.h>
+
 char *str_cat(const char *, const char *);
+char *str_n_cpy(char *, const char *, size_t);
 char *str_cpy(const char *);
 
 #ifdef __cplusplus

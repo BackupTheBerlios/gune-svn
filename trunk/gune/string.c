@@ -35,7 +35,6 @@
  */
 
 #include <stdlib.h>
-#include <string.h>
 
 #include <gune/string.h>
 
@@ -62,9 +61,34 @@ str_cat(const char *a, const char *b)
 	if ((x = malloc(strlen(a) + strlen(b) + 1)) == NULL)
 		return NULL;
 	l = strlen(a);
+
+	/*
+	 * Use memcpy for first half to avoid unnecessary checks for \0
+	 * characters.
+	 */
 	memcpy(x, a, l);
 	strcpy(x + l, b);
 	return x;
+}
+
+
+/**
+ * Copy a string, with a maximum of n characters.  Like C's strncpy, except
+ *  str_n_cpy guarantees a \0 at the end of the string.
+ *
+ * \param src  The source string (to copy).
+ * \param dst  The destination buffer (of at least len bytes).
+ * \param len  The number of bytes to copy, maximum.
+ *
+ * \return     The destination buffer.
+ */
+char *
+str_n_cpy(char *dst, const char *src, size_t len)
+{
+	strncpy(dst, src, len);
+	*(dst + len - 1) = '\0';
+
+	return dst;
 }
 
 

@@ -102,7 +102,7 @@ main(int argc, char **argv)
 {
 	extern char *optarg;
 	char *str = NULL;
-	char ch;
+	int ch;
 
 	warnlvl wrn = WARN_NOTIFY;
 
@@ -120,7 +120,7 @@ main(int argc, char **argv)
 	}
 
 	while ((ch = getopt(argc, argv, "n:s:l:e:c:v")) != -1)
-		switch (ch) {
+		switch ((char)ch) {
 		case 'n':
 			loop = atoi(optarg);
 			break;

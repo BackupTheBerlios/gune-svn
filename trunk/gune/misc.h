@@ -1,7 +1,7 @@
 /*
  * $Id$
  *
- * Copyright (c) 2003-2004 Peter Bex and Vincent Driessen
+ * Copyright (c) 2004 Peter Bex and Vincent Driessen
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,17 +29,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GUNE_GUNE_H
-#define GUNE_GUNE_H
+/**
+ * \file misc.h
+ * Miscellaneous loose odds and ends which don't really belong anywhere
+ */
+#ifndef GUNE_MISC_H
+#define GUNE_MISC_H
 
-#include <gune/error.h>
-#include <gune/types.h>
-#include <gune/string.h>
-#include <gune/lists.h>
-#include <gune/stack.h>
-#include <gune/queue.h>
-#include <gune/array.h>
-#include <gune/version.h>
-#include <gune/misc.h>
+#define SWAP(t,a,b)	{ t tmp = (a); (a) = (b); (b) = tmp;}
 
-#endif /* GUNE_GUNE_H */
+#define MAX(a,b)	((a) > (b) ? (a) : (b))
+#define MIN(a,b)	((a) < (b) ? (a) : (b))
+
+#endif /* GUNE_MISC_H */

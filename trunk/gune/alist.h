@@ -55,6 +55,7 @@ void alist_destroy(alist, free_func, free_func);
 alist alist_insert(alist, gendata, gendata, eq_func, free_func);
 int alist_lookup(alist, gendata, eq_func, gendata *);
 int alist_delete(alist, gendata, eq_func, free_func, free_func);
+void alist_walk(alist, assoc_func);
 
 #ifdef __cplusplus
 }

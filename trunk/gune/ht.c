@@ -249,3 +249,23 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 	al = *(t->buckets + bucketnr);
 	return alist_delete(al, key, eq, key_free, value_free);
 }
+
+
+/**
+ * Walk a hash table, using a user-specified function on the table's pairs.
+ * While using this function, the hash table should not be altered in any way.
+ *
+ * \param t     The hash table to walk
+ * \param walk  The function which will process the hash pairs
+ */
+void
+ht_walk(ht t, assoc_func walk)
+{
+	unsigned int i;
+
+	assert(t != ERROR_HT);
+	assert(t != NULL);
+
+	for (i = 0; i < t->range; ++i)
+		alist_walk(t->buckets[i], walk);
+}

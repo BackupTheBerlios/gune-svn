@@ -275,3 +275,27 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 
 	return 0;
 }
+
+
+/**
+ * Walk an alist, using a user-specified function on the list's pairs.
+ * While using this function, the alist should not be altered in any way.
+ *
+ * \param al    The alist to walk
+ * \param walk  The function which will process the pairs
+ */
+void
+alist_walk(alist al, assoc_func walk)
+{
+	alist_entry e;
+	sll l = al->list;
+
+	assert(al != ERROR_ALIST);
+	assert(al != NULL);
+
+	while(!sll_empty(l)) {
+		e = sll_get_data(l).ptr;
+		walk(e->key, e->value);
+		l = sll_next(l);
+	}
+}

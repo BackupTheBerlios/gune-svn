@@ -100,7 +100,6 @@ str_n_cpy(char *dst, const char *src, size_t len)
 {
 	assert(dst != NULL);
 	assert(src != NULL);
-	assert(len >= 0);
 
 	strncpy(dst, src, len);
 	*(dst + len - 1) = '\0';

@@ -159,7 +159,7 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
 
 	al = *(t->buckets + bucketnr);
 	if (uniq)
-		al = alist_insert_uniq(al, key, value, eq, free_value);
+		al = alist_insert_uniq(al, key, value, eq);
 	else
 		al = alist_insert(al, key, value, eq, free_value);
 
@@ -208,9 +208,6 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
  * \param key         The key of the data.
  * \param value       The data to insert.
  * \param eq          The equals predicate for two keys.
- * \param free_value  The function used to free the old value's data if it
- *		       needs to be replaced, or NULL if the data does not
- *		       need to be freed.
  *
  * \return  The original hash table, or ERROR_HT if the data could not be
  *           inserted.  Original hash table is still valid in case of error.
@@ -220,10 +217,9 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
  * \sa ht_insert, ht_delete
  */
 ht
-ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq,
-	       free_func free_value)
+ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq)
 {
-	return ht_insert_internal(t, key, value, eq, free_value, 1);
+	return ht_insert_internal(t, key, value, eq, NULL, 1);
 }
 
 

@@ -219,9 +219,6 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
  * \param key	      The key of the data.
  * \param value	      The data to insert.
  * \param eq          The equals predicate for two keys.
- * \param free_value  The function used to free the old value's data if it
- *		       needs to be replaced, or NULL if the data does not
- *		       need to be freed.
  *
  * \return  The original alist, or ERROR_ALIST if the data could not be
  *            inserted.  Original alist is still valid in case of error.
@@ -231,10 +228,9 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
  * \sa alist_insert, alist_delete
  */
 alist
-alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq,
-	          free_func free_value)
+alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq)
 {
-	return alist_insert_internal(al, key, value, eq, free_value, 1);
+	return alist_insert_internal(al, key, value, eq, NULL, 1);
 }
 
 

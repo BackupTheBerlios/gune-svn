@@ -103,11 +103,11 @@ maketar ()
 	getversion
 	cd ..
 	svn export "${REPOS}/trunk" "${BASENAME}"
-	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}"
 
 	cd ${BASENAME}
 	${MAKE} release
 	cleanup
+	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}"
 }
 
 

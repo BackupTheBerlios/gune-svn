@@ -42,18 +42,28 @@
 extern "C" {
 #endif
 
+/** Equals predicate function for comparing keys */
+typedef int (* eq_func) (gendata, gendata);
+
+/** Hashing function */
+typedef unsigned int (* hash_func) (gendata);
+
 /** Hash table implementation */
 typedef struct ht_t {
 	sll *table;
 	unsigned int range;
+	eq_func eq;
+	hash_func hash;
 } ht_t, *ht;
 
 /** Invalid hash table, used as error return value */
 extern ht_t * const ERROR_HT;
 
-ht ht_create(unsigned int);
+ht ht_create(unsigned int, hash_func, eq_func);
 void ht_destroy(ht, free_func);
 void ht_free(ht);
+ht ht_insert(ht, gendata, gendata);
+int ht_lookup(ht, gendata, gendata *);
 
 #ifdef __cplusplus
 }

@@ -39,6 +39,12 @@
 #include <gune/error.h>
 #include <gune/ht.h>
 
+/** Hash table entry (stored in the linked list) */
+typedef struct ht_entry_t {
+	gendata key;
+	gendata value;
+} ht_entry_t, * ht_entry;
+
 ht_t * const ERROR_HT = (void *)error_dummy_func;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -46,20 +52,27 @@ ht_t * const ERROR_HT = (void *)error_dummy_func;
 /**
  * Create a new, empty, hash table.
  *
- * \range   The range of the key function (0 <= x < range).
+ * \param range  The range of the key function (0 <= x < range).
+ * \param hash   The hashing function to use on keys.
+ * \param eq     The equals predicate for two keys.
  *
- * \return  A new empty hash table object, or ERROR_HT if out of memory.
+ * \return       A new empty hash table object, or ERROR_HT if out of memory.
  */
 ht
-ht_create(unsigned int range)
+ht_create(unsigned int range, hash_func hash, eq_func eq)
 {
 	ht_t *t;
 	unsigned int i, j;
+
+	assert(hash != NULL);
+	assert(eq != NULL);
 
 	if ((t = malloc(sizeof(ht_t))) == NULL)
 		return (ht)ERROR_HT;
 
 	t->range = range;
+	t->eq = eq;
+	t->hash = hash;
 
 	/*
 	 * We could use a Gune array, but we're not resizing so we would just
@@ -94,7 +107,8 @@ ht_create(unsigned int range)
  * Free all memory allocated for a hash table.  The data within the table is
  * freed by calling a user-supplied free function.
  * If the same data is included multiple times in the table, the free function
- * gets called that many times.
+ * gets called that many times. <- XXX This is impossible, currently, unless really
+ * strange things have been going on! (like, say, a random hashing function)
  *
  * \param t  The hash table to destroy.
  * \param f  The function which is used to free the data.
@@ -102,14 +116,15 @@ ht_create(unsigned int range)
 void
 ht_destroy(ht t, free_func f)
 {
-	unsigned int i;
+/* XXX Free elements, and keys/values IN elements */
+	sll *p;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 	assert(f != NULL);
 
-	for (i = 0; i < t->range; ++i)
-		sll_destroy(*(t->table + i), f);
+	for (p = t->table; p < (t->table + t->range); ++p)
+		sll_destroy(*p, f);
 
 	free(t);
 }
@@ -124,51 +139,124 @@ ht_destroy(ht t, free_func f)
 void
 ht_free(ht t)
 {
-	unsigned int i;
+	sll *p;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 
-	for (i = 0; i < t->range; ++i)
-		sll_free(*(t->table + i));
+	for (p = t->table; p < (t->table + t->range); ++p)
+		sll_free(*p);
 
 	free(t);
 }
 
 
 /**
- * Add a data element to the hash table with the given key.
+ * Add a data element to the hash table with the given key or replace an
+ *  existing element with the same key.
  *
- * \param t     The hash table to insert the data in.
- * \param data  The data to insert.
- * \param key   The key of the data.
+ * \param t      The hash table to insert the data in.
+ * \param key    The key of the data.
+ * \param value  The data to insert.
  *
  * \return      The original hash table, or ERROR_HT if the data could not be
  *               inserted.  Original hash table is still valid in case of error.
  */
 ht
-ht_insert(ht t, gendata data, unsigned int key)
+ht_insert(ht t, gendata key, gendata value)
 {
-	sll replace;
+	sll new_head;
+	unsigned int bucket;
+	sll ll;
+	ht_entry e;
+	gendata e_data;
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
+	assert(t->hash != NULL);
+
+	bucket = t->hash(key);
 
 #ifdef BOUNDS_CHECKING
-	if (key >= t->range)
-		log_entry(WARN_ERROR, "Gune: ht_insert: Key (%u) out of range",
-			  key);
+	if (bucket >= t->range)
+		log_entry(WARN_ERROR, "Gune: ht_insert: Key hash (%u) out of range",
+			  bucket);
 #endif
 
+	ll = *(t->table + bucket);
+
 	/*
-	 * There's no reason why we should append the data at the end of the
-	 * list, so we just lazily prepend it at to front.
+	 * We'll have to check if there's already a value with the same key.
+	 * If it is, overwrite that value.
 	 */
-	replace = sll_prepend_head(*(t->table + key), data);
-	if (replace == ERROR_SLL)
+	while (!sll_is_empty(ll)) {
+		e = sll_get_data(ll).ptr;
+		if (t->eq(key, e->key)) {
+			e->value = value;
+			e_data.ptr = e;
+			sll_set_data(ll, e_data);
+			return t;
+		}
+	}
+
+	/* If we got here, the key does not occur in the table yet */
+	if ((e = malloc(sizeof(ht_entry_t))) == NULL)
 		return ERROR_HT;
 
-	*(t->table + key) = replace;
+	e->key = key;
+	e->value = value;
+	e_data.ptr = e;
 
+	new_head = sll_prepend_head(*(t->table + bucket), e_data);
+	if (new_head == ERROR_SLL) {
+		free(e);
+		return ERROR_HT;
+	}
+
+	*(t->table + bucket) = new_head;
 	return t;
+}
+
+
+/**
+ * Lookup an element in the hash table.
+ *
+ * \param t     The hashtable which contains the element.
+ * \param key   The key to the element.
+ * \param data  A pointer to the location where the element is stored, if
+ *               it was found.
+ *
+ * \return      0 if the element could not be found, nonzero if it could.
+ */
+int
+ht_lookup(ht t, gendata key, gendata *data)
+{
+	sll l;
+	ht_entry e;
+	unsigned int bucket;
+
+	assert(t != ERROR_HT);
+	assert(t != NULL);
+	assert(t->eq != NULL);
+	assert(t->hash != NULL);
+
+	bucket = t->hash(key);
+
+#ifdef BOUNDS_CHECKING
+	if (bucket >= t->range)
+		log_entry(WARN_ERROR, "Gune: ht_lookup: Key hash (%u) out of range",
+			  bucket);
+#endif
+
+	l = *(t->table + bucket);
+	while (!sll_is_empty(l)) {
+		e = sll_get_data(l).ptr;
+		if (t->eq(key, e->key)) {
+			*data = e->value;
+			return 1;
+		}
+		l = sll_next(l);
+	}
+
+	return 0;
 }

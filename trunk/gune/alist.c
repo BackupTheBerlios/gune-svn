@@ -47,7 +47,7 @@ typedef struct alist_entry {
 } alist_entry_t, * alist_entry;
 
 static alist alist_insert_internal(alist, gendata, gendata, eq_func,
-				   free_func, int);
+				   free_func, free_func, int);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -78,23 +78,23 @@ alist_create(void)
  * \brief Free all memory allocated for an association list.
  *
  * The data within the list is freed by calling the user-supplied
- * function \p value_free.  The key used to identify the entry can also
- * be freed by the user-supplied \p key_free function.
+ * function \p free_value.  The key used to identify the entry can also
+ * be freed by the user-supplied \p free_key function.
  *
  * \attention
  * If the same data or key is included multiple times in the list, the free
  * functions get called that many times on the data or key.
  *
  * \param al          The association list to destroy.
- * \param key_free    The function which is used to free the key data, or
+ * \param free_key    The function which is used to free the key data, or
  *			\c NULL if no action should be taken on the key data.
- * \param value_free  The function which is used to free the value data, or
+ * \param free_value  The function which is used to free the value data, or
  *			\c NULL if no action should be taken on the value data.
  *
  * \sa alist_create
  */
 void
-alist_destroy(alist al, free_func key_free, free_func value_free)
+alist_destroy(alist al, free_func free_key, free_func free_value)
 {
 	alist_entry e;
 
@@ -104,15 +104,15 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
 	 * What we would really like to do is just call
 	 * sll_destroy(*p, f);
 	 * Problem is we can't pass a function which knows
-	 * about the * {key, value}_free functions. (you can't do
+	 * about the * free_{key, value} functions. (you can't do
 	 * currying in C)
 	 */
 	while (!sll_empty(al->list)) {
 		e = sll_get_data(al->list).ptr;
-		if (key_free != NULL)
-			key_free(e->key.ptr);
-		if (value_free != NULL)
-			value_free(e->value.ptr);
+		if (free_key != NULL)
+			free_key(e->key.ptr);
+		if (free_value != NULL)
+			free_value(e->value.ptr);
 		al->list = sll_remove_head(al->list, free);
 	}
 
@@ -129,7 +129,7 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
  */
 static alist
 alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
-		      free_func free_value, int uniq)
+		      free_func free_key, free_func free_value, int uniq)
 {
 	sll new_head;
 	alist_entry e;
@@ -155,8 +155,10 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
 			}
 
 			/* Free old data */
+			if (free_key != NULL)
+				free_key(e->key.ptr);
 			if (free_value != NULL)
-				free_value(sll_get_data(l).ptr);
+				free_value(e->value.ptr);
 			e->value = value;
 			e_data.ptr = e;
 			sll_set_data(l, e_data);
@@ -194,6 +196,9 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
  * \param key	      The key of the data.
  * \param value	      The data to insert.
  * \param eq          The equals predicate for two keys.
+ * \param free_key    The function used to free the old key's data if it
+ *		       needs to be replaced, or \c NULL if the data does not
+ *		       need to be freed.
  * \param free_value  The function used to free the old value's data if it
  *		       needs to be replaced, or \c NULL if the data does not
  *		       need to be freed.
@@ -204,13 +209,14 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
  * \par Errno values:
  * - \b ENOMEM if out of memory.
  *
- * \sa alist_insert_uniq, alist_delete
+ * \sa alist_insert_uniq alist_delete alist_merge
  */
 alist
 alist_insert(alist al, gendata key, gendata value, eq_func eq,
-	     free_func free_value)
+	     free_func free_key, free_func free_value)
 {
-	return alist_insert_internal(al, key, value, eq, free_value, 0);
+	return alist_insert_internal(al, key, value, eq,
+				     free_key, free_value, 0);
 }
 
 
@@ -233,12 +239,12 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
  * - \b EINVAL if the key is already in the list.
  * - \b ENOMEM if out of memory.
  *
- * \sa alist_insert, alist_delete
+ * \sa alist_insert alist_delete alist_lookup alist_merge_uniq
  */
 alist
 alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq)
 {
-	return alist_insert_internal(al, key, value, eq, NULL, 1);
+	return alist_insert_internal(al, key, value, eq, NULL, NULL, 1);
 }
 
 
@@ -256,6 +262,8 @@ alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq)
  *
  * \par Errno values:
  * - \b EINVAL if the key could not be found.
+ *
+ * \sa alist_insert
  */
 alist
 alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
@@ -289,9 +297,9 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
  * \param al          The association list which contains the element to delete.
  * \param key         The key to the element to delete.
  * \param eq          The equals predicate for two keys.
- * \param key_free    The function which is used to free the key data, or
+ * \param free_key    The function which is used to free the key data, or
  *			\c NULL if no action should be taken on the key data.
- * \param value_free  The function which is used to free the value data, or
+ * \param free_value  The function which is used to free the value data, or
  *			\c NULL if no action should be taken on the value data.
  *
  * \return  The alist, or \c NULL if the key could not be found.
@@ -302,8 +310,8 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
  * \sa alist_insert
  */
 alist
-alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
-	     free_func value_free)
+alist_delete(alist al, gendata key, eq_func eq, free_func free_key,
+	     free_func free_value)
 {
 	sll l, n;
 	alist_entry e;
@@ -324,10 +332,10 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 	 */
 	e = sll_get_data(l).ptr;
 	if (eq(key, e->key)) {
-		if (key_free != NULL)
-			key_free(e->key.ptr);
-		if (value_free != NULL)
-			value_free(e->value.ptr);
+		if (free_key != NULL)
+			free_key(e->key.ptr);
+		if (free_value != NULL)
+			free_value(e->value.ptr);
 		/* We are removing the first entry from the list! */
 		al->list = sll_remove_head(l, free);
 		return al;
@@ -339,10 +347,10 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 	while (!sll_empty(n)) {
 		e = sll_get_data(n).ptr;
 		if (eq(key, e->key)) {
-			if (key_free != NULL)
-				key_free(e->key.ptr);
-			if (value_free != NULL)
-				value_free(e->value.ptr);
+			if (free_key != NULL)
+				free_key(e->key.ptr);
+			if (free_value != NULL)
+				free_value(e->value.ptr);
 			sll_remove_next(l, free);
 			return al;
 		}
@@ -394,6 +402,7 @@ alist_walk(alist al, assoc_func walk, gendata data)
 	sll n = NULL;
 
 	assert(al != NULL);
+	assert(walk != NULL);
 
 	while(!sll_empty(l)) {
 		/* n is stored in case user deletes the current entry */
@@ -402,4 +411,129 @@ alist_walk(alist al, assoc_func walk, gendata data)
 		walk(&e->key, &e->value, data);
 		l = n;
 	}
+}
+
+
+/**
+ * \brief Merge two association lists together.
+ *
+ * Add all data elements from an association list to another association
+ * list, replacing the value of all existing elements with the same key.
+ *
+ * \note
+ * This function is \f$ O(n \cdot m) \f$ with \f$ n \f$ the length of
+ * \p base and \f$ m \f$ the length of \p rest.
+ *
+ * \param base	      The association list to insert the data in.
+ * \param rest        The association list to be merged into \p base.
+ * \param eq          The equals predicate for two keys.
+ * \param free_key    The function used to free the \p rest list's key data,
+ *		       or \c NULL if the data does not need to be freed.
+ * \param free_value  The function used to free the \p base value's data if it
+ *		       needs to be replaced, or \c NULL if the data does not
+ *		       need to be freed.
+ *
+ * \return  The \p base alist, merged with \p rest, or NULL in case of error.
+ *           If an error occurred, the \p base list is still valid, but
+ *           it is undefined which items from the \p rest list will have been
+ *           merged into the list and which haven't.  The \p rest list will
+ *	     not be valid after the function has finished.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
+ *
+ * \sa alist_insert alist_delete alist_merge_uniq
+ */
+alist
+alist_merge(alist base, alist rest, eq_func eq, free_func free_key,
+	     free_func free_value)
+{
+	sll l;
+	alist_entry e;
+
+	assert(base != NULL);
+	assert(rest != NULL);
+
+	l = rest->list;
+
+	while (!sll_empty(l)) {
+		e = sll_get_data(l).ptr;
+		base = alist_insert(base, e->key, e->value, eq,
+				    free_key, free_value);
+
+		/*
+		 * HACK: We are cheating here, since we're assuming the alist
+		 * implementation is a pointer to a container struct for the
+		 * list itself.  If this implementation would ever change, this
+		 * function would simple not work. (Imagine an error happening
+		 * in sll_append in the middle of appending.  What should be
+		 * returned?  Not NULL, since we have memory leakage then)
+		 */
+		if (base == NULL)
+			return NULL;
+
+		l = sll_remove_head(l, free);
+	}
+
+	free(rest);
+	return base;
+}
+
+
+/**
+ * \brief Merge two association lists together uniquely.
+ *
+ * Add all data elements from an association list to another association list
+ * with the given key.  If a duplicate key is encountered, the entry is not
+ * inserted into the \p base list.
+ *
+ * \note
+ * This function is \f$ O(n \cdot m) \f$ with \f$ n \f$ the length of
+ * \p base and \f$ m \f$ the length of \p rest.
+ *
+ * \param base	      The association list to insert the data in.
+ * \param rest        The association list to be merged into \p base.
+ * \param eq          The equals predicate for two keys.
+ *
+ * \return  The \p base alist, merged with \p rest, or NULL in case of error.
+ *           If an error occurred, the \p base list is still valid, but
+ *           it is undefined which items from the \p rest list will have been
+ *           merged into the list and which haven't.
+ *	    The \p rest alist will have been modified so it still contains
+ *	     the entries which had matching keys in the \p base alist.
+ *	    The \p rest alist will thus still be valid.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
+ *
+ * \sa alist_insert_uniq alist_delete alist_merge
+ */
+alist
+alist_merge_uniq(alist base, alist rest, eq_func eq)
+{
+	sll l;
+	alist_entry e;
+	alist base_tmp;
+
+	assert(base != NULL);
+	assert(rest != NULL);
+
+	l = rest->list;
+
+	while (!sll_empty(l)) {
+		e = sll_get_data(l).ptr;
+		base_tmp = alist_insert_uniq(base, e->key, e->value, eq);
+
+		if (base_tmp == NULL) {
+			if (errno == ENOMEM)
+				return NULL;
+			else
+				l = sll_next(l);
+		} else {
+			base = base_tmp;
+			l = sll_remove_head(l, free);
+		}
+	}
+
+	return base;
 }

@@ -35,11 +35,13 @@
  * \file ht.c
  */
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <gune/error.h>
 #include <gune/ht.h>
 
-static ht ht_insert_internal(ht, gendata, gendata, eq_func, free_func, int);
+static ht ht_insert_internal(ht, gendata, gendata, eq_func,
+			     free_func, free_func, int);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -111,22 +113,22 @@ ht_create(unsigned int range, hash_func hash)
  * going on. (like, say, a random hashing function)
  *
  * \param t           The hash table to destroy.
- * \param key_free    The function which is used to free the key data, or
+ * \param free_key    The function which is used to free the key data, or
  *			\c NULL if no action should be taken on the key data.
- * \param value_free  The function which is used to free the value data, or
+ * \param free_value  The function which is used to free the value data, or
  *			\c NULL if no action should be taken on the value data.
  *
  * \sa ht_create
  */
 void
-ht_destroy(ht t, free_func key_free, free_func value_free)
+ht_destroy(ht t, free_func free_key, free_func free_value)
 {
 	alist *al;
 
 	assert(t != NULL);
 
 	for (al = t->buckets; al < (t->buckets + t->range); ++al)
-		alist_destroy(*al, key_free, value_free);
+		alist_destroy(*al, free_key, free_value);
 
 	free(t->buckets);
 	free(t);
@@ -142,7 +144,7 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
  */
 static ht
 ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
-		   free_func free_value, int uniq)
+		   free_func free_key, free_func free_value, int uniq)
 {
 	unsigned int bucketnr;
 	alist al;
@@ -163,7 +165,7 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
 	if (uniq)
 		al = alist_insert_uniq(al, key, value, eq);
 	else
-		al = alist_insert(al, key, value, eq, free_value);
+		al = alist_insert(al, key, value, eq, free_key, free_value);
 
 	if (al == NULL)
 		t = NULL;
@@ -185,6 +187,9 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
  * \param key         The key of the data.
  * \param value       The data to insert.
  * \param eq          The equals predicate for two keys.
+ * \param free_key    The function used to free the old key's data if it
+ *		       needs to be replaced, or \c NULL if the data does not
+ *		       need to be freed.
  * \param free_value  The function used to free the old value's data if it
  *		       needs to be replaced, or \c NULL if the data does not
  *		       need to be freed.
@@ -198,9 +203,10 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
  * \sa ht_insert_uniq, ht_delete
  */
 ht
-ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
+ht_insert(ht t, gendata key, gendata value, eq_func eq,
+	  free_func free_key, free_func free_value)
 {
-	return ht_insert_internal(t, key, value, eq, free_value, 0);
+	return ht_insert_internal(t, key, value, eq, free_key, free_value, 0);
 }
 
 
@@ -227,7 +233,7 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
 ht
 ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq)
 {
-	return ht_insert_internal(t, key, value, eq, NULL, 1);
+	return ht_insert_internal(t, key, value, eq, NULL, NULL, 1);
 }
 
 
@@ -277,9 +283,9 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
  * \param t           The hashtable which contains the element to delete.
  * \param key         The key to the element to delete.
  * \param eq          The equals predicate for two keys.
- * \param key_free    The function which is used to free the key data, or
+ * \param free_key    The function which is used to free the key data, or
  *			\c NULL if no action should be taken on the key data.
- * \param value_free  The function which is used to free the value data, or
+ * \param free_value  The function which is used to free the value data, or
  *			\c NULL if no action should be taken on the value data.
  *
  * \return  The hash table, or \c NULL if the key could not be found.
@@ -290,8 +296,8 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
  * \sa ht_insert
  */
 ht
-ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
-	  free_func value_free)
+ht_delete(ht t, gendata key, eq_func eq, free_func free_key,
+	  free_func free_value)
 {
 	unsigned int bucketnr;
 	alist al;
@@ -309,7 +315,7 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 #endif
 
 	al = *(t->buckets + bucketnr);
-	if (alist_delete(al, key, eq, key_free, value_free) == NULL)
+	if (alist_delete(al, key, eq, free_key, free_value) == NULL)
 		return NULL;
 
 	return t;
@@ -358,7 +364,139 @@ ht_walk(ht t, assoc_func walk, gendata data)
 	unsigned int i;
 
 	assert(t != NULL);
+	assert(t->buckets != NULL);
 
 	for (i = 0; i < t->range; ++i)
 		alist_walk(t->buckets[i], walk, data);
+}
+
+
+/**
+ * \brief Merge two hash tables together.
+ *
+ * Add all data elements from a hash table to another hash table,
+ * replacing the value of all existing elements with the same key.
+ *
+ * \note
+ * This function is \f$ O(n \cdot m) \f$ with \f$ n \f$ the length of
+ * \p base and \f$ m \f$ the length of \p rest.
+ *
+ * \param base	      The hash table to insert the data in.
+ * \param rest        The hash table to be merged into \p base.
+ * \param eq          The equals predicate for two keys.
+ * \param free_key    The function used to free the \p rest list's key data,
+ *		       or \c NULL if the data does not need to be freed.
+ * \param free_value  The function used to free the \p base value's data if it
+ *		       needs to be replaced, or \c NULL if the data does not
+ *		       need to be freed.
+ *
+ * \return  The \p base hash table, merged with \p rest, or NULL in case
+ *	     of error.  If an error occurred, the \p base hash table is still
+ *	     valid, but it is undefined which items from the \p rest table will
+ *	     have been merged into the table and which haven't.  The \p rest
+ *	     table will not be valid after the function has finished.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
+ * - \b EINVAL if the two hash tables do not have the same range.
+ *
+ * \sa ht_insert ht_delete ht_merge_uniq
+ */
+ht
+ht_merge(ht base, ht rest, eq_func eq, free_func free_key, free_func free_value)
+{
+	unsigned int i;
+	alist al_tmp;
+
+	assert(base != NULL);
+	assert(rest != NULL);
+	assert(base->buckets != NULL);
+	assert(rest->buckets != NULL);
+
+	/* XXX: Maybe this requirement is too strict */
+	if (base->range != rest->range) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	for (i = 0; i < base->range; ++i) {
+		al_tmp = alist_merge(base->buckets[i], rest->buckets[i], eq,
+				     free_key, free_value);
+		if (al_tmp == NULL)
+			return NULL;
+		else
+			base->buckets[i] = al_tmp;
+	}
+
+	/*
+	 * NOTE: This is redundant in the current implementation of alist.
+	 * Also, we can't `destroy' the alist in the above loop, because
+	 * if we encounter an error, the hash table should still be valid.
+	 */
+	for (i = 0; i < rest->range; ++i)
+		alist_destroy(rest->buckets[i], free_key, free_value);
+     
+	free(rest->buckets);
+	free(rest);
+
+	return base;
+}
+
+
+/**
+ * \brief Merge two hash tables together uniquely.
+ *
+ * Add all data elements from a hash table to another hash table with the
+ * given key.  If a duplicate key is encountered, the entry is not inserted
+ * into the \p base hash table.
+ *
+ * \note
+ * This function is \f$ O(n \cdot m) \f$ with \f$ n \f$ the length of
+ * \p base and \f$ m \f$ the length of \p rest.
+ *
+ * \param base	      The hash table to insert the data in.
+ * \param rest        The hash table to be merged into \p base.
+ * \param eq          The equals predicate for two keys.
+ *
+ * \return  The \p base hash table, merged with \p rest, or NULL in case of
+ *	     error.  If an error occurred, the \p base hash table is still
+ *	     valid, but it is undefined which items from the \p rest hash table
+ *	     will have been merged into the table and which haven't.
+ *	    The \p rest table will have been modified so it still contains
+ *	     the entries which had matching keys in the \p base table.
+ *	    The \p rest hash table will thus still be valid.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
+ * - \b EINVAL if the two hash tables do not have the same range.
+ *
+ * \sa ht_insert_uniq ht_delete ht_merge
+ */
+ht
+ht_merge_uniq(ht base, ht rest, eq_func eq)
+{
+	unsigned int i;
+	alist al_tmp;
+
+	assert(base != NULL);
+	assert(rest != NULL);
+	assert(base->buckets != NULL);
+	assert(rest->buckets != NULL);
+
+	/* XXX: Maybe this requirement is too strict */
+	if (base->range != rest->range) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	for (i = 0; i < base->range; ++i) {
+		al_tmp = alist_merge_uniq(base->buckets[i],
+					  rest->buckets[i], eq);
+		if (al_tmp == NULL)
+			return NULL;
+		else
+			base->buckets[i] = al_tmp;
+	}
+
+	return base;
 }

@@ -51,12 +51,16 @@ typedef struct alist_t {
 
 alist alist_create(void);
 void alist_destroy(alist, free_func, free_func);
-alist alist_insert(alist, gendata, gendata, eq_func, free_func);
+alist alist_insert(alist, gendata, gendata, eq_func, free_func, free_func);
 alist alist_insert_uniq(alist, gendata, gendata, eq_func);
 alist alist_lookup(alist, gendata, eq_func, gendata *);
 alist alist_delete(alist, gendata, eq_func, free_func, free_func);
 int alist_empty(alist);
 void alist_walk(alist, assoc_func, gendata);
+
+/* Convenience functions */
+alist alist_merge(alist, alist, eq_func, free_func, free_func);
+alist alist_merge_uniq(alist, alist, eq_func);
 
 #ifdef __cplusplus
 }

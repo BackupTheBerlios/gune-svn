@@ -225,6 +225,7 @@ queue_destroy(queue q, free_func f)
 {
 	assert(q != ERROR_QUEUE);
 	assert(q != NULL);
+	assert(f != NULL);
 
 	sll_destroy(q->head, f);
 

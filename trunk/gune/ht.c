@@ -106,6 +106,7 @@ ht_destroy(ht t, free_func f)
 
 	assert(t != ERROR_HT);
 	assert(t != NULL);
+	assert(f != NULL);
 
 	for (i = 0; i < t->range; ++i)
 		sll_destroy(*(t->table + i), f);

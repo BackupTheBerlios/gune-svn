@@ -197,6 +197,7 @@ stack_destroy(stack s, free_func f)
 {
 	assert(s != ERROR_STACK);
 	assert(s != NULL);
+	assert(f != NULL);
 
 	sll_destroy(s->top, f);
 	free((stack_t *)s);

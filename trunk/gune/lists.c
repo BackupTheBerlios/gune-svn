@@ -74,6 +74,7 @@ void
 sll_destroy(sll ll, free_func f)
 {
 	assert(ll != ERROR_SLL);
+	assert(f != NULL);
 
 	while (!sll_is_empty(ll)) {
 		f(ll->data.ptr);
@@ -338,6 +339,7 @@ void
 dll_destroy(dll ll, free_func f)
 {
 	assert(ll != ERROR_DLL);
+	assert(f != NULL);
 
 	while (!dll_is_empty(ll)) {
 		f(ll->data.ptr);

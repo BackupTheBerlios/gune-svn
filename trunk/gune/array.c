@@ -92,6 +92,7 @@ array_destroy(array ar, free_func f)
 	assert(ar != ERROR_ARRAY);
 	assert(ar != NULL);
 	assert(ar->data != NULL);
+	assert(f != NULL);
 
 	for(p = ar->data; p < (ar->data + ar->size); ++p)
 		f(p->ptr);

@@ -41,6 +41,14 @@
 #include "types.h"
 #include "error.h"
 
+/* Hmm... Must have created this in my sleep! */
+int	list_error_ptr;
+
+sll ERROR_SLL = (sll)(void *)&list_error_ptr;
+dll ERROR_DLL = (dll)(void *)&list_error_ptr;
+stack ERROR_STACK = (stack)(void *)&list_error_ptr;
+queue ERROR_QUEUE = (queue)(void *)&list_error_ptr;
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
@@ -818,6 +826,8 @@ stack_peek(stack s)
 		log_entry(WARN_ERROR, "Cannot peek at top element of an"
 			   " empty stack.");
 
+	assert(s->head != NULL);
+
 	return s->head->data;
 }
 
@@ -888,14 +898,17 @@ stack_free(stack s)
 /**
  * Create a new queue object and returns a pointer to it.
  *
- * \return  A pointer to the new queue object.
+ * \return  A pointer to the new queue object or ERROR_QUEUE if there is
+ *           not enough memory available.
  */
 queue
 queue_new(void)
 {
 	queue q;
 
-	q = malloc(sizeof(queue_t));
+	if ((q = malloc(sizeof(queue_t))) == NULL)
+		return ERROR_QUEUE;
+
 	q->bgn = NULL;
 	q->end = NULL;
 	q->count = 0;
@@ -919,9 +932,17 @@ queue_enqueue(queue q, void *data)
 
 	assert(q != NULL);
 
-	el = malloc(sizeof(queue_elem));
+	if ((el = malloc(sizeof(queue_elem))) == NULL)
+		return ERROR_QUEUE;
+
 	el->data = data;
-	/* el->next = NULL <-- not necessary */
+	/*
+	 * The next statement is not necessary, since `el' will be the new
+	 *  q->end.
+	 */
+	/* el->next = NULL */
+
+	assert(q->end != NULL);
 	q->end->next = el;
 	q->end = el;
 	++q->count;
@@ -953,6 +974,8 @@ queue_dequeue(queue q)
 		log_entry(WARN_ERROR, "Cannot dequeue from an empty queue.");
 
 	el = q->bgn;
+	assert(el != NULL);
+
 	res = el->data;
 	q->bgn = q->bgn->next;
 	free(el);
@@ -988,6 +1011,8 @@ queue_peek(queue q)
 	if (queue_is_empty(q))
 		log_entry(WARN_ERROR, "Cannot peek at the head of an "
 			   "empty queue.");
+
+	assert(q->bgn != NULL);
 
 	return q->bgn->data;
 }

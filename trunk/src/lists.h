@@ -49,6 +49,9 @@ typedef struct sll_elem {
 typedef sll_elem *	sll;
 typedef sll_elem *	sll_iter;
 
+/** Invalid linked list, used as error return value */
+extern sll ERROR_SLL;
+
 /** SLL creation/deletion functions */
 sll sll_create(void);
 void sll_destroy(sll);
@@ -82,6 +85,9 @@ typedef struct dll_elem {
 } dll_elem;
 typedef dll_elem *	dll;
 typedef dll_elem *	dll_iter;
+
+/** Invalid linked list, used as error return value */
+extern dll ERROR_DLL;
 
 /** DLL creation/deletion functions */
 dll dll_create(void);
@@ -119,6 +125,9 @@ typedef struct stack_t {
 	struct stack_elem *head;
 } stack_t, *stack;
 
+/** Invalid stack, used as error return value */
+extern stack ERROR_STACK;
+
 stack stack_new(void);
 void *stack_pop(stack);
 void *stack_peek(stack);
@@ -138,6 +147,9 @@ typedef struct queue_t {
 	struct queue_elem *end;
 	int count;
 } queue_t, *queue;
+
+/** Invalid queue, used as error return value */
+extern queue ERROR_QUEUE;
 
 queue queue_new(void);
 queue queue_enqueue(queue, void *);

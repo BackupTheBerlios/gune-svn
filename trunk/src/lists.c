@@ -49,10 +49,10 @@ const int list_error_ptr;
  * and allocating memory on the heap for each new type we invent.  This
  * workaround may seem ugly, but it's the only way to get the desired effect.
  */
-const sll_c   ERROR_SLL   = (const void * const)&list_error_ptr;
-const dll_c   ERROR_DLL   = (const void * const)&list_error_ptr;
-const stack_c ERROR_STACK = (const void * const)&list_error_ptr;
-const queue_c ERROR_QUEUE = (const void * const)&list_error_ptr;
+const sll_t   * const ERROR_SLL   = (const void * const)&list_error_ptr;
+const dll_t   * const ERROR_DLL   = (const void * const)&list_error_ptr;
+const stack_t * const ERROR_STACK = (const void * const)&list_error_ptr;
+const queue_t * const ERROR_QUEUE = (const void * const)&list_error_ptr;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -132,10 +132,10 @@ void dll_dump(dll, char *);
 typedef struct stack_t {
 	void *data;
 	struct stack_t *head;
-} stack_t, *stack, const *stack_c;
+} stack_t, *stack, * const stack_c;
 
 /** Invalid stack, used as error return value */
-extern const stack_c ERROR_STACK;
+extern const stack_t * const ERROR_STACK;
 
 stack stack_new(void);
 void *stack_pop(stack);
@@ -151,10 +151,10 @@ typedef struct queue_t {
 	struct queue_t *bgn;
 	struct queue_t *end;
 	int count;
-} queue_t, *queue, const *queue_c;
+} queue_t, *queue;
 
 /** Invalid queue, used as error return value */
-extern const queue_c ERROR_QUEUE;
+extern const queue_t * const ERROR_QUEUE;
 
 queue queue_new(void);
 queue queue_enqueue(queue, void *);

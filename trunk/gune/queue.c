@@ -244,6 +244,12 @@ queue_destroy(queue q, free_func f)
 /**
  * \brief Append a queue to another queue.
  *
+ * The \p base queue will be augmented with the \p rest queue, maintaining the
+ * same order of base, and the same queue head.  The elements of the \p rest
+ * queue maintain the same order as well.  If the last element of \p base
+ * is dequeued from the new queue, the new queue head will be the current
+ * queue head of \p rest.
+ *
  * \param base  The queue to which the \p rest queue should be appended.
  * \param rest  The queue to append to \p base.
  *

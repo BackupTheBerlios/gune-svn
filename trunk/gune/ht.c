@@ -326,7 +326,7 @@ ht_delete(ht t, gendata key)
  * \param key    The string to hash.
  * \param range  The range of the hash table.
  *
- * \return  The hash of the supplied string, between 0 and range.
+ * \return  The hash of the supplied string, in the range [0..range-1].
  */
 unsigned int
 str_hash(gendata key, unsigned int range)

@@ -49,6 +49,8 @@
  *
  * \par Errno values:
  * - \b ENOMEM if out of memory.
+ *
+ * \sa queue_destroy
  */
 queue
 queue_create(void)
@@ -82,6 +84,8 @@ queue_create(void)
  *
  * \par Errno values:
  * - \b ENOMEM if out of memory.
+ *
+ * \sa queue_dequeue queue_append
  */
 queue
 queue_enqueue(queue q, gendata data)
@@ -127,7 +131,7 @@ queue_enqueue(queue q, gendata data)
  *
  * \return   The data dequeued from the queue.
  *
- * \sa queue_empty, queue_peek
+ * \sa queue_empty queue_enqueue queue_peek
  */
 gendata
 queue_dequeue(queue q)
@@ -167,7 +171,7 @@ queue_dequeue(queue q)
  *
  * \return   The data at the head of the queue.
  *
- * \sa queue_empty, queue_dequeue
+ * \sa queue_empty queue_dequeue
  */
 gendata
 queue_peek(queue q)
@@ -223,6 +227,8 @@ queue_empty(queue q)
  * \param q  The queue to destroy.
  * \param f  The function which is used to free the data, or \c NULL if no
  *	       action should be taken to free the data.
+ *
+ * \sa queue_create
  */
 void
 queue_destroy(queue q, free_func f)
@@ -232,4 +238,42 @@ queue_destroy(queue q, free_func f)
 	sll_destroy(q->head, f);
 
 	free((queue_t *)q);
+}
+
+
+/**
+ * \brief Append a queue to another queue.
+ *
+ * \param base  The queue to which the \p rest queue should be appended.
+ * \param rest  The queue to append to \p base.
+ *
+ * \return  The new queue.
+ *
+ * \sa queue_enqueue
+ */
+queue
+queue_append(queue base, queue rest)
+{
+	assert(base != NULL);
+	assert(rest != NULL);
+	assert(base->head != NULL);
+	assert(rest->head != NULL);
+	assert(base->tail != NULL);
+	assert(rest->tail != NULL);
+
+	/*
+	 * This is necessary if rest->tail is rest->head and that would be
+	 * the empty list.  We can't set base->tail to empty list if
+	 * base->tail points to a nonempty list.
+	 */
+	if (queue_empty(rest)) {
+		free(rest);
+		return base;
+	}
+
+	base->head = sll_append(base->head, rest->head);
+	base->tail = rest->tail;
+	free(rest);
+
+	return base;
 }

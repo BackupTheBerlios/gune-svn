@@ -8,8 +8,10 @@
 # System dependent options #
 ############################
 
-# Uncomment if necessary.  pkgsrc, for example, will set this for you.
-PREFIX?=		/usr/local
+# Change this if necessary.  pkgsrc, for example, will set this for you.
+PREFIX?=	/usr/local
+LIBDIR=		${PREFIX}/lib
+MANDIR=		${PREFIX}/share/man
 
 # Treat C and lint warnings as errors.
 CFLAGS+=	-g -ansi -pedantic-errors -Wall -Werror
@@ -26,10 +28,3 @@ DEFS+=		-DBOUNDS_CHECKING
 
 # Enable debug code?
 DEFS+=		-DDEBUG
-
-#
-# Check this
-#
-DESTDIR?=	${PREFIX}
-LIBDIR?=	/lib
-BINDIR?=	/bin

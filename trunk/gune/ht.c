@@ -189,7 +189,7 @@ ht_insert(ht t, gendata key, gendata value)
 	 * We'll have to check if there's already a value with the same key.
 	 * If it is, overwrite that value.
 	 */
-	while (!sll_is_empty(ll)) {
+	while (!sll_empty(ll)) {
 		e = sll_get_data(ll).ptr;
 		if (t->eq(key, e->key)) {
 			e->value = value;
@@ -249,7 +249,7 @@ ht_lookup(ht t, gendata key, gendata *data)
 #endif
 
 	l = *(t->table + bucket);
-	while (!sll_is_empty(l)) {
+	while (!sll_empty(l)) {
 		e = sll_get_data(l).ptr;
 		if (t->eq(key, e->key)) {
 			*data = e->value;

@@ -55,7 +55,7 @@ sll sll_create(void);
 void sll_destroy(sll, free_func);
 void sll_free(sll);
 unsigned int sll_count(sll);
-int sll_is_empty(sll);
+int sll_empty(sll);
 
 /* SLL exceptions for head */
 sll sll_remove_head(sll);
@@ -88,7 +88,7 @@ dll dll_create(void);
 void dll_destroy(dll, free_func);
 void dll_free(dll);
 unsigned int dll_count(dll);
-int dll_is_empty(dll);
+int dll_empty(dll);
 
 /* DLL exceptions for head */
 dll dll_remove_head(dll);

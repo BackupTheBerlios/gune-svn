@@ -71,13 +71,13 @@ stress_test_stack(int num)
 	for (i = 0; i < num; ++i)
 		x = stack_pop(s);
 
-	assert(stack_is_empty(s));
+	assert(stack_empty(s));
 
 	/* Now, again, fill up the stack... */
 	for (i = 0; i < num; ++i)
 		stack_push(s, x);
 
-	assert(!stack_is_empty(s));
+	assert(!stack_empty(s));
 
 	/* ...and free it */
 	stack_free(s);

@@ -85,7 +85,7 @@ stack_pop(stack s)
 	assert(s != NULL);
 	assert(s->top != ERROR_SLL);
 
-	if (stack_is_empty(s))
+	if (stack_empty(s))
 		log_entry(WARN_ERROR, "Cannot pop from an empty stack.");
 
 	res = sll_get_data(s->top);
@@ -118,7 +118,7 @@ stack_peek(stack s)
 	 * so returning NULL on an empty stack would be ambiguous.
 	 */
 
-	if (stack_is_empty(s))
+	if (stack_empty(s))
 		log_entry(WARN_ERROR, "Cannot peek at top element of an"
 			   " empty stack.");
 
@@ -153,12 +153,12 @@ stack_push(stack s, gendata data)
  * \return   Non-zero if the stack is empty, 0 if it is not.
  */
 int
-stack_is_empty(stack s)
+stack_empty(stack s)
 {
 	assert(s != NULL);
 	assert(s != ERROR_STACK);
 
-	return sll_is_empty(s->top);
+	return sll_empty(s->top);
 }
 
 

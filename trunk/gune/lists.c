@@ -76,7 +76,7 @@ sll_destroy(sll ll, free_func f)
 	assert(ll != ERROR_SLL);
 	assert(f != NULL);
 
-	while (!sll_is_empty(ll)) {
+	while (!sll_empty(ll)) {
 		f(ll->data.ptr);
 		ll = sll_remove_head(ll);
 	}
@@ -96,7 +96,7 @@ sll_free(sll ll)
 {
 	assert(ll != ERROR_SLL);
 
-	while (!sll_is_empty(ll))
+	while (!sll_empty(ll))
 		ll = sll_remove_head(ll);
 }
 
@@ -130,10 +130,10 @@ sll_count(sll ll)
  *
  * \return  Non-zero if the list is empty, 0 if it is not.
  *
- * \sa  dll_is_empty
+ * \sa  dll_empty
  */
 int
-sll_is_empty(sll ll)
+sll_empty(sll ll)
 {
 	assert(ll != ERROR_SLL);
 
@@ -363,7 +363,7 @@ dll_destroy(dll ll, free_func f)
 	assert(ll != ERROR_DLL);
 	assert(f != NULL);
 
-	while (!dll_is_empty(ll)) {
+	while (!dll_empty(ll)) {
 		f(ll->data.ptr);
 		ll = dll_remove_head(ll);
 	}
@@ -383,7 +383,7 @@ dll_free(dll ll)
 {
 	assert(ll != ERROR_DLL);
 
-	while (!dll_is_empty(ll))
+	while (!dll_empty(ll))
 		ll = dll_remove_head(ll);
 }
 
@@ -417,10 +417,10 @@ dll_count(dll ll)
  *
  * \return    Non-zero if the list is empty, 0 if it is not.
  *
- * \sa  sll_is_empty
+ * \sa  sll_empty
  */
 int
-dll_is_empty(dll ll)
+dll_empty(dll ll)
 {
 	assert(ll != ERROR_DLL);
 

@@ -94,7 +94,7 @@ queue_enqueue(queue q, gendata data)
 	q->tail = new;
 
 	/* If we were empty before, we now have a head again */
-	if (sll_is_empty(q->head))
+	if (sll_empty(q->head))
 		q->head = q->tail;
 
 	return q;
@@ -120,7 +120,7 @@ queue_dequeue(queue q)
 	assert(q != ERROR_QUEUE);
 	assert(q != NULL);
 
-	if (queue_is_empty(q))
+	if (queue_empty(q))
 		log_entry(WARN_ERROR, "Cannot dequeue from an empty queue.");
 
 	res = (sll_get_data(q->head));
@@ -131,7 +131,7 @@ queue_dequeue(queue q)
 	 * Make sure our tail pointer doesn't cling to some old list that
 	 * doesn't exist after we remove the last element from the list
 	 */
-	if (sll_is_empty(q->head))
+	if (sll_empty(q->head))
 		q->tail = q->head;
 
 	return res;
@@ -162,7 +162,7 @@ queue_peek(queue q)
 	assert(q != ERROR_QUEUE);
 	assert(q != NULL);
 
-	if (queue_is_empty(q))
+	if (queue_empty(q))
 		log_entry(WARN_ERROR, "Cannot peek at the head of an "
 			   "empty queue.");
 
@@ -180,7 +180,7 @@ queue_peek(queue q)
  * \return   Non-zero if the queue is empty, 0 if it is not.
  */
 int
-queue_is_empty(queue q)
+queue_empty(queue q)
 {
 	assert(q != ERROR_QUEUE);
 	assert(q != NULL);
@@ -189,7 +189,7 @@ queue_is_empty(queue q)
 	 * If the queue's head is an empty list, we sure as hell don't have
 	 * a tail, so the queue is empty.  Otherwise we're not empty.
 	 */
-	return sll_is_empty(q->head);
+	return sll_empty(q->head);
 }
 
 

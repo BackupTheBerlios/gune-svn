@@ -36,7 +36,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <gune/error.h>
 #include <gune/array.h>
 
@@ -47,7 +46,7 @@
 /**
  * Creates a new empty array.
  *
- * \return  A new empty array, or ERROR_PTR if out of memory.
+ * \return  A new empty array, or NULL if out of memory.
  *	     errno = ENOMEM if out of memory.
  *
  * \sa array_destroy
@@ -58,11 +57,11 @@ array_create(void)
 	array_t *ar;
 
 	if ((ar = malloc(sizeof(array_t))) == NULL)
-		return ERROR_PTR;
+		return NULL;
 
 	if ((ar->data = malloc(ARRAY_INITIAL_SIZE * sizeof(gendata))) == NULL) {
 		free(ar);
-		return ERROR_PTR;
+		return NULL;
 	}
 
 	ar->size = 0;
@@ -89,7 +88,6 @@ array_destroy(array ar, free_func f)
 {
 	gendata *p;
 
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 	assert(ar->data != NULL);
 
@@ -124,9 +122,9 @@ array_size(array ar)
  * \param ar    The array to resize.
  * \param size  The new (absolute) size of the array.
  *
- * \return  The array given as input, or ERROR_PTR if out of memory.
- *          The old array is still valid.
- *	      errno = ENOMEM if out of memory.
+ * \return  The array given as input, or NULL if out of memory.
+ *           The old array is still valid.
+ *	       errno = ENOMEM if out of memory.
  *
  * \sa array_grow, array_shrink, array_compact
  */
@@ -136,7 +134,6 @@ array_resize(array ar, unsigned int size)
 	int newsize;		/* Do not corrupt old array in case of error */
 	gendata *newptr;
 
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 	assert(ar->data != NULL);
 
@@ -148,7 +145,7 @@ array_resize(array ar, unsigned int size)
 		newsize = ar->capacity * 2;
 		if ((newptr = realloc(ar->data, newsize * sizeof(gendata)))
 		    == NULL)
-			return ERROR_PTR;
+			return NULL;
 		ar->data = newptr;
 		ar->capacity = newsize;
 	}
@@ -170,7 +167,6 @@ array_resize(array ar, unsigned int size)
 gendata
 array_get_data(array ar, unsigned int index)
 {
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 	assert(ar->data != NULL);
 
@@ -196,7 +192,6 @@ array_get_data(array ar, unsigned int index)
 array
 array_set_data(array ar, unsigned int index, gendata value)
 {
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 	assert(ar->data != NULL);
 
@@ -222,7 +217,7 @@ array_set_data(array ar, unsigned int index, gendata value)
  *
  * \param ar  The array to compact.
  *
- * \return    The supplied array, or ERROR_PTR if an error occurred during
+ * \return    The supplied array, or NULL if an error occurred during
  *            resize.  The old array is still valid.
  *		errno = ENOMEM if out of memory.
  */
@@ -232,18 +227,16 @@ array_compact(array ar)
 	gendata *newptr;
 	unsigned int newsize = 1;
 
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 	assert(ar->data != NULL);
 
-
+	/* NOTE: This can probably be sped up quite a bit */
 	for (; newsize < ar->size; newsize *= 2);
 
-	if ((newptr = realloc(ar->data, newsize * sizeof(gendata))) == NULL)
-		return ERROR_PTR;
-
-	ar->data = newptr;
-	ar->capacity = newsize;
+	if ((newptr = realloc(ar->data, newsize * sizeof(gendata))) != NULL) {
+		ar->data = newptr;
+		ar->capacity = newsize;
+	}
 
 	return ar;
 }
@@ -255,7 +248,7 @@ array_compact(array ar)
  * \param ar      The array to grow.
  * \param amount  The amount to grow.
  *
- * \return    The supplied array, or ERROR_PTR if an error occurred during
+ * \return    The supplied array, or NULL if an error occurred during
  *            resize.  The old array is still valid.
  *		errno = ENOMEM if out of memory.
  *
@@ -267,7 +260,6 @@ array_grow(array ar, int amount)
 	if (amount < 0)
 		return array_shrink(ar, 0 - amount);
 
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 
 	return array_resize(ar, ar->size + (unsigned int)amount);
@@ -283,7 +275,7 @@ array_grow(array ar, int amount)
  * \param ar      The array to shrink.
  * \param amount  The amount to shrink.
  *
- * \return    The supplied array, or ERROR_PTR if an error occurred during
+ * \return    The supplied array, or NULL if an error occurred during
  *            resize.  The old array is still valid.
  *		errno = ENOMEM if out of memory.
  *
@@ -295,7 +287,6 @@ array_shrink(array ar, int amount)
 	if (amount < 0)
 		return array_grow(ar, 0 - amount);
 
-	assert(ar != ERROR_PTR);
 	assert(ar != NULL);
 
 #ifdef BOUNDS_CHECKING
@@ -313,7 +304,7 @@ array_shrink(array ar, int amount)
  * \param ar     The array to add an element to.
  * \param value  The value to add to the array.
  *
- * \return    The supplied array, or ERROR_PTR if an error occurred during
+ * \return    The supplied array, or NULL if an error occurred during
  *            resize.  The old array is still valid.
  *		errno = ENOMEM if out of memory.
  *
@@ -323,7 +314,7 @@ array
 array_add(array ar, gendata value)
 {
 	ar = array_grow(ar, 1);
-	if (ar != ERROR_PTR) {
+	if (ar != NULL) {
 		assert(ar->data != NULL);
 		*(ar->data + ar->size) = value;
 	}
@@ -337,7 +328,7 @@ array_add(array ar, gendata value)
  *
  * \param ar     The array to remove the element from.
  *
- * \return    The supplied array, or ERROR_PTR if an error occurred during
+ * \return    The supplied array, or NULL if an error occurred during
  *            resize.  The old array is still valid.
  *		errno = ENOMEM if out of memory.
  *

@@ -53,25 +53,6 @@ static const char *warnlvl_descr[NUM_WARNLVLS] = {
 	"Critical error",
 };
 
-/* ``Hmm... Must have created this in my sleep!'' -- Gune, Titan AE
- *
- * No seriously, we need some constant pointer for defining error values.
- * The problem here is, that we want to return a pointer to `const' memory
- * in case of error, but not in the normal case.  This is of course not
- * possible in C.  Since in protected systems the program text is marked
- * read-only, we get an immediate segfault on write to this memory space.
- * This is the desired behaviour, since we do not want to erroneously
- * continue working with wrong pointers but get an error.
- */
-void error_dummy_func(void) { }
-
-/**
- * Error value for objects.  This is used when NULL is a valid value for
- * a pointer on function returns.  Used in Gune even if NULL is not a
- * valid value for consistency reasons.
- */
-void * const ERROR_PTR = (void *)error_dummy_func;
-
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

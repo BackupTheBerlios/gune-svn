@@ -46,4 +46,6 @@
 int ptr_eq(gendata, gendata);
 unsigned int ptr_hash(gendata, unsigned int);
 
+extern void * const CONST_PTR;
+
 #endif /* GUNE_MISC_H */

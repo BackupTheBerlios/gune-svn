@@ -37,8 +37,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <gune/error.h>
+#include <gune/misc.h>
 #include <gune/lists.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -53,7 +53,8 @@
 sll
 sll_create(void)
 {
-	return NULL;
+	/* This represents the empty list. */
+	return CONST_PTR;
 }
 
 
@@ -72,7 +73,7 @@ sll_create(void)
 void
 sll_destroy(sll ll, free_func f)
 {
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
 	while (!sll_empty(ll)) {
 		if (f != NULL)
@@ -96,10 +97,10 @@ sll_count(sll ll)
 {
 	int count;
 
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
-	for (count = 0; ll != NULL; ++count, ll = ll->next)
-		continue;
+	for (count = 0; !sll_empty(ll); ++count, ll = ll->next);
+
 	return count;
 }
 
@@ -116,15 +117,17 @@ sll_count(sll ll)
 int
 sll_empty(sll ll)
 {
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
-	return ll == NULL;
+	return ll == CONST_PTR;
 }
 
 
 /**
  * Removes the head from a singly linked list.  The data stored in the linked
  * list is NOT freed.
+ *
+ * XXX: It probably is a good idea to provide an extra free_func arg
  *
  * \param ll  The singly linked list.
  *
@@ -138,7 +141,7 @@ sll_remove_head(sll ll)
 	sll begin;
 
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!sll_empty(ll));
 
 	/* Move the ll pointer to the next element */
 	begin = ll;
@@ -154,9 +157,11 @@ sll_remove_head(sll ll)
  * Removes the next item after the head from a singly linked list.  The data
  * stored in the linked list is NOT freed.
  *
+ * XXX: It probably is a good idea to provide an extra free_func arg
+ *
  * \param ll  The singly linked list.
  *
- * \return  A pointer to the new singly linked list, or ERROR_PTR if the
+ * \return  A pointer to the new singly linked list, or NULL if the
  *	     next item does not exist.
  *	     errno = EINVAL if the next item does not exist.
  *
@@ -168,16 +173,16 @@ sll_remove_next(sll ll)
 	sll begin;
 	
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!sll_empty(ll));
 
 	/* Move the ll pointer to the next element */
 	begin = ll;
 	ll = ll->next;
 
-	if (ll == NULL) {
+	if (sll_empty(ll)) {
 		/* Should've checked with sll_empty before calling this func */
 		errno = EINVAL;
-		return ERROR_PTR;
+		return NULL;
 	}
 
 	begin->next = ll->next;
@@ -195,7 +200,7 @@ sll_remove_next(sll ll)
  * \param ll    The singly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or ERROR_PTR in case of error.  The old linked
+ * \return  The new linked list or NULL in case of error.  The old linked
  *	     list is still valid in case of error.
  *	      errno = ENOMEM if out of memory.
  *
@@ -206,11 +211,11 @@ sll_prepend_head(sll ll, gendata data)
 {
 	sll_t *new;
 
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(sll_t))) == NULL)
-		return (sll)ERROR_PTR;
+		return NULL;
 	new->data = data;
 
 	/* Prepend to the current list */
@@ -225,7 +230,7 @@ sll_prepend_head(sll ll, gendata data)
  * \param ll    The singly linked list to append the element at.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or ERROR_PTR in case of error.  The old
+ * \return  The old(!) linked list or NULL in case of error.  The old
  *	      linked list is still valid in case of error.
  *	      errno = ENOMEM if out of memory.
  *
@@ -236,16 +241,18 @@ sll_append_head(sll ll, gendata data)
 {
 	sll_t *new;
 
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(sll_t))) == NULL)
-		return (sll)ERROR_PTR;
-	new->data = data;
-	if (ll != NULL)
+		return NULL;
+
+	if (!sll_empty(ll))
 		new->next = ll->next;
 	else
-		new->next = NULL;
+		new->next = CONST_PTR;
+
+	new->data = data;
 
 	/* Append at the current list */
 	ll->next = new;
@@ -259,7 +266,7 @@ sll_append_head(sll ll, gendata data)
  * \param ll     The singly linked list to search in.
  * \param nskip  The number of elements to search forward.
  *
- * \return The list at the indexed position, or ERROR_PTR if the index
+ * \return The list at the indexed position, or NULL if the index
  *          is out of bounds.
  *	     errno = EINVAL if the index is out of bounds.
  *
@@ -271,12 +278,12 @@ sll_forward(sll ll, unsigned int nskip)
 	unsigned int i;
 
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!sll_empty(ll));
 
 	for (i = 0; i < nskip; ++i) {
 		if (ll == NULL) {
 			errno = EINVAL;
-			return (sll)ERROR_PTR;
+			return NULL;
 		}
 		ll = ll->next;
 	}
@@ -298,7 +305,7 @@ gendata
 sll_get_data(sll ll)
 {
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!sll_empty(ll));
 
 	return ll->data;
 }
@@ -318,7 +325,7 @@ sll
 sll_set_data(sll ll, gendata data)
 {
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!sll_empty(ll));
 
 	ll->data = data;
 
@@ -345,17 +352,17 @@ sll_set_data(sll ll, gendata data)
 void
 sll_dump(sll ll, const char *fmt)
 {
-	if (ll == ERROR_PTR) {
-		printf("ERROR_PTR\n");
+	if (ll == NULL) {
+		printf("NULL\n");
 		return;
 	}
 
-	for (; ll != NULL; ll = ll->next) {
+	for (; !sll_empty(ll); ll = ll->next) {
 		/* Just dump the integer value of the ptr */
 		printf(fmt, ll->data.posnum);
 		printf(" -> ");
 	}
-	printf("NULL\n");
+	printf("(EOL)\n");
 }
 #endif /* DEBUG */
 
@@ -370,7 +377,8 @@ sll_dump(sll ll, const char *fmt)
 dll
 dll_create(void)
 {
-	return NULL;
+	/* This represents the empty list */
+	return CONST_PTR;
 }
 
 
@@ -389,7 +397,7 @@ dll_create(void)
 void
 dll_destroy(dll ll, free_func f)
 {
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
 	while (!dll_empty(ll)) {
 		if (f != NULL)
@@ -413,10 +421,10 @@ dll_count(dll ll)
 {
 	int count;
 
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
-	for (count = 0; ll != NULL; ++count, ll = ll->next)
-		continue;
+	for (count = 0; !dll_empty(ll); ++count, ll = ll->next);
+
 	return count;
 }
 
@@ -433,14 +441,15 @@ dll_count(dll ll)
 int
 dll_empty(dll ll)
 {
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
-	return ll == NULL;
+	return ll == CONST_PTR;
 }
 
 
 /**
- * Removes the head from a doubly linked list.
+ * Removes the head from a doubly linked list, honouring the prev element
+ *  of the list.
  *
  * \param ll  The doubly linked list.
  *
@@ -454,12 +463,12 @@ dll_remove_head(dll ll)
 	dll begin;
 	
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!dll_empty(ll));
 
 	/* Move the ll pointer to the next element */
 	begin = ll;
 	ll = ll->next;
-	ll->prev = NULL;
+	ll->prev = begin->prev;
 
 	/* Free up used space by the head element */
 	free(begin);
@@ -474,7 +483,7 @@ dll_remove_head(dll ll)
  * \param ll    The doubly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or ERROR_PTR in case of error.
+ * \return  The new linked list or NULL in case of error.
  *	      errno = ENOMEM if out of memory.
  *
  * \sa  dll_append_head sll_prepend_head
@@ -484,23 +493,23 @@ dll_prepend_head(dll ll, gendata data)
 {
 	dll_t *new;
 
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(dll_t))) == NULL)
-		return (dll)ERROR_PTR;
+		return NULL;
 	new->data = data;
 	new->next = ll;
 
 	/* Prepend to the current list */
-	if (ll != NULL) {
+	if (!dll_empty(ll)) {
 		new->prev = ll->prev;
 		ll->prev = new;
 
-		if (new->prev != NULL)
+		if (!dll_empty(new->prev))
 			new->prev->next = new;
 	} else {
-		new->prev = NULL;
+		new->prev = CONST_PTR;
 	}
 	return (dll)new;
 }
@@ -512,7 +521,7 @@ dll_prepend_head(dll ll, gendata data)
  * \param ll    The doubly linked list to prepend the element at.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or ERROR_PTR in case of error.  The old
+ * \return  The old(!) linked list or NULL in case of error.  The old
  *	     list is still valid in case of error.
  *	      errno = ENOMEM if out of memory.
  *
@@ -523,22 +532,22 @@ dll_append_head(dll ll, gendata data)
 {
 	dll_t *new;
 
-	assert(ll != ERROR_PTR);
+	assert(ll != NULL);
 
 	if ((new = malloc(sizeof(dll_t))) == NULL)
-		return (dll)ERROR_PTR;
+		return NULL;
 	new->data = data;
 	new->prev = ll;
 
-	if (ll != NULL) {
+	if (!dll_empty(ll)) {
 		new->next = ll->next;
 		new->prev = ll;
 		ll->next = new;
 
-		if (new->next != NULL)
+		if (!dll_empty(new->next))
 			new->next->prev = new;
 	} else {
-		new->next = NULL;
+		new->next = CONST_PTR;
 	}
 
 	return ll;
@@ -551,7 +560,7 @@ dll_append_head(dll ll, gendata data)
  * \param ll     The doubly linked list to search in.
  * \param nskip  The number of elements to search forward.
  *
- * \return The list at the indexed position, or ERROR_PTR if the index
+ * \return The list at the indexed position, or NULL if the index
  *          is out of bounds.
  *	     errno = EINVAL if the index is out of bounds.
  *
@@ -563,12 +572,12 @@ dll_forward(dll ll, unsigned int nskip)
 	unsigned int i;
 
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!dll_empty(ll));
 
 	for (i = 0; i < nskip; ++i) {
 		if (ll == NULL) {
 			errno = EINVAL;
-			return (dll)ERROR_PTR;
+			return NULL;
 		}
 		ll = ll->next;
 	}
@@ -583,7 +592,7 @@ dll_forward(dll ll, unsigned int nskip)
  * \param ll     The doubly linked list to search in.
  * \param nskip  The number of elements to search backward.
  *
- * \return The list at the indexed position, or ERROR_PTR if the index
+ * \return The list at the indexed position, or NULL if the index
  *          is out of bounds.
  *	    errno = EINVAL if the index is out of bounds.
  *
@@ -595,12 +604,12 @@ dll_backward(dll ll, unsigned int nskip)
 	unsigned int i;
 
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!dll_empty(ll));
 
 	for (i = 0; i < nskip; ++i) {
 		if (ll == NULL) {
 			errno = EINVAL;
-			return (dll)ERROR_PTR;
+			return NULL;
 		}
 		ll = ll->prev;
 	}
@@ -622,7 +631,7 @@ gendata
 dll_get_data(dll ll)
 {
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!dll_empty(ll));
 
 	return ll->data;
 }
@@ -642,7 +651,7 @@ dll
 dll_set_data(dll ll, gendata data)
 {
 	assert(ll != NULL);
-	assert(ll != ERROR_PTR);
+	assert(!dll_empty(ll));
 
 	ll->data = data;
 
@@ -664,18 +673,18 @@ dll_set_data(dll ll, gendata data)
 void
 dll_dump(dll ll, const char *fmt)
 {
-	if (ll == ERROR_PTR) {
-		printf("ERROR_PTR\n");
+	if (ll == NULL) {
+		printf("NULL\n");
 		return;
 	}
 
 #ifdef BOUNDS_CHECKING
-	if (ll->prev != NULL)
+	if (ll->prev != CONST_PTR)
 		log_entry(WARN_ERROR, "Gune: dll_dump: First element of doubly "
-			  "linked list has non-NULL prev pointer");
+			  "linked list has non-CONST_PTR prev pointer");
 #endif
 
-	for (; ll != NULL; ll = ll->next) {
+	for (; !dll_empty(ll); ll = ll->next) {
 #ifdef BOUNDS_CHECKING
 		if (ll->prev != NULL && ll->prev->next != ll)
 			log_entry(WARN_ERROR, "Gune: dll_dump: Linked list is not "
@@ -685,6 +694,6 @@ dll_dump(dll ll, const char *fmt)
 		printf(fmt, ll->data.posnum);
 		printf(" -> ");
 	}
-	printf("NULL\n");
+	printf("(EOL)\n");
 }
 #endif /* DEBUG */

@@ -36,16 +36,15 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
-
-#include <gune/queue.h>
 #include <gune/error.h>
+#include <gune/queue.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
  * Create a new, empty, queue.
  *
- * \return  A new empty queue object, or ERROR_PTR if out of memory.
+ * \return  A new empty queue object, or NULL if out of memory.
  *	      errno = ENOMEM if out of memory.
  */
 queue
@@ -54,15 +53,15 @@ queue_create(void)
 	queue_t *q;
 
 	if ((q = malloc(sizeof(queue_t))) == NULL)
-		return (queue)ERROR_PTR;
+		return NULL;
 
 	q->head = sll_create();
-	/* XXX: This test is overkill, sll_create always returns NULL.  */
-	if (q->head == ERROR_PTR) {
+	/* NOTE: This test is overkill, sll_create never returns NULL.  */
+	if (q->head == NULL) {
 		free(q);
-		return (queue)ERROR_PTR;
+		return NULL;
 	}
-		
+
 	q->tail = q->head;
 	return (queue)q;
 }
@@ -75,7 +74,7 @@ queue_create(void)
  * \param q     The given queue.
  * \param data  The data to add to the tail of the queue.
  *
- * \return  The queue given as input, or ERROR_PTR if out of memory.
+ * \return  The queue given as input, or NULL if out of memory.
  *	      errno = ENOMEM if out of memory.
  */
 queue
@@ -83,15 +82,14 @@ queue_enqueue(queue q, gendata data)
 {
 	sll new;
 
-	assert(q != ERROR_PTR);
 	assert(q != NULL);
-	assert(q->head != ERROR_PTR);
-	assert(q->tail != ERROR_PTR);
+	assert(q->head != NULL);
+	assert(q->tail != NULL);
 
 	new = sll_append_head(q->tail, data);
 
-	if (new == ERROR_PTR)
-		return (queue)ERROR_PTR;
+	if (new == NULL)
+		return NULL;
 
 	q->tail = new;
 
@@ -119,7 +117,6 @@ queue_dequeue(queue q)
 {
 	gendata res;
 
-	assert(q != ERROR_PTR);
 	assert(q != NULL);
 
 	if (queue_empty(q))
@@ -162,7 +159,6 @@ queue_peek(queue q)
 	 * so returning NULL on an empty queue would be ambiguous.
 	 * Perhaps we should do the same as with alists.
 	 */
-	assert(q != ERROR_PTR);
 	assert(q != NULL);
 
 	if (queue_empty(q))
@@ -185,7 +181,6 @@ queue_peek(queue q)
 int
 queue_empty(queue q)
 {
-	assert(q != ERROR_PTR);
 	assert(q != NULL);
 
 	/*
@@ -209,7 +204,6 @@ queue_empty(queue q)
 void
 queue_destroy(queue q, free_func f)
 {
-	assert(q != ERROR_PTR);
 	assert(q != NULL);
 
 	sll_destroy(q->head, f);

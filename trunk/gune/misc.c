@@ -36,6 +36,26 @@
 
 #include <gune/misc.h>
 
+/* ``Hmm... Must have created this in my sleep!'' -- Gune, Titan AE
+ *
+ * No seriously, we need a constant pointer that can be used in many spots.
+ * The problem here is, that we want to return a pointer to `const' memory
+ * in some cases, while we want a nonconst pointer in most cases.
+ * This is of course not possible in C.  Since in protected systems the
+ * program text is marked read-only, we get an immediate segfault on write
+ * to this memory space (with NULL too, but NULL is used to signal error).
+ * This is the desired behaviour, since we do not want to erroneously
+ * continue working with wrong pointers but get an error.
+ */
+void constant_ptr_dummy_func(void) { }
+
+/**
+ * Constant pointer.  This can be used when NULL already has another meaning
+ * for a pointer.  For example, it is used as a list terminator, while NULL
+ * means an error for the list.
+ */
+void * const CONST_PTR = (void *)constant_ptr_dummy_func;
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**

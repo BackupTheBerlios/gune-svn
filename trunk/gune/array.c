@@ -61,7 +61,7 @@ array_create(void)
 	if ((ar = malloc(sizeof(array_t))) == NULL)
 		return ERROR_ARRAY;
 
-	if ((ar->data = malloc(ARRAY_INITIAL_SIZE * sizeof(void *))) == NULL) {
+	if ((ar->data = malloc(ARRAY_INITIAL_SIZE * sizeof(gendata))) == NULL) {
 		free(ar);
 		return ERROR_ARRAY;
 	}
@@ -120,7 +120,7 @@ array
 array_resize(array ar, unsigned int size)
 {
 	int newsize;		/* Do not corrupt old array in case of error */
-	void *newptr;
+	gendata *newptr;
 
 	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
 
@@ -130,7 +130,7 @@ array_resize(array ar, unsigned int size)
 	 */
 	if (size > ar->capacity) {
 		newsize = ar->capacity * 2;
-		if ((newptr = realloc(ar->data, newsize * sizeof(void *))) == NULL)
+		if ((newptr = realloc(ar->data, newsize * sizeof(gendata))) == NULL)
 			return ERROR_ARRAY;
 		ar->data = newptr;
 		ar->capacity = newsize;
@@ -150,7 +150,7 @@ array_resize(array ar, unsigned int size)
  *
  * \return       The value at the specified index in the array.
  */
-void *
+gendata
 array_get_data(array ar, unsigned int index)
 {
 	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
@@ -174,7 +174,7 @@ array_get_data(array ar, unsigned int index)
  * \return       The supplied array.
  */
 array
-array_set_data(array ar, unsigned int index, void *value)
+array_set_data(array ar, unsigned int index, gendata value)
 {
 	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
 
@@ -203,14 +203,14 @@ array_set_data(array ar, unsigned int index, void *value)
 array
 array_compact(array ar)
 {
-	void **newptr;
+	gendata *newptr;
 	unsigned int newsize = 1;
 
 	assert(ar != ERROR_ARRAY && ar != NULL && ar->data != NULL);
 
 	for (; newsize < ar->size; newsize *= 2);
 
-	if ((newptr = realloc(ar->data, newsize * sizeof(void *))) == NULL)
+	if ((newptr = realloc(ar->data, newsize * sizeof(gendata))) == NULL)
 		return ERROR_ARRAY;
 
 	ar->data = newptr;
@@ -285,7 +285,7 @@ array_shrink(array ar, int amount)
  * \sa array_remove
  */
 array
-array_add(array ar, void *value)
+array_add(array ar, gendata value)
 {
 	ar = array_grow(ar, 1);
 	if (ar != ERROR_ARRAY) {

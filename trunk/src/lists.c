@@ -42,12 +42,17 @@
 #include "error.h"
 
 /* Hmm... Must have created this in my sleep! */
-int	list_error_ptr;
+const int list_error_ptr;
 
-sll ERROR_SLL = (sll)(void *)&list_error_ptr;
-dll ERROR_DLL = (dll)(void *)&list_error_ptr;
-stack ERROR_STACK = (stack)(void *)&list_error_ptr;
-queue ERROR_QUEUE = (queue)(void *)&list_error_ptr;
+/*
+ * No seriously, we need some constant pointer for defining error values
+ * and allocating memory on the heap for each new type we invent.  This
+ * workaround may seem ugly, but it's the only way to get the desired effect.
+ */
+const sll_c   ERROR_SLL   = (const void * const)&list_error_ptr;
+const dll_c   ERROR_DLL   = (const void * const)&list_error_ptr;
+const stack_c ERROR_STACK = (const void * const)&list_error_ptr;
+const queue_c ERROR_QUEUE = (const void * const)&list_error_ptr;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

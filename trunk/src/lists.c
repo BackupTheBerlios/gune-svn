@@ -42,17 +42,20 @@
 #include "error.h"
 
 /* Hmm... Must have created this in my sleep! */
-const int list_error_ptr;
+int list_error_ptr;
 
 /*
  * No seriously, we need some constant pointer for defining error values
  * and allocating memory on the heap for each new type we invent.  This
  * workaround may seem ugly, but it's the only way to get the desired effect.
+ *
+ * This memory should really be declared `const', but that does not work
+ * when returning them from a function, resulting in lint warnings.
  */
-const sll_t   * const ERROR_SLL   = (const void *)&list_error_ptr;
-const dll_t   * const ERROR_DLL   = (const void *)&list_error_ptr;
-const stack_t * const ERROR_STACK = (const void *)&list_error_ptr;
-const queue_t * const ERROR_QUEUE = (const void *)&list_error_ptr;
+sll_t   * const ERROR_SLL   = (void *)&list_error_ptr;
+dll_t   * const ERROR_DLL   = (void *)&list_error_ptr;
+stack_t * const ERROR_STACK = (void *)&list_error_ptr;
+queue_t * const ERROR_QUEUE = (void *)&list_error_ptr;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -154,7 +154,7 @@ sll_remove_head(sll ll)
  * \sa  sll_append_head dll_prepend_head
  */
 sll
-sll_prepend_head(sll ll, void *data)
+sll_prepend_head(sll ll, gendata data)
 {
 	sll_t *new;
 
@@ -182,7 +182,7 @@ sll_prepend_head(sll ll, void *data)
  * \sa  sll_prepend_head dll_append_head
  */
 sll
-sll_append_head(sll ll, void *data)
+sll_append_head(sll ll, gendata data)
 {
 	sll_t *new;
 
@@ -241,11 +241,11 @@ sll_forward(sll ll, unsigned int nskip)
  *
  * \param ll     The singly linked list to look in.
  *
- * \return A pointer to the data
+ * \return       The data in the list.
  *
  * \sa dll_get_data
  */
-void *
+gendata
 sll_get_data(sll ll)
 {
 	assert(ll != NULL);
@@ -275,7 +275,8 @@ sll_dump(sll ll, char *fmt)
 	}
 
 	for (; ll != NULL; ll = ll->next) {
-		printf(fmt, (int)ll->data);
+		/* Just dump the integer value of the ptr */
+		printf(fmt, ll->data.posnum);
 		printf(" -> ");
 	}
 	printf("NULL\n");
@@ -394,7 +395,7 @@ dll_remove_head(dll ll)
  * \sa  dll_append sll_prepend_head
  */
 dll
-dll_prepend_head(dll ll, void *data)
+dll_prepend_head(dll ll, gendata data)
 {
 	dll_t *new;
 
@@ -432,7 +433,7 @@ dll_prepend_head(dll ll, void *data)
  * \sa  dll_append sll_prepend_head
  */
 dll
-dll_append_head(dll ll, void *data)
+dll_append_head(dll ll, gendata data)
 {
 	dll_t *new;
 
@@ -530,11 +531,11 @@ dll_backward(dll ll, unsigned int nskip)
  *
  * \param ll     The doubly linked list to look in.
  *
- * \return A pointer to the data
+ * \return       The data in the list.
  *
  * \sa sll_get_data
  */
-void *
+gendata
 dll_get_data(dll ll)
 {
 	assert(ll != NULL);
@@ -575,7 +576,8 @@ dll_dump(dll ll, char *fmt)
 			log_entry(WARN_ERROR, "Gune: dll_dump: Linked list is not "
 				  "consistent");
 #endif
-		printf(fmt, (int)ll->data);
+		/* Just dump the integer value of the ptr */
+		printf(fmt, ll->data.posnum);
 		printf(" -> ");
 	}
 	printf("NULL\n");

@@ -44,7 +44,6 @@ extern "C" {
 
 /** Queue implementation */
 typedef struct queue_t {
-	void *data;
 	sll head;
 	sll tail;
 } queue_t, *queue;
@@ -53,9 +52,9 @@ typedef struct queue_t {
 extern queue_t * const ERROR_QUEUE;
 
 queue queue_create(void);
-queue queue_enqueue(queue, void *);
-void *queue_dequeue(queue);
-void *queue_peek(queue);
+queue queue_enqueue(queue, gendata);
+gendata queue_dequeue(queue);
+gendata queue_peek(queue);
 bool queue_is_empty(queue);
 void queue_destroy(queue);
 

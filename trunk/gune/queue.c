@@ -77,7 +77,7 @@ queue_create(void)
  * \return	The queue given as input, or ERROR_QUEUE if out of memory.
  */
 queue
-queue_enqueue(queue q, void *data)
+queue_enqueue(queue q, gendata data)
 {
 	sll new;
 
@@ -110,10 +110,10 @@ queue_enqueue(queue q, void *data)
  *
  * \sa queue_empty, queue_peek
  */
-void *
+gendata
 queue_dequeue(queue q)
 {
-	void *res;
+	gendata res;
 
 	assert(q != ERROR_QUEUE && q != NULL);
 
@@ -147,7 +147,7 @@ queue_dequeue(queue q)
  *
  * \sa queue_empty, queue_dequeue
  */
-void *
+gendata
 queue_peek(queue q)
 {
 	/*

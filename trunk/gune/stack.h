@@ -51,9 +51,9 @@ typedef struct stack_t {
 extern stack_t * const ERROR_STACK;
 
 stack stack_create(void);
-void *stack_pop(stack);
-void *stack_peek(stack);
-void stack_push(stack, void *);
+gendata stack_pop(stack);
+gendata stack_peek(stack);
+void stack_push(stack, gendata);
 bool stack_is_empty(stack);
 void stack_destroy(stack);
 

@@ -40,4 +40,16 @@
 #define false	0
 #define true	(!false)
 
+/** Generic data type to put in lists, stacks etc */
+/*
+ * Note: We can't use the names of C (char, int), so we have to be a little
+ * creative here.
+ */
+typedef union gendata {
+	int		num;		/* Number */
+	unsigned int	posnum;		/* Positive number */
+	char		sym;		/* Symbol */
+	void *		ptr;		/* Pointer */
+} gendata;
+
 #endif /* GUNE_TYPES_H */

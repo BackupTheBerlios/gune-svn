@@ -54,11 +54,11 @@ err_tester(warnlvl wrn)
 void
 stress_test_stack(int num)
 {
-	int i, *x;
+	int i;
+	gendata x;
 	stack s;
 	
-	x = (int *)malloc(sizeof(int));
-	*x = 13;
+	x.num = 13;
 
 	/* Create a new stack */
 	s = stack_create();
@@ -69,7 +69,7 @@ stress_test_stack(int num)
 		stack_push(s, x);
 	printf("Emptying stack of %d items...\n", num);
 	for (i = 0; i < num; ++i)
-		*x = *(int *)stack_pop(s);
+		x = stack_pop(s);
 
 	assert(stack_is_empty(s) == true);
 
@@ -81,7 +81,6 @@ stress_test_stack(int num)
 
 	/* ...and free it */
 	stack_destroy(s);
-	free(x);
 }
 
 

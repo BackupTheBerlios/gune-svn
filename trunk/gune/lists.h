@@ -43,7 +43,7 @@ extern "C" {
 
 /** Singly linked list implementation */
 typedef struct sll_t {
-	void *data;
+	gendata data;
 	struct sll_t *next;
 } sll_t, *sll;
 
@@ -58,11 +58,11 @@ bool sll_is_empty(sll);
 
 /* SLL exceptions for head */
 sll sll_remove_head(sll);
-sll sll_prepend_head(sll, void *);
-sll sll_append_head(sll, void *);
+sll sll_prepend_head(sll, gendata);
+sll sll_append_head(sll, gendata);
 
 /* Accessor functions */
-void *sll_get_data(sll);
+gendata sll_get_data(sll);
 sll sll_forward(sll, unsigned int);
 
 #ifdef DEBUG
@@ -71,7 +71,7 @@ void sll_dump(sll, char *);
 
 /** Doubly linked list implementation */
 typedef struct dll_t {
-	void *data;
+	gendata data;
 	struct dll_t *prev;
 	struct dll_t *next;
 } dll_t, *dll;
@@ -87,11 +87,11 @@ bool dll_is_empty(dll);
 
 /* DLL exceptions for head */
 dll dll_remove_head(dll);
-dll dll_prepend_head(dll, void *);
-dll dll_append_head(dll, void *);
+dll dll_prepend_head(dll, gendata);
+dll dll_append_head(dll, gendata);
 
 /* Accessor functions */
-void *dll_get_data(dll);
+gendata dll_get_data(dll);
 dll dll_forward(dll, unsigned int);
 dll dll_backward(dll, unsigned int);
 

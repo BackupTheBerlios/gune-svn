@@ -76,10 +76,10 @@ stack_create(void)
  *
  * \sa stack_peek, stack_push
  */
-void *
+gendata
 stack_pop(stack s)
 {
-	void *res;
+	gendata res;
 
 	assert(s != ERROR_STACK && s != NULL);
 	assert(s->top != ERROR_SLL);
@@ -104,7 +104,7 @@ stack_pop(stack s)
  *
  * \sa stack_pop
  */
-void *
+gendata
 stack_peek(stack s)
 {
 	assert(s != ERROR_STACK && s != NULL);
@@ -135,7 +135,7 @@ stack_peek(stack s)
  * \sa stack_pop
  */
 void
-stack_push(stack s, void *data)
+stack_push(stack s, gendata data)
 {
 	/* XXX Must be able to signal an error if sll_prepend_head dies. */
 

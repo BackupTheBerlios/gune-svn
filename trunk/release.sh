@@ -31,8 +31,8 @@ usage ()
 	echo "Options:"
 	echo "-r   Make release tarball"
 	echo "-t   Create a tag in subversion"
-	echo "-v   Bump minor version number"
-	echo "-V   Bump major version number"
+	echo "-v   Bump minor version number (and update header)"
+	echo "-V   Bump major version number (and update header)"
 	echo "-H   Update header files to reflect shlib_version"
 	echo "-h   Show this help"
 	echo "-p   Print version numbers and repos"
@@ -59,7 +59,7 @@ bumpmajor ()
 {
 	getversion
 	NEWMAJOR=`${EXPR} ${MAJOR} + 1`
-	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
+	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMINOR}/;minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
 	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
 }
 
@@ -138,8 +138,8 @@ do
 	case "${opt}" in
 		t) createtag ;;
 		r) maketar ;;
-		v) bumpminor ;;
-		V) bumpmajor ;;
+		v) bumpminor; updateheader ;;
+		V) bumpmajor; updateheader ;;
 		H) updateheader ;;
 		p) printinfo ;;
 		h) usage; exit ;;

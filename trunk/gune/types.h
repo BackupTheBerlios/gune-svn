@@ -38,17 +38,17 @@
 /** Boolean implementation */
 /* Some other packages may define bool themselves. */
 #ifdef bool
-#undefine bool
+#undef bool
 #endif
 #define bool	int
 
 #ifdef false
-#undefine false
+#undef false
 #endif
 #define false	0
 
 #ifdef true
-#undefine true
+#undef true
 #endif
 #define true	(!false)
 

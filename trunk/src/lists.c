@@ -80,7 +80,7 @@ sll_create(void)
 void
 sll_destroy(sll ll)
 {
-	assert(ll != ERROR_SLL && ll != NULL);
+	assert(ll != ERROR_SLL);
 
 	while (!sll_is_empty(ll))
 		ll = sll_remove_head(ll);
@@ -101,7 +101,7 @@ sll_count(sll ll)
 {
 	int count;
 
-	assert(ll != ERROR_SLL && ll != NULL);
+	assert(ll != ERROR_SLL);
 
 	for (count = 0; ll != NULL; ++count, ll = ll->next)
 		continue;
@@ -121,6 +121,8 @@ sll_count(sll ll)
 bool
 sll_is_empty(sll ll)
 {
+	assert(ll != ERROR_SLL);
+
 	return ll == NULL;
 }
 
@@ -137,9 +139,16 @@ sll_is_empty(sll ll)
 sll
 sll_remove_head(sll ll)
 {
-	sll begin = ll;
+	sll begin;
+	
+	assert(ll != NULL);
+	assert(ll != ERROR_SLL);
 
+	/* Move the ll pointer to the next element */
+	begin = ll;
 	ll = ll->next;
+
+	/* Free up used space by the head element */
 	free(begin);
 	return ll;
 }
@@ -159,6 +168,8 @@ sll
 sll_prepend_head(sll ll, void *data)
 {
 	sll_t *new;
+
+	assert(ll != ERROR_SLL);
 
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(sll_t))) == NULL)
@@ -186,11 +197,16 @@ sll_append_head(sll ll, void *data)
 {
 	sll_t *new;
 
+	assert(ll != ERROR_SLL);
+
 	/* Allocate the new element */
 	if ((new = malloc(sizeof(sll_t))) == NULL)
 		return (sll)ERROR_SLL;
 	new->data = data;
-	new->next = ll->next;
+	if (ll != NULL)
+		new->next = ll->next;
+	else
+		new->next = NULL;
 
 	/* Append at the current list */
 	ll->next = new;
@@ -214,9 +230,14 @@ sll_forward(sll ll, unsigned int nskip)
 {
 	int i;
 
-	assert(ll != ERROR_SLL && ll != NULL);
+	assert(ll != NULL);
+	assert(ll != ERROR_SLL);
 
 	for (i = 0; i < nskip; ++i) {
+		/*
+		 * XXX: Maybe instead of this, we should do something with
+		 *      bounds checking...
+		 */
 		if (ll == NULL)
 			return (sll)ERROR_SLL;
 		ll = ll->next;
@@ -238,7 +259,8 @@ sll_forward(sll ll, unsigned int nskip)
 void *
 sll_get_data(sll ll)
 {
-	assert(ll != ERROR_SLL && ll != NULL);
+	assert(ll != NULL);
+	assert(ll != ERROR_SLL);
 
 	return ll->data;
 }
@@ -258,6 +280,11 @@ sll_get_data(sll ll)
 void
 sll_dump(sll ll, char *fmt)
 {
+	if (ll == ERROR_SLL) {
+		printf("ERROR_SLL\n");
+		return;
+	}
+
 	for (; ll != NULL; ll = ll->next) {
 		printf(fmt, (int)ll->data);
 		printf(" -> ");
@@ -291,6 +318,8 @@ dll_create(void)
 void
 dll_destroy(dll ll)
 {
+	assert(ll != ERROR_DLL);
+
 	while (!dll_is_empty(ll))
 		ll = dll_remove_head(ll);
 }
@@ -309,6 +338,9 @@ unsigned int
 dll_count(dll ll)
 {
 	int count;
+
+	assert(ll != ERROR_DLL);
+
 	for (count = 0; ll != NULL; ++count, ll = ll->next)
 		continue;
 	return count;
@@ -327,6 +359,8 @@ dll_count(dll ll)
 bool
 dll_is_empty(dll ll)
 {
+	assert(ll != ERROR_DLL);
+
 	return ll == NULL;
 }
 
@@ -343,10 +377,17 @@ dll_is_empty(dll ll)
 dll
 dll_remove_head(dll ll)
 {
-	dll begin = ll;
+	dll begin;
+	
+	assert(ll != NULL);
+	assert(ll != ERROR_DLL);
 
+	/* Move the ll pointer to the next element */
+	begin = ll;
 	ll = ll->next;
 	ll->prev = NULL;
+
+	/* Free up used space by the head element */
 	free(begin);
 	return ll;
 }
@@ -368,12 +409,25 @@ dll_prepend_head(dll ll, void *data)
 {
 	dll_t *new;
 
+	assert(ll != ERROR_DLL);
+
+	/* Allocate the new element */
 	if ((new = malloc(sizeof(dll_t))) == NULL)
-		return NULL;
+		return (dll)ERROR_DLL;
 	new->data = data;
 	new->next = ll;
-	new->prev = ll->prev;
-	ll->prev = new;
+
+	/* Prepend to the current list */
+	/* XXX: Test this on boundary values! */
+	if (ll != NULL) {
+		new->prev = ll->prev;
+		ll->prev = new;
+
+		if (new->prev != NULL)
+			new->prev->next = new;
+	} else {
+		new->prev = NULL;
+	}
 	return (dll)new;
 }
 
@@ -393,13 +447,25 @@ dll_append_head(dll ll, void *data)
 {
 	dll_t *new;
 
+	assert(ll != ERROR_DLL);
+
 	if ((new = malloc(sizeof(dll_t))) == NULL)
-		return NULL;
+		return (dll)ERROR_DLL;
 	new->data = data;
-	new->next = ll->next;
-	new->next->prev = new;
 	new->prev = ll;
-	ll->next = new;
+
+	/* XXX: Test this on boundary values! */
+	if (ll != NULL) {
+		new->next = ll->next;
+		new->prev = ll;
+		ll->next = new;
+
+		if (new->next != NULL)
+			new->next->prev = new;
+	} else {
+		new->next = NULL;
+	}
+
 	return ll;
 }
 
@@ -420,9 +486,14 @@ dll_forward(dll ll, unsigned int nskip)
 {
 	int i;
 
-	assert(ll != ERROR_DLL && ll != NULL);
+	assert(ll != NULL);
+	assert(ll != ERROR_DLL);
 
 	for (i = 0; i < nskip; ++i) {
+		/*
+		 * XXX: Maybe instead of this, we should do something with
+		 *      bounds checking...
+		 */
 		if (ll == NULL)
 			return (dll)ERROR_DLL;
 		ll = ll->next;
@@ -448,9 +519,14 @@ dll_backward(dll ll, unsigned int nskip)
 {
 	int i;
 
-	assert(ll != ERROR_DLL && ll != NULL);
+	assert(ll != NULL);
+	assert(ll != ERROR_DLL);
 
 	for (i = 0; i < nskip; ++i) {
+		/*
+		 * XXX: Maybe instead of this, we should do something with
+		 *      bounds checking...
+		 */
 		if (ll == NULL)
 			return (dll)ERROR_DLL;
 		ll = ll->prev;
@@ -472,7 +548,8 @@ dll_backward(dll ll, unsigned int nskip)
 void *
 dll_get_data(dll ll)
 {
-	assert(ll != ERROR_DLL && ll != NULL);
+	assert(ll != NULL);
+	assert(ll != ERROR_DLL);
 
 	return ll->data;
 }
@@ -492,6 +569,11 @@ dll_get_data(dll ll)
 void
 dll_dump(dll ll, char *fmt)
 {
+	if (ll == ERROR_DLL) {
+		printf("ERROR_DLL\n");
+		return;
+	}
+
 #ifdef BOUNDS_CHECKING
 	if (ll->prev != NULL)
 		fprintf(stderr, "Gune: dll_dump: First element of doubly "

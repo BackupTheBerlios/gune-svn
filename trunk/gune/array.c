@@ -1,7 +1,7 @@
 /*
  * $Id$
  *
- * Copyright (c) 2003-2004 Peter Bex and Vincent Driessen
+ * Copyright (c) 2004 Peter Bex and Vincent Driessen
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,32 +29,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Error logging provisions
+/**
+ * \file array.c
+ * Array implementation
  */
-#ifndef GUNE_ERROR_H
-#define GUNE_ERROR_H
-
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/** The possible warning levels a log message can have */
-typedef enum {
-	WARN_DEBUG,
-	WARN_NOTIFY,
-	WARN_WARNING,
-	WARN_ERROR,
-	NUM_WARNLVLS
-} warnlvl;
-
-void set_logfile(FILE *);
-int log_entry(warnlvl, char *, ...);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* GUNE_ERROR_H */
+#include <gune/types.h>
+#include <gune/error.h>

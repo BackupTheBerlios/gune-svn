@@ -35,7 +35,7 @@
 #ifndef GUNE_LISTS_H
 #define GUNE_LISTS_H
 
-#include "types.h"
+#include <gune/types.h>
 
 #ifdef __cplusplus
 extern "C" {

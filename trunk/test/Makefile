@@ -5,7 +5,9 @@
 #
 
 PROG=	test
+SRCS=	test.c
 MAN=
-LDADD=	-L../src -R../src -lgune
+CFLAGS+=-I..
+LDADD=	-L../gune -R../gune -lgune
 
 .include <bsd.prog.mk>

@@ -29,58 +29,78 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * \file string.c
- * String manipulation
+/*
+ * Linked lists
  */
+#ifndef GUNE_LISTS_H
+#define GUNE_LISTS_H
 
-#include <stdlib.h>
-#include <string.h>
+#include <gune/types.h>
 
-#include "string.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/** Singly linked list implementation */
+typedef struct sll_t {
+	void *data;
+	struct sll_t *next;
+} sll_t, *sll;
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/** Invalid linked list, used as error return value */
+extern sll_t * const ERROR_SLL;
 
+/* SLL creation/deletion functions */
+sll sll_create(void);
+void sll_destroy(sll);
+unsigned int sll_count(sll);
+bool sll_is_empty(sll);
 
-/**
- * Concatenate two strings in a newly allocated string.
- * Original strings are left intact and a new string is malloc()ed.
- *
- * \param a  The first part of the new string.
- * \param b  The second part of the new string.
- *
- * \return  If all went right, a pointer to the newly allocated string.
- *          Otherwise, NULL.
- */
-char *
-str_cat(const char *a, const char *b)
-{
-	size_t l;
-	char *x;
+/* SLL exceptions for head */
+sll sll_remove_head(sll);
+sll sll_prepend_head(sll, void *);
+sll sll_append_head(sll, void *);
 
-	if ((x = malloc(strlen(a) + strlen(b) + 1)) == NULL)
-		return NULL;
-	l = strlen(a);
-	memcpy(x, a, l);
-	strcpy(x + l, b);
-	return x;
+/* Accessor functions */
+void *sll_get_data(sll);
+sll sll_forward(sll, unsigned int);
+
+#ifdef DEBUG
+void sll_dump(sll, char *);
+#endif
+
+/** Doubly linked list implementation */
+typedef struct dll_t {
+	void *data;
+	struct dll_t *prev;
+	struct dll_t *next;
+} dll_t, *dll;
+
+/** Invalid linked list, used as error return value */
+extern dll_t * const ERROR_DLL;
+
+/* DLL creation/deletion functions */
+dll dll_create(void);
+void dll_destroy(dll);
+unsigned int dll_count(dll);
+bool dll_is_empty(dll);
+
+/* DLL exceptions for head */
+dll dll_remove_head(dll);
+dll dll_prepend_head(dll, void *);
+dll dll_append_head(dll, void *);
+
+/* Accessor functions */
+void *dll_get_data(dll);
+dll dll_forward(dll, unsigned int);
+dll dll_backward(dll, unsigned int);
+
+#ifdef DEBUG
+void dll_dump(dll, char *);
+#endif
+
+#ifdef __cplusplus
 }
+#endif
 
-
-/**
- * Copy a string, allocating memory for the new string.
- *
- * \param s  The string to copy.
- *
- * \return   The copy of the original string, or NULL if out of memory.
- */
-char *
-str_cpy(const char *s)
-{
-	char *x;
-
-	if ((x = malloc(strlen(s) + 1)) == NULL)
-		return NULL;
-	return strcpy(x, s);
-}
+#endif /* GUNE_LISTS_H */

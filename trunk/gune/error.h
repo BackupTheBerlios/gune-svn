@@ -29,16 +29,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GUNE_GUNE_H
-#define GUNE_GUNE_H
+/*
+ * Error logging provisions
+ */
+#ifndef GUNE_ERROR_H
+#define GUNE_ERROR_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#include "error.h"
-#include "lists.h"
-#include "string.h"
-#include "types.h"
+/** The possible warning levels a log message can have */
+typedef enum {
+	WARN_DEBUG,
+	WARN_NOTIFY,
+	WARN_WARNING,
+	WARN_ERROR,
+	NUM_WARNLVLS
+} warnlvl;
 
-#endif /* GUNE_GUNE_H */
+void set_logfile(FILE *);
+int log_entry(warnlvl, char *, ...);
+
+void error_dummy_func(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* GUNE_ERROR_H */

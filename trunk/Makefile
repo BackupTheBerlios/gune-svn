@@ -6,6 +6,6 @@
 #  as BSD Makefile structure is extremely elegant.
 #
 
-SUBDIR=		src test
+SUBDIR=		gune test
 
 .include <bsd.subdir.mk>

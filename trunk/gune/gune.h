@@ -29,77 +29,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * \file error.c
- * Provisions for error reporting
- */
+#ifndef GUNE_GUNE_H
+#define GUNE_GUNE_H
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include "types.h"
-#include "error.h"
+#include <gune/error.h>
+#include <gune/string.h>
+#include <gune/types.h>
+#include <gune/lists.h>
+#include <gune/stack.h>
+#include <gune/queue.h>
+#include <gune/array.h>
 
-static FILE *logfile = stderr;
-
-/**
- * Description strings for the different warning levels
- *
- * \sa warnlvl
- */
-static const char *warnlvl_descr[NUM_WARNLVLS] = {
-	"DEBUG",
-	"Note",
-	"Warning",
-	"Critical error",
-};
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/**
- * Specify which file is used to send log messages to. Defaults to stderr.
- *
- * \param log  The log file to write to.  If this is NULL, nothing is changed.
- *
- * \sa log_entry
- */
-void
-set_logfile(FILE *log)
-{
-	if (log != NULL)
-		logfile = log;
-}
-
-
-/**
- * Write a message of the specified level to the log file.
- * The default logfile is standard error (stderr).
- * This function does not return in case of an WARN_ERROR
- * it exit()s with an exit status of 1.
- *
- * \param lvl  The warning level of the log message.
- * \param msg  The message to log (no carriage return needed).
- *
- * \return 0 if everything went allright, -1 if an error occurred.
- *
- * \sa warnlvl set_logfile
- */
-int
-log_entry(warnlvl lvl, char *msg, ...)
-{
-	int ret = 0;
-	va_list ap;
-	va_start(ap, msg);
-
-	if (fprintf(logfile, warnlvl_descr[lvl]) == -1 ||
-	  fprintf(logfile, ": ") == -1 || vfprintf(logfile, msg, ap) == -1 ||
-	  fprintf(logfile, "\n") == -1)
-		ret = -1;
-
-	va_end(ap);
-
-	/* Quit if the warning level is an error */
-	if (lvl >= WARN_ERROR)
-		exit(1);
-
-	return ret;
-}
+#endif /* GUNE_GUNE_H */

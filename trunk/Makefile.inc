@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.inc,v 1.1 2004/03/16 23:44:40 airhead Exp $
+# $Id$
 #
 # Globally included Makefile for Gune.  Contains user configuration.
 #

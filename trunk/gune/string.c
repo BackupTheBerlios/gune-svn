@@ -145,20 +145,17 @@ str_hash(gendata key, unsigned int range)
 
 
 /**
- * String comparison function for hash tables.  Simply a wrapper for strcmp(3),
- *  to pick the ptr from gendata.
+ * String comparison function for hash tables.
  *
  * \param s1  The string to compare to s2.
  * \param s2  The string to compare to s1.
  *
- * \return  An integer greater than, equal to, or less than 0, according to
- *	      whether s1 is greater than, equal to, or less than s2.  Exact
- *	      values depend on your C library's strcmp implementation.
+ * \return  0 if the string is not equal, 1 if it is equal.
  *
  * \sa str_hash
  */
 int
 str_eq(gendata s1, gendata s2)
 {
-	return strcmp(s1.ptr, s2.ptr);
+	return !strcmp(s1.ptr, s2.ptr);
 }

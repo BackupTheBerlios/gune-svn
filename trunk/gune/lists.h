@@ -70,6 +70,10 @@ void sll_dump(sll, const char *);
 /** Quick macro to go forward one item in the list */
 #define sll_next(l)	(sll_forward((l), 1))
 
+/* Convenience functions */
+sll sll_append(sll, sll);
+sll sll_prepend(sll, sll);
+
 
 /** \brief Doubly linked list implementation */
 typedef struct dll_t {
@@ -100,6 +104,10 @@ void dll_dump(dll, const char *);
 #define dll_next(l)	(dll_forward((l), 1))
 /** Quick macro to go backward one item in the list */
 #define dll_prev(l)	(dll_backward((l), 1))
+
+/* Convenience functions */
+dll dll_append(dll, dll);
+dll dll_prepend(dll, dll);
 
 #ifdef __cplusplus
 }

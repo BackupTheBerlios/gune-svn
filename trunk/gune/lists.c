@@ -220,7 +220,7 @@ sll_remove_next(sll ll, free_func f)
  * \par Errno values:
  * - \b ENOMEM if out of memory.
  *
- * \sa  sll_append_head, dll_prepend_head
+ * \sa  sll_append_head dll_prepend_head sll_prepend
  */
 sll
 sll_prepend_head(sll ll, gendata data)
@@ -254,7 +254,7 @@ sll_prepend_head(sll ll, gendata data)
  * \par Errno values:
  * - \b ENOMEM if out of memory.
  *
- * \sa  sll_prepend_head dll_append_head
+ * \sa  sll_prepend_head dll_append_head sll_append
  */
 sll
 sll_append_head(sll ll, gendata data)
@@ -384,6 +384,63 @@ sll_dump(sll ll, const char *fmt)
 		printf(" -> ");
 	}
 	printf("(EOL)\n");
+}
+
+
+/**
+ * \brief Append a singly linked list to another singly linked list.
+ *
+ * \note
+ * This function is \f$ O(n) \f$ with \f$ n \f$ the length of \p base.
+ *
+ * \param base  The singly linked list to extend.
+ * \param rest  The singly linked list to append to \p base.
+ *
+ * \return  The \p base list.
+ *
+ * \sa dll_append sll_prepend sll_append_head
+ */
+sll
+sll_append(sll base, sll rest)
+{
+	sll ll;
+
+	assert(base != NULL);
+	assert(rest != NULL);
+
+	/* If base is empty, there is no base->next */
+	if (sll_empty(base))
+		return rest;
+
+	/* Optimisation:  Don't walk the list if rest is empty. */
+	if (sll_empty(rest))
+		return base;
+
+	for (ll = base; !sll_empty(ll->next); ll = ll->next);
+
+	ll->next = rest;
+
+	return base;
+}
+
+
+/**
+ * \brief Prepend a singly linked list to another singly linked list.
+ *
+ * \note
+ * This function is \f$ O(n) \f$ with \f$ n \f$ the length of \p rest.
+ *
+ * \param base  The singly linked list to extend.
+ * \param rest  The singly linked list to prepend to \p base.
+ *
+ * \return  The \p rest list.
+ *
+ * \sa dll_prepend sll_append sll_prepend_head
+ */
+sll
+sll_prepend(sll base, sll rest)
+{
+	return sll_append(rest, base);
 }
 
 
@@ -523,7 +580,7 @@ dll_remove_head(dll ll, free_func f)
  * \par Errno values:
  * - \b ENOMEM if out of memory.
  *
- * \sa  dll_append_head sll_prepend_head
+ * \sa  dll_append_head sll_prepend_head dll_prepend
  */
 dll
 dll_prepend_head(dll ll, gendata data)
@@ -564,7 +621,7 @@ dll_prepend_head(dll ll, gendata data)
  * \par Errno values:
  * - \b ENOMEM if out of memory.
  *
- * \sa  sll_append_head dll_prepend_head
+ * \sa  sll_append_head dll_prepend_head dll_append
  */
 dll
 dll_append_head(dll ll, gendata data)
@@ -740,4 +797,77 @@ dll_dump(dll ll, const char *fmt)
 		printf(" -> ");
 	}
 	printf("(EOL)\n");
+}
+
+
+/**
+ * \brief Append a doubly linked list to another doubly linked list.
+ *
+ * \note
+ * This function is \f$ O(n) \f$ with \f$ n \f$ the length of \p base.
+ *
+ * \attention
+ * The \p rest list must be the absolute head of a list. (ie, \p rest may
+ *  not have a previous element).
+ *
+ * \param base  The doubly linked list to extend.
+ * \param rest  The doubly linked list to append to \p base.
+ *
+ * \return  The \p base list, or \c NULL in case of error.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the \p rest list has a non-empty previous element.
+ *
+ * \sa sll_append dll_prepend dll_append_head
+ */
+dll
+dll_append(dll base, dll rest)
+{
+	dll ll;
+
+	assert(base != NULL);
+	assert(rest != NULL);
+
+	if (!dll_empty(rest->prev)) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	/* If base is empty, there is no base->next */
+	if (dll_empty(base))
+		return rest;
+
+	/* Optimisation:  Don't walk the list if rest is empty. */
+	if (dll_empty(rest))
+		return base;
+
+	for (ll = base; !dll_empty(ll->next); ll = ll->next);
+
+	ll->next = rest;
+	rest->prev = ll;
+
+	return base;
+}
+
+
+/**
+ * \brief Prepend a doubly linked list to another doubly linked list.
+ *
+ * \note
+ * This function is \f$ O(n) \f$ with \f$ n \f$ the length of \p rest.
+ *
+ * \param base  The doubly linked list to extend.
+ * \param rest  The doubly linked list to prepend to \p base.
+ *
+ * \return  The \p rest list, or \c NULL in case of error.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the \p rest list has a non-empty previous element.
+ *
+ * \sa sll_prepend dll_append dll_prepend_head
+ */
+dll
+dll_prepend(dll base, dll rest)
+{
+	return dll_append(rest, base);
 }

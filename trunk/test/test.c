@@ -196,86 +196,110 @@ stress_test_array(int amt)
 void
 stress_test_sll(int amt)
 {
-	sll l;
+	sll l1;
+	sll l2;
 	gendata x, y;
 	int i;
 
-	l = sll_create();
-	printf("Filling a sll with 2 * %d items...\n", amt);
+	l1 = sll_create();
+	l2 = sll_create();
+	assert(sll_empty(l1));
+	assert(sll_empty(l2));
+	printf("Filling two slls with 2 * %d items...\n", amt);
 	for (i = 0; i < amt; ++i) {
 		x.num = i;
-		l = sll_prepend_head(l, x);
-		assert(!sll_empty(l));
-		l = sll_append_head(l, x);
-		assert(!sll_empty(l));
+		l1 = sll_prepend_head(l1, x);
+		l2 = sll_prepend_head(l2, x);
+		assert(!sll_empty(l1));
+		assert(!sll_empty(l2));
+		l1 = sll_append_head(l1, x);
+		l2 = sll_append_head(l2, x);
+		assert(!sll_empty(l1));
+		assert(!sll_empty(l2));
 	}
-	assert(sll_count(l) == (unsigned int)(2 * amt));
+	assert(sll_count(l1) == (unsigned int)(2 * amt));
+	assert(sll_count(l2) == (unsigned int)(2 * amt));
 
-	printf("Removing 2 * %d items from the sll...\n", amt);
-	for (i = 0; i < amt; ++i) {
-		x = sll_get_data(sll_next(l));
-		assert(!sll_empty(l));
-		l = sll_remove_next(l, NULL);
-		y = sll_get_data(l);
-		assert(!sll_empty(l));
-		l = sll_remove_head(l, NULL);
+	l1 = sll_append(l1, l2);
+	assert(sll_count(l1) == (unsigned int)(4 * amt));
+
+	/* From now on, l2 is `invalid' */
+
+	printf("Removing 2 * 2 * %d items from the appended sll...\n", amt);
+	for (i = 0; i < (2 * amt); ++i) {
+		x = sll_get_data(sll_next(l1));
+		assert(!sll_empty(l1));
+		l1 = sll_remove_next(l1, NULL);
+		y = sll_get_data(l1);
+		assert(!sll_empty(l1));
+		l1 = sll_remove_head(l1, NULL);
 
 		/*
 		 * We have to count backwards in this check, since we're
 		 * using the list like a stack, prepending all the time.
 		 */
-		assert(x.num == amt - i - 1);
+		assert(x.num == amt - (i % amt) - 1);
 		assert(x.num == y.num);
 	}
-	assert(sll_empty(l));
-	sll_destroy(l, NULL);
+	assert(sll_empty(l1));
+	sll_destroy(l1, NULL);
 }
 
 
 void
 stress_test_dll(int amt)
 {
-	dll l;
+	dll l1;
+	dll l2;
 	gendata x, y;
 	int i;
 
-	l = dll_create();
-	assert(dll_empty(l));
+	l1 = dll_create();
+	l2 = dll_create();
+	assert(dll_empty(l1));
+	assert(dll_empty(l2));
 
-	printf("Filling a dll with 2 * %d items...\n", amt);
+	printf("Filling two dlls with 2 * %d items...\n", amt);
 	for (i = 0; i < amt; ++i) {
 		x.num = i;
-		l = dll_prepend_head(l, x);
-		assert(!dll_empty(l));
-		l = dll_append_head(l, x);
-		assert(!dll_empty(l));
+		l1 = dll_prepend_head(l1, x);
+		l2 = dll_prepend_head(l2, x);
+		assert(!dll_empty(l1));
+		assert(!dll_empty(l2));
+		l1 = dll_append_head(l1, x);
+		l2 = dll_append_head(l2, x);
+		assert(!dll_empty(l1));
+		assert(!dll_empty(l2));
 	}
 
 	/* Do some funky inserting at a `random' position. */
-	dll_append_head(dll_forward(l, 1), x);
-	/* assert(x.num == dll_get_data(dll_forward(l, 1)).num); */
-	dll_remove_head(dll_forward(l, 2), NULL);
+	dll_append_head(dll_forward(l1, 1), x);
+	assert(x.num == dll_get_data(dll_forward(l1, 1)).num);
+	dll_remove_head(dll_forward(l1, 2), NULL);
 
-	assert(dll_count(l) == (unsigned int)(2 * amt));
+	l1 = dll_append(l1, l2);
+	assert(dll_count(l1) == (unsigned int)(4 * amt));
 
-	printf("Removing 2 * %d items from the dll...\n", amt);
-	for (i = 0; i < amt; ++i) {
-		assert(!dll_empty(l));
-		x = dll_get_data(l);
-		l = dll_remove_head(l, NULL);
-		assert(!dll_empty(l));
-		y = dll_get_data(l);
-		l = dll_remove_head(l, NULL);
+	/* From now on, l2 is `invalid' */
+
+	printf("Removing 2 * 2 * %d items from the appended dll...\n", amt);
+	for (i = 0; i < (2 * amt); ++i) {
+		assert(!dll_empty(l1));
+		x = dll_get_data(l1);
+		l1 = dll_remove_head(l1, NULL);
+		assert(!dll_empty(l1));
+		y = dll_get_data(l1);
+		l1 = dll_remove_head(l1, NULL);
 
 		/*
 		 * We have to count backwards in this check, since we're
 		 * using the list like a stack, prepending all the time.
 		 */
-		assert(x.num == amt - i - 1);
+		assert(x.num == amt - (i % amt) - 1);
 		assert(x.num == y.num);
 	}
-	assert(dll_empty(l));
-	dll_destroy(l, NULL);
+	assert(dll_empty(l1));
+	dll_destroy(l1, NULL);
 }
 
 

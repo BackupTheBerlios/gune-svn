@@ -128,6 +128,7 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
 	for (al = t->buckets; al < (t->buckets + t->range); ++al)
 		alist_destroy(*al, key_free, value_free);
 
+	free(t->buckets);
 	free(t);
 }
 

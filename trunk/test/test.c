@@ -37,6 +37,7 @@
 
 #define DEFNUM			100
 #define DEFLOOPCOUNT		10
+#define COMPACTISE_MODULO	7
 
 void
 strcat_tester(char *s)
@@ -54,7 +55,99 @@ err_tester(warnlvl wrn)
 }
 
 
-void stress_test_dll(int amt)
+void
+stress_test_array(int amt)
+{
+	array arr; /* matey! */
+	gendata x;
+	int i;
+
+	arr = array_create();
+	assert(array_size(arr) == 0);
+
+	printf("Adding %d items to an array...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
+		arr = array_add(arr, x);
+		assert(x.num == array_get_data(arr, (unsigned int)i).num);
+		assert(array_size(arr) == (unsigned int)(i + 1));
+	}
+
+	printf("Shrinking an array of %d items...\n", amt);
+	for (i = amt - 1; i >= 0; --i) {
+		assert(array_get_data(arr, (unsigned int)i).num == i);
+		arr = array_remove(arr);
+		assert(array_size(arr) == (unsigned int)i);
+	}
+
+	printf("Filling a pre-grown array of %d items...\n", amt);
+	array_grow(arr, amt);
+	assert(array_size(arr) == (unsigned int)amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
+		arr = array_set_data(arr, (unsigned int)i, x);
+		assert(x.num == array_get_data(arr, (unsigned int)i).num);
+	}
+
+	printf("Shrinking an array of %d items...\n", amt);
+	for (i = amt - 1; i >= 0; --i) {
+		assert(array_get_data(arr, (unsigned int)i).num == i);
+		arr = array_shrink(arr, 1);
+
+		assert(array_size(arr) == (unsigned int)i);
+		/* Compactise at funky points */
+		if ((i % COMPACTISE_MODULO) == 0) {
+			arr = array_compact(arr);
+			/* Compactising should not change size */
+			assert(array_size(arr) == (unsigned int)i);
+		}
+	}
+
+	array_destroy(arr, NULL);
+}
+
+
+void
+stress_test_sll(int amt)
+{
+	sll l;
+	gendata x, y;
+	int i;
+
+	l = sll_create();
+	printf("Filling a sll with 2 * %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
+		l = sll_prepend_head(l, x);
+		assert(!sll_empty(l));
+		l = sll_append_head(l, x);
+		assert(!sll_empty(l));
+	}
+	assert(sll_count(l) == (unsigned int)(2 * amt));
+
+	printf("Removing 2 * %d items from the sll...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x = sll_get_data(sll_next(l));
+		assert(!sll_empty(l));
+		l = sll_remove_next(l, NULL);
+		y = sll_get_data(l);
+		assert(!sll_empty(l));
+		l = sll_remove_head(l, NULL);
+
+		/*
+		 * We have to count backwards in this check, since we're
+		 * using the list like a stack, prepending all the time.
+		 */
+		assert(x.num == amt - i - 1);
+		assert(x.num == y.num);
+	}
+	assert(sll_empty(l));
+	sll_destroy(l, NULL);
+}
+
+
+void
+stress_test_dll(int amt)
 {
 	dll l;
 	gendata x, y;
@@ -96,6 +189,7 @@ void stress_test_dll(int amt)
 		assert(x.num == y.num);
 	}
 	assert(dll_empty(l));
+	dll_destroy(l, NULL);
 }
 
 
@@ -142,7 +236,8 @@ stress_test_stack(int amt)
 }
 
 
-void stress_test_queue(int amt)
+void
+stress_test_queue(int amt)
 {
 	int i;
 	queue q;
@@ -167,19 +262,30 @@ void stress_test_queue(int amt)
 		assert(x.num == i);
 	}
 	assert(queue_empty(q));
+
+	printf("Re-enqueueing a queue with %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = i;
+		q = queue_enqueue(q, x);
+		assert(!queue_empty(q));
+	}
+	printf("Destroying a queue with %d items...\n", amt);
+	queue_destroy(q, NULL);
 }
 
 
 void
 usage(void)
 {
-	printf("usage: test [-n num] [-l log] -s amt | -e lvl | "
-		"-d amt -q amt -a\n");
+	printf("usage: test [-a] [-n num] [-l log] [-s amt | -e lvl | "
+		"-d amt | -q amt | -r amt | -S amt]\n");
 	printf("-n num	Perform selected tests `num' times. Default is 10.\n");
 	printf("-a      Perform every test, using %i for `amt'\n", DEFNUM);
 	printf("-s amt	Do a stack stress test on `amt' stack items.\n");
 	printf("-d amt  Do a Doubly Linked List (dll) stress test.\n");
 	printf("-q amt  Do a queue stress test.\n");
+	printf("-r amt  Do an array stress test.\n");
+	printf("-S amt  Do a Singly Linked List (sll) stress test.\n");
 	printf("-e lvl  Print an error on the specified level (0-3).\n");
 	printf("-l log  Use log as a file to write messages to.\n");
 	printf("-c str  Test string copy routines.\n");
@@ -194,8 +300,8 @@ main(int argc, char **argv)
 	char *str = NULL;
 	int ch;
 	extern char *malloc_options;
-	int i, loop, stack_test, queue_test, dll_test, err_test;
-	int strcat_test, idle;
+	int i, loop, stack_test, queue_test, dll_test, sll_test, err_test;
+	int strcat_test, array_test, idle;
 
 	warnlvl wrn = WARN_NOTIFY;
 
@@ -208,11 +314,8 @@ main(int argc, char **argv)
 	malloc_options = "ZAVX";
 
 	/* Default options */
-	stack_test = 0;
-	dll_test = 0;
-	err_test = 0;
-	strcat_test = 0;
-	queue_test = 0;
+	stack_test = dll_test = err_test = strcat_test = queue_test = 0;
+	array_test = sll_test = 0;
 	loop = DEFLOOPCOUNT;
 	idle = 1;	/* Set idle, unless a test should be run */
 
@@ -221,10 +324,11 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	while ((ch = getopt(argc, argv, "ac:d:e:l:n:q:s:v")) != -1)
+	while ((ch = getopt(argc, argv, "ac:d:e:l:n:q:r:s:S:v")) != -1)
 		switch ((char)ch) {
 			case 'a':
 				dll_test = stack_test = queue_test = DEFNUM;
+				array_test = sll_test = DEFNUM;
 				idle = 0;
 				break;
 			case 'c':
@@ -259,8 +363,16 @@ main(int argc, char **argv)
 				queue_test = atoi(optarg);
 				idle = 0;
 				break;
+			case 'r':
+				array_test = atoi(optarg);
+				idle = 0;
+				break;
 			case 's':
 				stack_test = atoi(optarg);
+				idle = 0;
+				break;
+			case 'S':
+				sll_test = atoi(optarg);
 				idle = 0;
 				break;
 			case 'v':
@@ -295,10 +407,19 @@ main(int argc, char **argv)
 				printf("\n----> QUEUE <----\n");
 				stress_test_queue(queue_test);
 			}
+			if (array_test > 0) {
+				printf("\n----> ARRAY <----\n");
+				stress_test_array(array_test);
+			}
 			if (strcat_test > 0) {
 				printf("\n----> STR_CAT <----\n");
 				strcat_tester(str);
 			}
+			if (sll_test > 0) {
+				printf("\n----> SLL <----\n");
+				stress_test_sll(sll_test);
+			}
+			printf("\n");
 		}
 
 	printf("Done\n");

@@ -338,7 +338,7 @@ array_add(array ar, gendata value)
 	ar = array_grow(ar, 1);
 	if (ar != NULL) {
 		assert(ar->data != NULL);
-		*(ar->data + ar->size) = value;
+		*(ar->data + ar->size - 1) = value;
 	}
 
 	return ar;

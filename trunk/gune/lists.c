@@ -203,7 +203,7 @@ sll_remove_next(sll ll, free_func f)
 	/* Free up used space by the removed element */
 	free(ll);
 
-	return ll;
+	return begin;
 }
 
 

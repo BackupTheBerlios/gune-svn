@@ -43,7 +43,7 @@ usage ()
 
 getrepos ()
 {
-	REPOS=`svn info | ${GREP} URL | ${SED} "s/URL:[[:space:]]*//" | ${SED} "s,/trunk,,`
+	REPOS=`svn info | ${GREP} URL | ${SED} "s/URL:[[:space:]]*//" | ${SED} "s,/(trunk|branches/.*|tags/.*),,`
 }
 
 getversion ()
@@ -58,16 +58,16 @@ bumpmajor ()
 {
 	getversion
 	NEWMAJOR=`${EXPR} ${MAJOR} + 1`
-	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMAJOR}/;s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
-	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
+	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMAJOR}/;s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=0/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new || exit
+	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION} || exit
 }
 
 bumpminor ()
 {
 	getversion
 	NEWMINOR=`${EXPR} ${MINOR} + 1`
-	${SED} "s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
-	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
+	${SED} "s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new || exit
+	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION} || exit
 }
 
 updateheader ()
@@ -92,22 +92,22 @@ printinfo ()
 #
 cleanup ()
 {
-	${SED} "/^(#.*)?$/d" devel-files | ${XARGS_RM}
-	${RM} devel-files
+	${SED} "/^(#.*)?$/d" devel-files | ${XARGS_RM} || exit
+	${RM} devel-files || exit
 }
 
 maketar ()
 {
 	getrepos
 	getversion
-	cd ..
-	svn export "${REPOS}/${dir}" "${BASENAME}"
+	cd .. || exit
+	svn export "${REPOS}/${dir}" "${BASENAME}" || exit
 
-	cd ${BASENAME}
-	${MAKE} release
+	cd ${BASENAME} || exit
+	${MAKE} release || exit
 	cleanup
-	cd ..
-	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}"
+	cd .. || exit
+	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}" || exit
 }
 
 

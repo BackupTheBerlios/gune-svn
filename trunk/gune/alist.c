@@ -33,7 +33,6 @@
  * \brief Association lists implementation.
  *
  * \file alist.c
- * Association lists implementation.
  */
 #include <assert.h>
 #include <errno.h>

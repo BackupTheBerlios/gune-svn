@@ -33,7 +33,6 @@
  * \brief Dynamic arrays implementation.
  *
  * \file array.c
- * Dynamic arrays implementation.
  */
 #include <assert.h>
 #include <stdio.h>

@@ -30,10 +30,10 @@
  */
 
 /**
- * \brief Miscellaneous functionality
+ * \brief Miscellaneous functionality interface.
  *
  * \file misc.h
- * Miscellaneous loose odds and ends which don't really belong anywhere
+ * Loose odds and ends which don't really belong anywhere.
  */
 #ifndef GUNE_MISC_H
 #define GUNE_MISC_H

@@ -33,7 +33,6 @@
  * \brief Stacks implementation.
  *
  * \file stack.c
- * Stacks implementation.
  */
 #include <assert.h>
 #include <errno.h>

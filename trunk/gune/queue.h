@@ -33,7 +33,6 @@
  * \brief Queues interface.
  *
  * \file queue.h
- * Queues interface.
  */
 #ifndef GUNE_QUEUE_H
 #define GUNE_QUEUE_H

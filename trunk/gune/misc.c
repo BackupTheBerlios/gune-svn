@@ -30,10 +30,10 @@
  */
 
 /**
- * \brief Miscelleaneous functionality.
+ * \brief Miscelleaneous functionality implementation.
  *
  * \file misc.c
- * Miscellaneous functionality which has no real place anywhere else.
+ * Loose odds and ends which don't really belong anywhere.
  */
 
 #include <gune/misc.h>

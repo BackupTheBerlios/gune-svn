@@ -33,7 +33,6 @@
  * \brief Error reporting and logging interface.
  *
  * \file error.h
- * Error reporting and logging interface.
  */
 #ifndef GUNE_ERROR_H
 #define GUNE_ERROR_H

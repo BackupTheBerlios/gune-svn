@@ -33,7 +33,6 @@
  * \brief Hash tables implementation.
  *
  * \file ht.c
- * Hash tables implementation.
  */
 #include <assert.h>
 #include <stdlib.h>

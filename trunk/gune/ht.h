@@ -33,7 +33,6 @@
  * \brief Hash tables interface.
  *
  * \file ht.h
- * Hash tables interface.
  */
 #ifndef GUNE_HT_H
 #define GUNE_HT_H

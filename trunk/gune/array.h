@@ -33,7 +33,6 @@
  * \brief Dynamic arrays interface.
  *
  * \file array.h
- * Dynamic arrays interface.
  */
 #ifndef GUNE_ARRAY_H
 #define GUNE_ARRAY_H

@@ -33,7 +33,6 @@
  * \brief Linked lists implementation.
  *
  * \file lists.c
- * Singly and doubly linked list implementations.
  */
 #include <assert.h>
 #include <errno.h>

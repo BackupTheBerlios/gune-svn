@@ -30,10 +30,9 @@
  */
 
 /**
- * \brief Association lists interface
+ * \brief Association lists interface.
  *
  * \file alist.h
- * Association lists interface.
  */
 #ifndef GUNE_ALIST_H
 #define GUNE_ALIST_H

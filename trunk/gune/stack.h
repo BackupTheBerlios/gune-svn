@@ -33,7 +33,6 @@
  * \brief Stacks interface.
  *
  * \file stack.h
- * Stacks interface.
  */
 #ifndef GUNE_STACK_H
 #define GUNE_STACK_H

@@ -33,7 +33,6 @@
  * \brief Linked lists interface.
  *
  * \file lists.h
- * Singly and doubly linked list interface.
  */
 #ifndef GUNE_LISTS_H
 #define GUNE_LISTS_H

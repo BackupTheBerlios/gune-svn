@@ -33,7 +33,6 @@
  * \brief Error reporting and logging implementation.
  *
  * \file error.c
- * Error reporting and logging implementation.
  */
 
 #include <stdarg.h>

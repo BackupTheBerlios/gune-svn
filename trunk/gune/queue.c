@@ -33,7 +33,6 @@
  * \brief Queues implementation.
  *
  * \file queue.c
- * Queues implementation.
  */
 #include <assert.h>
 #include <errno.h>

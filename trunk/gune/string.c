@@ -33,7 +33,6 @@
  * \brief String manipulation implementation.
  *
  * \file string.c
- * String manipulation implementation.
  */
 
 #include <assert.h>

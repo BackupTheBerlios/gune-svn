@@ -17,4 +17,3 @@
 - Add conversion functions between the different types.
 - Add sorting functions for the types on which it is meaningful.
 - Implement a tree data type.
-- Fix installation and check if it works with pkgsrc or can be cleaner, perhaps.

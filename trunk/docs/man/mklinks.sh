@@ -9,6 +9,8 @@
 
 SRCDIR="../../gune"
 
+MANEXT=.3
+
 # Relative from SRCDIR
 TARGET="../docs/man/man3/Makefile.inc"
 
@@ -19,7 +21,7 @@ echo "MAN = \\" > ${TARGET}
 for FILE in *.h
 do
 
-MAN=${FILE}.3
+MAN=${FILE}${MANEXT}
 
 echo "	${MAN} \\" >> ${TARGET}
 
@@ -31,15 +33,15 @@ echo "" >> ${TARGET}
 #
 # Now, add links
 #
-echo "MKLINKS = \\" >> ${TARGET}
+echo "MLINKS = \\" >> ${TARGET}
 
 for FILE in *.h
 do
 
-MAN=${FILE}.3
+MAN=${FILE}${MANEXT}
 
 sed -E "
-s/^[[:space:]]*[[:alpha:]_][[:alnum:]_]*[[:space:]]+([[:alpha:]_][[:alnum:]_]*)[[:space:]]*\\([[:alpha:]_].*\\)[[:space:]]*;[[:space:]]*\$/	${MAN}	\\1	\\\\/
+s/^[[:space:]]*[[:alpha:]_][[:alnum:]_]*[[:space:]]+([[:alpha:]_][[:alnum:]_]*)[[:space:]]*\\([[:alpha:]_].*\\)[[:space:]]*;[[:space:]]*\$/	${MAN}	\\1${MANEXT}	\\\\/
 t
 d" ${FILE} >> ${TARGET}
 

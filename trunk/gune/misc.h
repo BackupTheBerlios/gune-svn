@@ -44,5 +44,6 @@
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 
 int ptr_eq(gendata, gendata);
+unsigned int ptr_hash(gendata, unsigned int);
 
 #endif /* GUNE_MISC_H */

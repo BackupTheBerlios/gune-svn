@@ -151,11 +151,11 @@ ht_insert(ht t, gendata data, unsigned int key)
 {
 	sll replace;
 
-	assert(ht != ERROR_HT);
-	assert(ht != NULL);
+	assert(t != ERROR_HT);
+	assert(t != NULL);
 
 #ifdef BOUNDS_CHECKING
-	if (key >= range)
+	if (key >= t->range)
 		log_entry(WARN_ERROR, "Gune: ht_insert: Key (%u) out of range",
 			  key);
 #endif
@@ -164,11 +164,11 @@ ht_insert(ht t, gendata data, unsigned int key)
 	 * There's no reason why we should append the data at the end of the
 	 * list, so we just lazily prepend it at to front.
 	 */
-	replace = sll_prepend_head(*(t->data + key), data);
+	replace = sll_prepend_head(*(t->table + key), data);
 	if (replace == ERROR_SLL)
 		return ERROR_HT;
 
-	*(t->data + key) = replace;
+	*(t->table + key) = replace;
 
 	return t;
 }

@@ -311,7 +311,7 @@ array_shrink(array ar, int amount)
 	assert(ar != NULL);
 
 #ifdef BOUNDS_CHECKING
-	if (ar->size - amount < 0)
+	if ((ar->size - amount) < 0)
 		log_entry(WARN_ERROR, "Gune: array_shrink: Can not shrink to"
 			  " size smaller than zero (%i)", ar->size - amount);
 #endif

@@ -80,7 +80,7 @@ stress_test_stack(int num)
 	assert(!stack_is_empty(s));
 
 	/* ...and free it */
-	stack_destroy(s);
+	stack_free(s);
 }
 
 

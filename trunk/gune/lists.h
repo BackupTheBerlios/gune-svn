@@ -52,7 +52,8 @@ extern sll_t * const ERROR_SLL;
 
 /* SLL creation/deletion functions */
 sll sll_create(void);
-void sll_destroy(sll);
+void sll_destroy(sll, free_func);
+void sll_free(sll);
 unsigned int sll_count(sll);
 int sll_is_empty(sll);
 
@@ -81,7 +82,8 @@ extern dll_t * const ERROR_DLL;
 
 /* DLL creation/deletion functions */
 dll dll_create(void);
-void dll_destroy(dll);
+void dll_destroy(dll, free_func);
+void dll_free(dll);
 unsigned int dll_count(dll);
 int dll_is_empty(dll);
 

@@ -1,7 +1,7 @@
 /*
  * $Id$
  *
- * Copyright (c) 2003-2004 Peter Bex and Vincent Driessen
+ * Copyright (c) 2004 Peter Bex and Vincent Driessen
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,10 @@
  */
 
 /*
- * Stack
+ * Hash table
  */
-#ifndef GUNE_STACK_H
-#define GUNE_STACK_H
+#ifndef GUNE_HT_H
+#define GUNE_HT_H
 
 #include <gune/lists.h>
 #include <gune/types.h>
@@ -42,24 +42,21 @@
 extern "C" {
 #endif
 
-/** Stack implementation */
-typedef struct stack_t {
-	sll top;
-} stack_t, *stack;
+/** Hash table implementation */
+typedef struct ht_t {
+	sll *table;
+	unsigned int range;
+} ht_t, *ht;
 
-/** Invalid stack, used as error return value */
-extern stack_t * const ERROR_STACK;
+/** Invalid hash table, used as error return value */
+extern ht_t * const ERROR_HT;
 
-stack stack_create(void);
-gendata stack_pop(stack);
-gendata stack_peek(stack);
-void stack_push(stack, gendata);
-int stack_is_empty(stack);
-void stack_destroy(stack, free_func);
-void stack_free(stack);
+ht ht_create(unsigned int);
+void ht_destroy(ht, free_func);
+void ht_free(ht);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* GUNE_STACK_H */
+#endif /* GUNE_HT_H */

@@ -51,7 +51,7 @@ array_t * const ERROR_ARRAY = (void *)error_dummy_func;
  *
  * \return  A new empty array, or ERROR_ARRAY if out of memory.
  *
- * \sa array_destroy
+ * \sa array_destroy array_free
  */
 array
 array_create(void)
@@ -74,14 +74,43 @@ array_create(void)
 
 
 /**
- * Destroy an array
+ * Free all memory allocated for an array. The data stored within the
+ * by calling a user-supplied function on it.
+ * If the same data is included multiple times in the list, the free function
+ * gets called that many times.
+ *
+ * \param ar  The array to destroy.
+ * \param f   The function which is used to free the data.
+ *
+ * \sa  array_create array_free
+ */
+void
+array_destroy(array ar, free_func f)
+{
+	gendata *p;
+
+	assert(ar != ERROR_ARRAY);
+	assert(ar != NULL);
+	assert(ar->data != NULL);
+
+	for(p = ar->data; p < (ar->data + ar->size); ++p)
+		f(p->ptr);
+
+	free(ar->data);
+	free(ar);
+}
+
+
+/**
+ * Free all memory allocated for an array. The data stored within the
+ * array is NOT freed.
  *
  * \param ar  The array to destroy.
  *
- * \sa  array_create
+ * \sa  array_create array_destroy
  */
 void
-array_destroy(array ar)
+array_free(array ar)
 {
 	assert(ar != ERROR_ARRAY);
 	assert(ar != NULL);

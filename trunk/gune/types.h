@@ -47,4 +47,7 @@ typedef union gendata {
 	void *		ptr;		/* Pointer */
 } gendata;
 
+/** Function type to be supplied to the _destroy functions to free data. */
+typedef void (*free_func) (void *);
+
 #endif /* GUNE_TYPES_H */

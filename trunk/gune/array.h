@@ -52,7 +52,8 @@ typedef struct array_t {
 extern array_t * const ERROR_ARRAY;
 
 array array_create(void);
-void array_destroy(array);
+void array_destroy(array, free_func);
+void array_free(array);
 unsigned int array_size(array);
 array array_resize(array, unsigned int);
 gendata array_get_data(array, unsigned int);

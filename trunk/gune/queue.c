@@ -194,18 +194,39 @@ queue_is_empty(queue q)
 
 
 /**
- * Free all memory allocated for the queue. Note that the data stored
- * within the queue is NOT freed.
+ * Destroy a queue by deleting each element.  The data stored in the queue is
+ * not freed!
  *
- * \param q  The queue to free.
+ * \param q  The queue to destroy.
  */
 void
-queue_destroy(queue q)
+queue_free(queue q)
 {
 	assert(q != ERROR_QUEUE);
 	assert(q != NULL);
 
-	sll_destroy(q->head);
+	sll_free(q->head);
+
+	free((queue_t *)q);
+}
+
+
+/**
+ * Destroy a queue by deleting each element.  The data is freed by calling a
+ * user-supplied function on it.
+ * If the same data is included multiple times in the queue, the free function
+ * gets called that many times.
+ *
+ * \param q  The queue to destroy.
+ * \param f  The function which is used to free the data.
+ */
+void
+queue_destroy(queue q, free_func f)
+{
+	assert(q != ERROR_QUEUE);
+	assert(q != NULL);
+
+	sll_destroy(q->head, f);
 
 	free((queue_t *)q);
 }

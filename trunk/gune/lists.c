@@ -37,8 +37,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gune/lists.h>
 #include <gune/error.h>
+#include <gune/lists.h>
 
 sll_t   * const ERROR_SLL   = (void *)error_dummy_func;
 dll_t   * const ERROR_DLL   = (void *)error_dummy_func;
@@ -60,14 +60,38 @@ sll_create(void)
 
 
 /**
- * Destroy a singly linked list by deleting each element.
+ * Destroy a singly linked list by deleting each element.  The data is freed
+ * by calling a user-supplied function on it.
+ * If the same data is included multiple times in the list, the free function
+ * gets called that many times.
+ *
+ * \param ll  The list to destroy.
+ * \param f  The function which is used to free the data.
+ *
+ * \sa  sll_create sll_free dll_destroy
+ */
+void
+sll_destroy(sll ll, free_func f)
+{
+	assert(ll != ERROR_SLL);
+
+	while (!sll_is_empty(ll)) {
+		f(ll->data.ptr);
+		ll = sll_remove_head(ll);
+	}
+}
+
+
+/**
+ * Destroy a singly linked list by deleting each element.  The data stored in
+ * the linked list is not freed!
  *
  * \param ll  The list to destroy.
  *
- * \sa  sll_create dll_destroy
+ * \sa  sll_create sll_destroy dll_free
  */
 void
-sll_destroy(sll ll)
+sll_free(sll ll)
 {
 	assert(ll != ERROR_SLL);
 
@@ -117,7 +141,8 @@ sll_is_empty(sll ll)
 
 
 /**
- * Removes the head from a singly linked list.
+ * Removes the head from a singly linked list.  The data stored in the linked
+ * list is NOT freed.
  *
  * \param ll  The singly linked list.
  *
@@ -299,14 +324,38 @@ dll_create(void)
 
 
 /**
- * Destroy a doubly linked list by deleting each element.
+ * Destroy a doubly linked list by deleting each element.  The data stored
+ * in the linked list is freed by calling a user-supplied function.
+ * If the same data is included multiple times in the list, the free function
+ * gets called that many times.
+ *
+ * \param ll  The list to destroy.
+ * \param f   The function which is used to free the data.
+ *
+ * \sa  dll_create dll_free sll_destroy
+ */
+void
+dll_destroy(dll ll, free_func f)
+{
+	assert(ll != ERROR_DLL);
+
+	while (!dll_is_empty(ll)) {
+		f(ll->data.ptr);
+		ll = dll_remove_head(ll);
+	}
+}
+
+
+/**
+ * Destroy a doubly linked list by deleting each element.  The data stored
+ * in the linked list is NOT freed.
  *
  * \param ll  The list to destroy.
  *
- * \sa  dll_create sll_destroy
+ * \sa  dll_create dll_destroy sll_destroy
  */
 void
-dll_destroy(dll ll)
+dll_free(dll ll)
 {
 	assert(ll != ERROR_DLL);
 
@@ -469,7 +518,7 @@ dll_append_head(dll ll, gendata data)
  * \return The list at the indexed position, or ERROR_DLL if the index
  *          is out of bounds.
  *
- * \sa sll_forward, dll_backward
+ * \sa sll_forward dll_backward
  */
 dll
 dll_forward(dll ll, unsigned int nskip)

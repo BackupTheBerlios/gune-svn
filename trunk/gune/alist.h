@@ -53,7 +53,7 @@ alist alist_insert(alist, gendata, gendata, eq_func, free_func);
 alist alist_insert_uniq(alist, gendata, gendata, eq_func);
 alist alist_lookup(alist, gendata, eq_func, gendata *);
 alist alist_delete(alist, gendata, eq_func, free_func, free_func);
-void alist_walk(alist, assoc_func);
+void alist_walk(alist, assoc_func, gendata);
 
 #ifdef __cplusplus
 }

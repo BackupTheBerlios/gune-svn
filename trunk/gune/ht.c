@@ -312,9 +312,10 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
  *
  * \param t     The hash table to walk
  * \param walk  The function which will process the hash pairs
+ * \param data  Any data to pass to the function every time it is called.
  */
 void
-ht_walk(ht t, assoc_func walk)
+ht_walk(ht t, assoc_func walk, gendata data)
 {
 	unsigned int i;
 
@@ -322,5 +323,5 @@ ht_walk(ht t, assoc_func walk)
 	assert(t != NULL);
 
 	for (i = 0; i < t->range; ++i)
-		alist_walk(t->buckets[i], walk);
+		alist_walk(t->buckets[i], walk, data);
 }

@@ -60,6 +60,6 @@ typedef int (* eq_func) (gendata, gendata);
  * Function for traveling through lists that have (key, value) pairs, like
  *  association lists and hash tables.
  */
-typedef void (* assoc_func) (gendata *, gendata *);
+typedef void (* assoc_func) (gendata *, gendata *, gendata);
 
 #endif /* GUNE_TYPES_H */

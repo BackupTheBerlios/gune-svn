@@ -341,11 +341,12 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
  * the current entry.  It is allowed to change the contents of the key and
  * value.
  *
- * \param al    The alist to walk
- * \param walk  The function which will process the pairs
+ * \param al    The alist to walk.
+ * \param walk  The function which will process the pairs.
+ * \param data  Any data to pass to the function every time it is called.
  */
 void
-alist_walk(alist al, assoc_func walk)
+alist_walk(alist al, assoc_func walk, gendata data)
 {
 	alist_entry e;
 	sll l = al->list;
@@ -358,7 +359,7 @@ alist_walk(alist al, assoc_func walk)
 		/* n is stored in case user deletes the current entry */
 		n = sll_next(l);
 		e = sll_get_data(l).ptr;
-		walk(&e->key, &e->value);
+		walk(&e->key, &e->value, data);
 		l = n;
 	}
 }

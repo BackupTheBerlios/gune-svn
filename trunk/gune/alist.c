@@ -47,8 +47,6 @@ typedef struct alist_entry {
 	gendata value;
 } alist_entry_t, * alist_entry;
 
-alist_t * const ERROR_ALIST = (void *)error_dummy_func;
-
 static alist alist_insert_internal(alist, gendata, gendata, eq_func,
 				   free_func, int);
 
@@ -58,7 +56,7 @@ static alist alist_insert_internal(alist, gendata, gendata, eq_func,
 /**
  * Create a new, empty, association list.
  *
- * \return  A new empty alist object, or ERROR_ALIST if out of memory.
+ * \return  A new empty alist object, or ERROR_PTR if out of memory.
  *	     errno = ENOMEM if out of memory.
  *
  * \sa alist_destroy
@@ -69,7 +67,7 @@ alist_create(void)
 	alist_t *al;
 
 	if ((al = malloc(sizeof(alist_t))) == NULL)
-		return (alist)ERROR_ALIST;
+		return (alist)ERROR_PTR;
 
 	al->list = sll_create();
 
@@ -96,7 +94,7 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
 {
 	alist_entry e;
 
-	assert(al != ERROR_ALIST);
+	assert(al != ERROR_PTR);
 	assert(al != NULL);
 
 	/*
@@ -135,7 +133,7 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
 	gendata e_data;
 	sll l;
 
-	assert(al != ERROR_ALIST);
+	assert(al != ERROR_PTR);
 	assert(al != NULL);
 	assert(eq != NULL);
 
@@ -151,7 +149,7 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
 			/* Duplicates not allowed? */
 			if (uniq) {
 				errno = EINVAL;
-				return ERROR_ALIST;
+				return ERROR_PTR;
 			}
 
 			/* Free old data */
@@ -167,16 +165,16 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
 
 	/* If we got here, the key does not occur in the table yet */
 	if ((e = malloc(sizeof(alist_entry_t))) == NULL)
-		return ERROR_ALIST;
+		return ERROR_PTR;
 
 	e->key = key;
 	e->value = value;
 	e_data.ptr = e;
 
 	new_head = sll_prepend_head(al->list, e_data);
-	if (new_head == ERROR_SLL) {
+	if (new_head == ERROR_PTR) {
 		free(e);
-		return ERROR_ALIST;
+		return ERROR_PTR;
 	}
 
 	al->list = new_head;
@@ -196,7 +194,7 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
  *		       needs to be replaced, or NULL if the data does not
  *		       need to be freed.
  *
- * \return  The original alist, or ERROR_ALIST if the data could not be
+ * \return  The original alist, or ERROR_PTR if the data could not be
  *           inserted.  Original alist is still valid in case of error.
  *	    errno = ENOMEM if out of memory.
  *
@@ -220,7 +218,7 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
  * \param value	      The data to insert.
  * \param eq          The equals predicate for two keys.
  *
- * \return  The original alist, or ERROR_ALIST if the data could not be
+ * \return  The original alist, or ERROR_PTR if the data could not be
  *            inserted.  Original alist is still valid in case of error.
  *          errno = EINVAL if the key is already in the list.
  *	    errno = ENOMEM if out of memory.
@@ -243,7 +241,7 @@ alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq)
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
- * \return  The alist if the key was found, or ERROR_ALIST if the key
+ * \return  The alist if the key was found, or ERROR_PTR if the key
  *	     could not be found.
  *	    errno = EINVAL if the key could not be found.
  */
@@ -253,7 +251,7 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
 	sll l;
 	alist_entry e;
 
-	assert(al != ERROR_ALIST);
+	assert(al != ERROR_PTR);
 	assert(al != NULL);
 	assert(eq != NULL);
 
@@ -269,7 +267,7 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
 	}
 
 	errno = EINVAL;
-	return ERROR_ALIST;
+	return ERROR_PTR;
 }
 
 
@@ -284,7 +282,7 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
  * \param value_free  The function which is used to free the value data, or
  *			NULL if no action should be taken on the value data.
  *
- * \return  The alist, or ERROR_ALIST if the key could not be found.
+ * \return  The alist, or ERROR_PTR if the key could not be found.
  *	      errno = EINVAL if the key could not be found.
  *
  * \sa alist_insert
@@ -296,7 +294,7 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 	sll l, n;
 	alist_entry e;
 
-	assert(al != ERROR_ALIST);
+	assert(al != ERROR_PTR);
 	assert(al != NULL);
 	assert(eq != NULL);
 
@@ -304,7 +302,7 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 
 	if (sll_empty(l)) {
 		errno = EINVAL;
-		return ERROR_ALIST;
+		return ERROR_PTR;
 	}
 
 	/*
@@ -333,7 +331,7 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 	}
 
 	errno = EINVAL;
-	return ERROR_ALIST;
+	return ERROR_PTR;
 }
 
 
@@ -353,7 +351,7 @@ alist_walk(alist al, assoc_func walk)
 	sll l = al->list;
 	sll n = NULL;
 
-	assert(al != ERROR_ALIST);
+	assert(al != ERROR_PTR);
 	assert(al != NULL);
 
 	while(!sll_empty(l)) {

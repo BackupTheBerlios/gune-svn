@@ -53,7 +53,7 @@ typedef enum {
 void set_logfile(FILE *);
 int log_entry(warnlvl, const char *, ...);
 
-void error_dummy_func(void);
+extern void * const ERROR_PTR;
 
 #ifdef __cplusplus
 }

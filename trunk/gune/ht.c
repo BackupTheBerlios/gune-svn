@@ -39,8 +39,6 @@
 #include <gune/error.h>
 #include <gune/ht.h>
 
-ht_t * const ERROR_HT = (void *)error_dummy_func;
-
 static ht ht_insert_internal(ht, gendata, gendata, eq_func, free_func, int);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,7 +49,7 @@ static ht ht_insert_internal(ht, gendata, gendata, eq_func, free_func, int);
  * \param range  The range of the key function (0 <= x < range).
  * \param hash   The hashing function to use on keys.
  *
- * \return  A new empty hash table object, or ERROR_HT if out of memory.
+ * \return  A new empty hash table object, or ERROR_PTR if out of memory.
  *	     errno = ENOMEM if out of memory.
  *
  * \sa ht_destroy
@@ -65,7 +63,7 @@ ht_create(unsigned int range, hash_func hash)
 	assert(hash != NULL);
 
 	if ((t = malloc(sizeof(ht_t))) == NULL)
-		return (ht)ERROR_HT;
+		return (ht)ERROR_PTR;
 
 	t->range = range;
 	t->hash = hash;
@@ -76,7 +74,7 @@ ht_create(unsigned int range, hash_func hash)
 	 */
 	if ((t->buckets = (alist *)malloc(range * sizeof(alist))) == NULL) {
 		free(t);
-		return (ht)ERROR_HT;
+		return (ht)ERROR_PTR;
 	}
 
 	/*
@@ -85,13 +83,13 @@ ht_create(unsigned int range, hash_func hash)
 	 * not be the bottleneck of any sane program.
 	 */
 	for (i = 0; i < range; ++i) {
-		if ((*(t->buckets + i) = alist_create()) == ERROR_ALIST) {
+		if ((*(t->buckets + i) = alist_create()) == ERROR_PTR) {
 			/* Creation went wrong halfway?  Destroy all previous */
 			for (j = 0; j < i; ++j)
 				alist_destroy(*(t->buckets + j), NULL, NULL);
 
 			free(t);
-			return (ht)ERROR_HT;
+			return (ht)ERROR_PTR;
 		}
 	}
 
@@ -120,7 +118,7 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
 {
 	alist *al;
 
-	assert(t != ERROR_HT);
+	assert(t != ERROR_PTR);
 	assert(t != NULL);
 
 	for (al = t->buckets; al < (t->buckets + t->range); ++al)
@@ -144,7 +142,7 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
 	unsigned int bucketnr;
 	alist al;
 
-	assert(t != ERROR_HT);
+	assert(t != ERROR_PTR);
 	assert(t != NULL);
 	assert(t->hash != NULL);
 	assert(eq != NULL);
@@ -163,8 +161,8 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
 	else
 		al = alist_insert(al, key, value, eq, free_value);
 
-	if (al == ERROR_ALIST)
-		t = ERROR_HT;
+	if (al == ERROR_PTR)
+		t = ERROR_PTR;
 	else
 		/* Strictly not needed */
 		*(t->buckets + bucketnr) = al;
@@ -185,7 +183,7 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
  *		       needs to be replaced, or NULL if the data does not
  *		       need to be freed.
  *
- * \return  The original hash table, or ERROR_HT if the data could not be
+ * \return  The original hash table, or ERROR_PTR if the data could not be
  *           inserted.  Original hash table is still valid in case of error.
  *	    errno = ENOMEM if out of memory.
  *
@@ -209,7 +207,7 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
  * \param value       The data to insert.
  * \param eq          The equals predicate for two keys.
  *
- * \return  The original hash table, or ERROR_HT if the data could not be
+ * \return  The original hash table, or ERROR_PTR if the data could not be
  *           inserted.  Original hash table is still valid in case of error.
  *          errno = EINVAL if the key is already in the table.
  *	    errno = ENOMEM if out of memory.
@@ -232,7 +230,7 @@ ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq)
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
- * \return  The hash table, or ERROR_HT if the key could not be found.
+ * \return  The hash table, or ERROR_PTR if the key could not be found.
  *	     errno = EINVAL if the key could not be found.
  */
 ht
@@ -241,7 +239,7 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
 	unsigned int bucketnr;
 	alist al;
 
-	assert(t != ERROR_HT);
+	assert(t != ERROR_PTR);
 	assert(t != NULL);
 	assert(t->hash != NULL);
 	assert(eq != NULL);
@@ -255,8 +253,8 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
 #endif
 
 	al = *(t->buckets + bucketnr);
-	if (alist_lookup(al, key, eq, data) == ERROR_ALIST)
-		return ERROR_HT;
+	if (alist_lookup(al, key, eq, data) == ERROR_PTR)
+		return ERROR_PTR;
 
 	return t;
 }
@@ -273,7 +271,7 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
  * \param value_free  The function which is used to free the value data, or
  *			NULL if no action should be taken on the value data.
  *
- * \return  The hash table, or ERROR_HT if the key could not be found.
+ * \return  The hash table, or ERROR_PTR if the key could not be found.
  *	     errno = EINVAL if the key could not be found.
  *
  * \sa ht_insert
@@ -285,7 +283,7 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 	unsigned int bucketnr;
 	alist al;
 
-	assert(t != ERROR_HT);
+	assert(t != ERROR_PTR);
 	assert(t != NULL);
 	assert(t->hash != NULL);
 	assert(eq != NULL);
@@ -299,8 +297,8 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 #endif
 
 	al = *(t->buckets + bucketnr);
-	if (alist_delete(al, key, eq, key_free, value_free) == ERROR_ALIST)
-		return ERROR_HT;
+	if (alist_delete(al, key, eq, key_free, value_free) == ERROR_PTR)
+		return ERROR_PTR;
 
 	return t;
 }
@@ -320,7 +318,7 @@ ht_walk(ht t, assoc_func walk)
 {
 	unsigned int i;
 
-	assert(t != ERROR_HT);
+	assert(t != ERROR_PTR);
 	assert(t != NULL);
 
 	for (i = 0; i < t->range; ++i)

@@ -48,9 +48,6 @@ typedef struct queue_t {
 	sll tail;
 } queue_t, *queue;
 
-/** Invalid queue, used as error return value */
-extern queue_t * const ERROR_QUEUE;
-
 queue queue_create(void);
 queue queue_enqueue(queue, gendata);
 gendata queue_dequeue(queue);

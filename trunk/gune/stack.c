@@ -41,14 +41,12 @@
 #include <gune/stack.h>
 #include <gune/error.h>
 
-stack_t * const ERROR_STACK = (void *)error_dummy_func;
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
  * Create a new, empty, stack.
  *
- * \return  A new empty stack object, or ERROR_STACK if out of memory.
+ * \return  A new empty stack object, or ERROR_PTR if out of memory.
  *	     errno = ENOMEM if out of memory.
  */
 stack
@@ -57,12 +55,12 @@ stack_create(void)
 	stack_t *s;
 	
 	if ((s = malloc(sizeof(stack_t))) == NULL)
-		return (stack)ERROR_STACK;
+		return (stack)ERROR_PTR;
 
 	/* XXX: This test is overkill, sll_create always returns NULL.  */
-	if ((s->top = sll_create()) == ERROR_SLL) {
+	if ((s->top = sll_create()) == ERROR_PTR) {
 		free(s);
-		return (stack)ERROR_STACK;
+		return (stack)ERROR_PTR;
 	}
 
 	return (stack)s;
@@ -83,9 +81,9 @@ stack_pop(stack s)
 {
 	gendata res;
 
-	assert(s != ERROR_STACK);
+	assert(s != ERROR_PTR);
 	assert(s != NULL);
-	assert(s->top != ERROR_SLL);
+	assert(s->top != ERROR_PTR);
 
 	if (stack_empty(s))
 		log_entry(WARN_ERROR, "Cannot pop from an empty stack.");
@@ -110,7 +108,7 @@ stack_pop(stack s)
 gendata
 stack_peek(stack s)
 {
-	assert(s != ERROR_STACK);
+	assert(s != ERROR_PTR);
 	assert(s != NULL);
 
 	/*
@@ -135,7 +133,7 @@ stack_peek(stack s)
  * \param s     The stack object to push onto.
  * \param data  The data to push onto the stack.
  * 
- * \return  The given stack s, or ERROR_STACK in case of an error.  The old
+ * \return  The given stack s, or ERROR_PTR in case of an error.  The old
  *	     stack is still valid in case of an error.
  *	      errno = ENOMEM if out of memory.
  *
@@ -146,8 +144,8 @@ stack_push(stack s, gendata data)
 {
 	sll l;
 
-	if ((l = sll_prepend_head(s->top, data)) == ERROR_SLL)
-		return ERROR_STACK;
+	if ((l = sll_prepend_head(s->top, data)) == ERROR_PTR)
+		return ERROR_PTR;
 
 	s->top = l;
 	return s;
@@ -165,7 +163,7 @@ int
 stack_empty(stack s)
 {
 	assert(s != NULL);
-	assert(s != ERROR_STACK);
+	assert(s != ERROR_PTR);
 
 	return sll_empty(s->top);
 }
@@ -186,7 +184,7 @@ stack_empty(stack s)
 void
 stack_destroy(stack s, free_func f)
 {
-	assert(s != ERROR_STACK);
+	assert(s != ERROR_PTR);
 	assert(s != NULL);
 
 	sll_destroy(s->top, f);

@@ -48,9 +48,6 @@ typedef struct array_t {
 	unsigned int capacity;
 } array_t, *array;
 
-/** Invalid array, used as error return value */
-extern array_t * const ERROR_ARRAY;
-
 array array_create(void);
 void array_destroy(array, free_func);
 void array_free(array);

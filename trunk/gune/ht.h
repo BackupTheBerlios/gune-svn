@@ -53,9 +53,6 @@ typedef struct ht_t {
 	hash_func hash;
 } ht_t, *ht;
 
-/** Invalid hash table, used as error return value */
-extern ht_t * const ERROR_HT;
-
 ht ht_create(unsigned int, hash_func);
 void ht_destroy(ht, free_func, free_func);
 ht ht_insert(ht, gendata, gendata, eq_func, free_func);

@@ -47,9 +47,6 @@ typedef struct sll_t {
 	struct sll_t *next;
 } sll_t, *sll;
 
-/** Invalid linked list, used as error return value */
-extern sll_t * const ERROR_SLL;
-
 /* SLL creation/deletion functions */
 sll sll_create(void);
 void sll_destroy(sll, free_func);
@@ -79,9 +76,6 @@ typedef struct dll_t {
 	struct dll_t *prev;
 	struct dll_t *next;
 } dll_t, *dll;
-
-/** Invalid linked list, used as error return value */
-extern dll_t * const ERROR_DLL;
 
 /* DLL creation/deletion functions */
 dll dll_create(void);

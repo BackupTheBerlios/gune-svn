@@ -47,9 +47,6 @@ typedef struct stack_t {
 	sll top;
 } stack_t, *stack;
 
-/** Invalid stack, used as error return value */
-extern stack_t * const ERROR_STACK;
-
 stack stack_create(void);
 gendata stack_pop(stack);
 gendata stack_peek(stack);

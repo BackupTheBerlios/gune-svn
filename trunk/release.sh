@@ -49,8 +49,8 @@ getrepos ()
 
 getversion ()
 {
-	MAJOR=`${GREP} major ${SHLIB_VERSION} | ${SED} "s/.*([0-9]+).*/\1/"`
-	MINOR=`${GREP} minor ${SHLIB_VERSION} | ${SED} "s/.*([0-9]+).*/\1/"`
+	MAJOR=`${GREP} major ${SHLIB_VERSION} | ${SED} "s/[^0-9]*([0-9]+)[^0-9]*/\1/"`
+	MINOR=`${GREP} minor ${SHLIB_VERSION} | ${SED} "s/[^0-9]*([0-9]+)[^0-9]*/\1/"`
 	VERSIONSTRING="${MAJOR}.${MINOR}"
 	BASENAME="${PROJECT}-${VERSIONSTRING}"
 }
@@ -59,7 +59,7 @@ bumpmajor ()
 {
 	getversion
 	NEWMAJOR=`${EXPR} ${MAJOR} + 1`
-	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+.*/major=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
+	${SED} "s/major[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/major=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
 	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
 }
 
@@ -67,15 +67,15 @@ bumpminor ()
 {
 	getversion
 	NEWMINOR=`${EXPR} ${MINOR} + 1`
-	${SED} "s/minor[[:space:]]*=[[:space:]]*[0-9]+.*/minor=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
+	${SED} "s/minor[[:space:]]*=[[:space:]]*[0-9]+[^0-9]*/minor=${NEWMINOR}/" ${SHLIB_VERSION} > ${SHLIB_VERSION}.new
 	${MV} ${SHLIB_VERSION}.new ${SHLIB_VERSION}
 }
 
 updateheader ()
 {
 	getversion
-	${SED} "s/(.*${VERSION_MAJOR}.*)[0-9]+(.*)/\1${MAJOR}\2/;s/(.*${VERSION_MINOR}.*)[0-9]+(.*)/\1${MINOR}\2/" ${VERSION_FILE} > ${VERSION_FILE}.new
-	${MV} ${VERSION_FILE}.new ${VERSION_FILE}
+	${SED} "s/(.*${VERSION_MAJOR}[^0-9]*)[0-9]+([^0-9]*)/\1${MAJOR}\2/;s/(.*${VERSION_MINOR}[^0-9]*)[0-9]+([^0-9]*)/\1${MINOR}\2/" ${VERSION_HEADER} > ${VERSION_HEADER}.new
+	${MV} ${VERSION_HEADER}.new ${VERSION_HEADER}
 }
 
 printinfo ()

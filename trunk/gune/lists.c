@@ -138,7 +138,7 @@ sll
 sll_remove_head(sll ll)
 {
 	sll begin;
-	
+
 	assert(ll != NULL);
 	assert(ll != ERROR_SLL);
 

@@ -46,11 +46,22 @@ typedef struct sll_elem {
 	void *data;
 	struct sll_elem *next;
 } sll_elem;
+
+/* In stead of this:
 typedef sll_elem *	sll;
 typedef sll_elem *	sll_iter;
+, we get this: */
+typedef struct sll_t {
+	void *data;
+	struct sll_elem *next;
+} *sll;
+
+/* And the next line can be slightly different.  From this:
+extern const (sll_elem const *) ERROR_SLL;
+we get this: */
 
 /** Invalid linked list, used as error return value */
-extern sll ERROR_SLL;
+extern const (sll_t const *) ERROR_SLL;
 
 /** SLL creation/deletion functions */
 sll sll_create(void);
@@ -87,7 +98,7 @@ typedef dll_elem *	dll;
 typedef dll_elem *	dll_iter;
 
 /** Invalid linked list, used as error return value */
-extern dll ERROR_DLL;
+extern const dll ERROR_DLL;
 
 /** DLL creation/deletion functions */
 dll dll_create(void);
@@ -126,7 +137,7 @@ typedef struct stack_t {
 } stack_t, *stack;
 
 /** Invalid stack, used as error return value */
-extern stack ERROR_STACK;
+extern const stack ERROR_STACK;
 
 stack stack_new(void);
 void *stack_pop(stack);
@@ -149,7 +160,7 @@ typedef struct queue_t {
 } queue_t, *queue;
 
 /** Invalid queue, used as error return value */
-extern queue ERROR_QUEUE;
+extern const (queue_t const *) ERROR_QUEUE;
 
 queue queue_new(void);
 queue queue_enqueue(queue, void *);

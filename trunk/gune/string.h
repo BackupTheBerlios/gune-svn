@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * String manipulation
+/**
+ * \brief String manipulation interface.
+ *
+ * \file string.h
+ * String manipulation interface.
  */
 #ifndef GUNE_STRING_H
 #define GUNE_STRING_H

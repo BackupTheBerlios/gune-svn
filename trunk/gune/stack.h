@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Stack
+/**
+ * \brief Stacks interface.
+ *
+ * \file stack.h
+ * Stacks interface.
  */
 #ifndef GUNE_STACK_H
 #define GUNE_STACK_H
@@ -42,9 +45,9 @@
 extern "C" {
 #endif
 
-/** Stack implementation */
+/** \brief Stack implementation */
 typedef struct stack_t {
-	sll top;
+	sll top;				/**< Stack pointer */
 } stack_t, *stack;
 
 stack stack_create(void);

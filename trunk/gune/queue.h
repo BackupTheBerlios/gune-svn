@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Queue
+/**
+ * \brief Queues interface.
+ *
+ * \file queue.h
+ * Queues interface.
  */
 #ifndef GUNE_QUEUE_H
 #define GUNE_QUEUE_H
@@ -42,10 +45,10 @@
 extern "C" {
 #endif
 
-/** Queue implementation */
+/** \brief Queue implementation */
 typedef struct queue_t {
-	sll head;
-	sll tail;
+	sll head;			/**< Pointer to the head of the list */
+	sll tail;			/**< Pointer to the tail of the list */
 } queue_t, *queue;
 
 queue queue_create(void);

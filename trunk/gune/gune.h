@@ -29,6 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * \brief Global include.
+ *
+ * \file gune.h
+ * Header file to include all gune functionality at once.  If you include
+ * this header, no other gune headers need to be included.
+ */
+
 #ifndef GUNE_GUNE_H
 #define GUNE_GUNE_H
 

@@ -30,6 +30,8 @@
  */
 
 /**
+ * \brief Miscellaneous functionality
+ *
  * \file misc.h
  * Miscellaneous loose odds and ends which don't really belong anywhere
  */
@@ -38,9 +40,45 @@
 
 #include <gune/types.h>
 
+/**
+ * Swap two variables' contents.
+ * \note
+ * This only works for basic types, and the variables must be of the same type.
+ *
+ * \param t  The type of the variables.
+ * \param a  The first variable.
+ * \param b  The second variable.
+ *
+ * \hideinitializer
+ */
 #define SWAP(t,a,b)	{ t tmp = (a); (a) = (b); (b) = tmp;}
 
+/**
+ * Determine the maximum of two variables.
+ * \note
+ * This only works for basic types.
+ *
+ * \param a  The first variable.
+ * \param b  The second variable.
+ *
+ * \return   The maximum of \p a and \p b, or \p b if they're equal.
+ *
+ * \hideinitializer
+ */
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
+
+/**
+ * Determine the minimum of two variables.
+ * \note
+ * This only works for basic types.
+ *
+ * \param a  The first variable.
+ * \param b  The second variable.
+ *
+ * \return   The minimum of \p a and \p b, or \p b if they're equal.
+ *
+ * \hideinitializer
+ */
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 
 int ptr_eq(gendata, gendata);

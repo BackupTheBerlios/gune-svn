@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Dynamic arrays implementation.
+ *
  * \file array.c
- * Array implementation
+ * Dynamic arrays implementation.
  */
 #include <assert.h>
 #include <stdio.h>
@@ -39,15 +41,18 @@
 #include <gune/error.h>
 #include <gune/array.h>
 
+/** Compile-time option of initial array size */
 #define ARRAY_INITIAL_SIZE	16
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Creates a new empty array.
+ * \brief Create a new empty array.
  *
- * \return  A new empty array, or NULL if out of memory.
- *	     errno = ENOMEM if out of memory.
+ * \return  A new empty array, or \c NULL if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa array_destroy
  */
@@ -72,14 +77,18 @@ array_create(void)
 
 
 /**
- * Free all memory allocated for an array. The data stored within the
- * by calling a user-supplied function on it.
+ * \brief Free all memory allocated for an array.
+ *
+ * The data stored within the array is freed by calling the user-supplied
+ * function \p f on it.
+ *
+ * \attention
  * If the same data is included multiple times in the list, the free function
  * gets called that many times.
  *
  * \param ar  The array to destroy.
- * \param f   The function which is used to free the data, or NULL if no action
- *		should be taken to free the data.
+ * \param f   The function which is used to free the data, or \c NULL if no
+ *		action	should be taken to free the data.
  *
  * \sa  array_create
  */
@@ -102,7 +111,7 @@ array_destroy(array ar, free_func f)
 
 
 /**
- * Get the number of elements in the array.
+ * \brief Get the number of elements in the array.
  *
  * \param ar  The array to get the size of.
  */
@@ -116,15 +125,18 @@ array_size(array ar)
 /**
  * \brief Resize an array.
  *
+ * \note
  * This does not actually free any memory if the array is made smaller.
  * Use array_compact to accomplish this.
  *
  * \param ar    The array to resize.
  * \param size  The new (absolute) size of the array.
  *
- * \return  The array given as input, or NULL if out of memory.
- *           The old array is still valid.
- *	       errno = ENOMEM if out of memory.
+ * \return  The array given as input, or \c NULL in case of error.
+ *           The old array is still valid if an error occurred.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa array_grow, array_shrink, array_compact
  */
@@ -157,7 +169,7 @@ array_resize(array ar, unsigned int size)
 
 
 /**
- * Get the value of an index in an array.
+ * \brief Get the value at an index in an array.
  *
  * \param ar     The array to get the value from.
  * \param index  The index of the value to get.
@@ -181,7 +193,7 @@ array_get_data(array ar, unsigned int index)
 
 
 /**
- * Set the value of an index in an array.
+ * \brief Set the value at an index in an array.
  *
  * \param ar     The array to set the value in.
  * \param index  The index of the value to set.
@@ -217,9 +229,11 @@ array_set_data(array ar, unsigned int index, gendata value)
  *
  * \param ar  The array to compact.
  *
- * \return    The supplied array, or NULL if an error occurred during
+ * \return    The supplied array, or \c NULL if an error occurred during
  *            resize.  The old array is still valid.
- *		errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  */
 array
 array_compact(array ar)
@@ -243,14 +257,16 @@ array_compact(array ar)
 
 
 /**
- * Grow an array by n items.
+ * \brief Grow an array by \e n items.
  *
  * \param ar      The array to grow.
  * \param amount  The amount to grow.
  *
- * \return    The supplied array, or NULL if an error occurred during
+ * \return    The supplied array, or \c NULL if an error occurred during
  *            resize.  The old array is still valid.
- *		errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa array_shrink, array_resize
  */
@@ -275,9 +291,11 @@ array_grow(array ar, int amount)
  * \param ar      The array to shrink.
  * \param amount  The amount to shrink.
  *
- * \return    The supplied array, or NULL if an error occurred during
+ * \return    The supplied array, or \c NULL if an error occurred during
  *            resize.  The old array is still valid.
- *		errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa array_grow, array_resize
  */
@@ -299,14 +317,19 @@ array_shrink(array ar, int amount)
 
 
 /**
- * Add an element to the end of the array, increasing the array's size by one.
+ * \brief Add an element to the end of an array.
+ *
+ * This function increases the array's size by one and places the \p value
+ * at the newly allocated spot at the end.
  *
  * \param ar     The array to add an element to.
  * \param value  The value to add to the array.
  *
- * \return    The supplied array, or NULL if an error occurred during
+ * \return    The supplied array, or \c NULL if an error occurred during
  *            resize.  The old array is still valid.
- *		errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa array_remove
  */
@@ -324,13 +347,18 @@ array_add(array ar, gendata value)
 
 
 /**
- * Remove the last element from an array, decreasing the array's size by one.
+ * \brief Remove the last element from an array.
  *
- * \param ar     The array to remove the element from.
+ * This function decreases the array's size by one, thereby removing the
+ * element at the end.
  *
- * \return    The supplied array, or NULL if an error occurred during
+ * \param ar  The array to remove the element from.
+ *
+ * \return    The supplied array, or \c NULL if an error occurred during
  *            resize.  The old array is still valid.
- *		errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa array_add
  */

@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Arrays
+/**
+ * \brief Dynamic arrays interface.
+ *
+ * \file array.h
+ * Dynamic arrays interface.
  */
 #ifndef GUNE_ARRAY_H
 #define GUNE_ARRAY_H
@@ -41,11 +44,11 @@
 extern "C" {
 #endif
 
-/** Array implementation */
+/** \brief Array implementation */
 typedef struct array_t {
-	gendata *data;
-	unsigned int size;
-	unsigned int capacity;
+	gendata *data;		/**< Pointer to the data in the array */
+	unsigned int size;	/**< The `virtual' size of the array */
+	unsigned int capacity;	/**< The capacity (`real' size) of the array */
 } array_t, *array;
 
 array array_create(void);

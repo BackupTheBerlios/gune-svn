@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Queues implementation.
+ *
  * \file queue.c
- * Queue implementation
+ * Queues implementation.
  */
 #include <assert.h>
 #include <errno.h>
@@ -42,10 +44,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Create a new, empty, queue.
+ * \brief Create a new empty queue.
  *
- * \return  A new empty queue object, or NULL if out of memory.
- *	      errno = ENOMEM if out of memory.
+ * \return  A new empty queue object, or \c NULL if an error occurred.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  */
 queue
 queue_create(void)
@@ -68,14 +72,17 @@ queue_create(void)
 
 
 /**
- * Enqueue data in the queue. Data is put as the last element in the row
- * following the FIFO principle.
+ * \brief Enqueue data in a queue.
+ *
+ * Data is put as the last element in the queue following the FIFO principle.
  *
  * \param q     The given queue.
  * \param data  The data to add to the tail of the queue.
  *
- * \return  The queue given as input, or NULL if out of memory.
- *	      errno = ENOMEM if out of memory.
+ * \return  The queue given as input, or \c NULL if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  */
 queue
 queue_enqueue(queue q, gendata data)
@@ -102,9 +109,13 @@ queue_enqueue(queue q, gendata data)
 
 
 /**
- * Remove the element at the head of the queue from the queue. This function
- * throws an error if the queue is empty. Therefore, always check with the
- * queue_empty() function to see whether a queue is empty or not.
+ * \brief Remove the element at the head of a queue from the queue.
+ *
+ * \attention
+ * This function logs an error at WARN_ERROR level if the queue is empty
+ * (which will exit the application).
+ * Therefore, always check with the queue_empty() function to see whether
+ * a queue is empty or not.
  *
  * \param q  The queue to dequeue the data from.
  *
@@ -138,10 +149,13 @@ queue_dequeue(queue q)
 
 
 /**
- * Look at the element at the head of the queue without dequeueing it.
- * This function throws an error if the queue is empty. Therefore, always
- * check with the queue_empty() function to see whether a queue is empty or
- * not.
+ * \brief Look at the element at the head of a queue without dequeueing it.
+ *
+ * \attention
+ * This function logs an error at WARN_ERROR level if the queue is empty
+ * (which will exit the application).
+ * Therefore, always check with the queue_empty() function to see whether
+ * a queue is empty or not.
  *
  * \param q  The queue to peek at.
  *
@@ -172,7 +186,7 @@ queue_peek(queue q)
 
 
 /**
- * Check whether the queue is empty.
+ * \brief Check whether a queue is empty.
  *
  * \param q  The queue to check for emptiness.
  *
@@ -192,13 +206,16 @@ queue_empty(queue q)
 
 
 /**
- * Destroy a queue by deleting each element.  The data is freed by calling a
- * user-supplied function on it.
+ * \brief Destroy a queue by deleting each element.
+ *
+ * The data is freed by calling the user-supplied function \p f on it.
+ *
+ * \attention
  * If the same data is included multiple times in the queue, the free function
  * gets called that many times.
  *
  * \param q  The queue to destroy.
- * \param f  The function which is used to free the data, or NULL if no
+ * \param f  The function which is used to free the data, or \c NULL if no
  *	       action should be taken to free the data.
  */
 void

@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Stacks implementation.
+ *
  * \file stack.c
- * Stack implementation
+ * Stacks implementation.
  */
 #include <assert.h>
 #include <errno.h>
@@ -43,10 +45,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Create a new, empty, stack.
+ * \brief Create a new empty stack.
  *
- * \return  A new empty stack object, or NULL if out of memory.
- *	     errno = ENOMEM if out of memory.
+ * \return  A new empty stack object, or \c NULL if an error occurred.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  */
 stack
 stack_create(void)
@@ -67,7 +71,7 @@ stack_create(void)
 
 
 /**
- * Pop the top element off the stack and return it.
+ * \brief Pop the top element off a stack.
  *
  * \param s  The stack object to pop the element off.
  *
@@ -94,8 +98,7 @@ stack_pop(stack s)
 
 
 /**
- * Peek at the top element on the stack and return it, without actually
- * popping it.
+ * \brief Peek at the top element on a stack, without actually popping it.
  *
  * \param s  The stack object to peek at.
  *
@@ -125,14 +128,16 @@ stack_peek(stack s)
 
 
 /**
- * Push data onto a stack.
+ * \brief Push data onto a stack.
  *
  * \param s     The stack object to push onto.
  * \param data  The data to push onto the stack.
  * 
- * \return  The given stack s, or NULL in case of an error.  The old
+ * \return  The given stack s, or \c NULL in case of an error.  The old
  *	     stack is still valid in case of an error.
- *	      errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa stack_pop
  */
@@ -150,7 +155,7 @@ stack_push(stack s, gendata data)
 
 
 /**
- * Check whether a stack is empty.
+ * \brief Check whether a stack is empty.
  *
  * \param s  The stack to check.
  *
@@ -166,8 +171,11 @@ stack_empty(stack s)
 
 
 /**
- * Destroy a stack by deleting each element.  The data is freed by calling a
- * user-supplied function on it.
+ * \brief Destroy a stack by deleting each element.
+ *
+ * The data is freed by calling the user-supplied function \p f on it.
+ *
+ * \attention
  * If the same data is included multiple times in the stack, the free function
  * gets called that many times.
  *

@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Association lists implementation.
+ *
  * \file alist.c
- * Association list implementation
+ * Association lists implementation.
  */
 #include <assert.h>
 #include <errno.h>
@@ -39,10 +41,10 @@
 #include <string.h>
 #include <gune/alist.h>
 
-/** Association list entry (stored in the linked list) */
+/** \brief Association list entry (stored in the linked list) */
 typedef struct alist_entry {
-	gendata key;
-	gendata value;
+	gendata key;		/**< Key, used for identification of entries */
+	gendata value;		/**< The entry itself */
 } alist_entry_t, * alist_entry;
 
 static alist alist_insert_internal(alist, gendata, gendata, eq_func,
@@ -52,10 +54,12 @@ static alist alist_insert_internal(alist, gendata, gendata, eq_func,
 
 
 /**
- * Create a new, empty, association list.
+ * \brief Create a new empty association list.
  *
- * \return  A new empty alist object, or NULL if out of memory.
- *	     errno = ENOMEM if out of memory.
+ * \return  A new empty alist object, or \c NULL in case of an error.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa alist_destroy
  */
@@ -72,16 +76,21 @@ alist_create(void)
 
 
 /**
- * Free all memory allocated for an association list.  The data within the
- * list is freed by calling a user-supplied free function.
- * If the same data is included multiple times in the list, the free function
- * gets called that many times.
+ * \brief Free all memory allocated for an association list.
+ *
+ * The data within the list is freed by calling the user-supplied
+ * function \p value_free.  The key used to identify the entry can also
+ * be freed by the user-supplied \p key_free function.
+ *
+ * \attention
+ * If the same data or key is included multiple times in the list, the free
+ * functions get called that many times on the data or key.
  *
  * \param al          The association list to destroy.
  * \param key_free    The function which is used to free the key data, or
- *			NULL if no action should be taken on the key data.
+ *			\c NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
- *			NULL if no action should be taken on the value data.
+ *			\c NULL if no action should be taken on the value data.
  *
  * \sa alist_create
  */
@@ -177,6 +186,8 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
 
 
 /**
+ * \brief Add a (key, value) pair to a linked list (with replace)
+ *
  * Add a data element to the association list with the given key or replace
  * an existing element with the same key.
  *
@@ -185,12 +196,14 @@ alist_insert_internal(alist al, gendata key, gendata value, eq_func eq,
  * \param value	      The data to insert.
  * \param eq          The equals predicate for two keys.
  * \param free_value  The function used to free the old value's data if it
- *		       needs to be replaced, or NULL if the data does not
+ *		       needs to be replaced, or \c NULL if the data does not
  *		       need to be freed.
  *
- * \return  The original alist, or NULL if the data could not be inserted.
+ * \return  The original alist, or \c NULL if the data could not be inserted.
  *          Original alist is still valid in case of error.
- *	        errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa alist_insert_uniq, alist_delete
  */
@@ -203,6 +216,8 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
 
 
 /**
+ * \brief Add a (key, value) pair to a linked list (no replace)
+ *
  * Add a data element to the association list with the given key.  If there
  * already is an element with the same key in the list, it is regarded
  * as an error.
@@ -212,10 +227,12 @@ alist_insert(alist al, gendata key, gendata value, eq_func eq,
  * \param value	      The data to insert.
  * \param eq          The equals predicate for two keys.
  *
- * \return  The original alist, or NULL if the data could not be inserted.
+ * \return  The original alist, or \p NULL if the data could not be inserted.
  *          Original alist is still valid in case of error.
- *             errno = EINVAL if the key is already in the list.
- *	       errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the key is already in the list.
+ * - \b ENOMEM if out of memory.
  *
  * \sa alist_insert, alist_delete
  */
@@ -227,7 +244,7 @@ alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq)
 
 
 /**
- * Lookup an element in the association list.
+ * \brief Look up an element in the association list.
  *
  * \param al    The association list which contains the element.
  * \param key   The key to the element.
@@ -235,9 +252,11 @@ alist_insert_uniq(alist al, gendata key, gendata value, eq_func eq)
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
- * \return  The alist if the key was found, or NULL if the key could not be
+ * \return  The alist if the key was found, or \c NULL if the key could not be
  *          found.
- *	       errno = EINVAL if the key could not be found.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the key could not be found.
  */
 alist
 alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
@@ -266,18 +285,20 @@ alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
 
 
 /**
- * Delete an element from the association list.
+ * \brief Delete an element from the association list.
  *
  * \param al          The association list which contains the element to delete.
  * \param key         The key to the element to delete.
  * \param eq          The equals predicate for two keys.
  * \param key_free    The function which is used to free the key data, or
- *			NULL if no action should be taken on the key data.
+ *			\c NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
- *			NULL if no action should be taken on the value data.
+ *			\c NULL if no action should be taken on the value data.
  *
- * \return  The alist, or NULL if the key could not be found.
- *	       errno = EINVAL if the key could not be found.
+ * \return  The alist, or \c NULL if the key could not be found.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the key could not be found.
  *
  * \sa alist_insert
  */
@@ -330,7 +351,11 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 
 
 /**
+ * \brief Walk through all elements of an alist.
+ *
  * Walk an alist, using a user-specified function on the list's pairs.
+ *
+ * \attention
  * While using this function, it is not allowed to remove entries other than
  * the current entry.  It is allowed to change the contents of the key and
  * value.

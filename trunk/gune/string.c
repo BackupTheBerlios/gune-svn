@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief String manipulation implementation.
+ *
  * \file string.c
- * String manipulation
+ * String manipulation implementation.
  */
 
 #include <assert.h>
@@ -44,14 +46,18 @@
 
 
 /**
- * Concatenate two strings in a newly allocated string.
+ * \brief Concatenate two strings into a newly allocated string.
+ *
  * Original strings are left intact and a new string is malloc()ed.
  *
  * \param a  The first part of the new string.
  * \param b  The second part of the new string.
  *
- * \return  A pointer to the newly allocated string or NULL if out of memory.
- *	      errno = ENOMEM if out of memory.
+ * \return  A pointer to the newly allocated string or \c NULL if an
+ *           error occurred.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  */
 char *
 str_cat(const char *a, const char *b)
@@ -77,8 +83,10 @@ str_cat(const char *a, const char *b)
 
 
 /**
- * Copy a string, with a maximum of n characters.  Like C's strncpy, except
- *  str_n_cpy guarantees a \0 at the end of the string.
+ * \brief Copy a string, with a maximum of \e n characters.
+ *
+ * Like C's strncpy, except str_n_cpy guarantees a \\0 at the end of the
+ * string.
  *
  * \param src  The source string (to copy).
  * \param dst  The destination buffer (of at least len bytes).
@@ -99,12 +107,14 @@ str_n_cpy(char *dst, const char *src, size_t len)
 
 
 /**
- * Copy a string, allocating memory for the new string.
+ * \brief Copy a string, allocating memory for the new string.
  *
  * \param s  The string to copy.
  *
- * \return   The copy of the original string, or NULL if out of memory.
- *	       errno = ENOMEM if out of memory.
+ * \return   The copy of the original string, or \c NULL if an error occurred.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa str_n_cpy
  */
@@ -122,12 +132,12 @@ str_cpy(const char *s)
 
 
 /**
- * Generate hash from a string.
+ * \brief Generate hash from a string.
  *
  * \param key    The string to hash.
  * \param range  The range of the hash table.
  *
- * \return  The hash of the supplied string, in the range [0..range-1].
+ * \return  The hash of the supplied string, in the range \f$ [0..range-1] \f$.
  *
  * \sa str_eq
  */
@@ -152,7 +162,7 @@ str_hash(gendata key, unsigned int range)
 
 
 /**
- * String comparison function for hash tables.
+ * \brief String comparison function for use with hash tables.
  *
  * \param s1  The string to compare to s2.
  * \param s2  The string to compare to s1.

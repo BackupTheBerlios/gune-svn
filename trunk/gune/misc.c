@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Miscelleaneous functionality.
+ *
  * \file misc.c
- * Miscellaneous functions
+ * Miscellaneous functionality which has no real place anywhere else.
  */
 
 #include <gune/misc.h>
@@ -59,7 +61,7 @@ void * const CONST_PTR = (void *)constant_ptr_dummy_func;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Pointer comparison function for hash tables and association lists.
+ * \brief Pointer comparison function for hash tables and association lists.
  *
  * \param p1  The pointer to compare to p2.
  * \param p2  The pointer to compare to p1.
@@ -74,17 +76,22 @@ ptr_eq(gendata p1, gendata p2)
 
 
 /**
- * Generate hash from a pointer, using just the pointer's raw integer value.
+ * \brief Calculate hash from a pointer.
+ *
+ * The hash is calculated using just the pointer's raw integer value.
+ *
+ * \attention
  * Use of this function is not recommended.  If anything more is known about
- *  the key's data it is highly recommended to write a more specific hashing
- *  function.
+ * the key's data it is highly recommended to write a more specific hashing
+ * function.
  *
  * \param key    The pointer to hash.
  * \param range  The range of the hash table.  This should be a prime value
  *		  for this function to ensure all hash table buckets are
  *		  used equally much.
  *
- * \return  The hash of the supplied pointer, in the range [0..range-1].
+ * \return  The hash of the supplied pointer, in the range
+ *           \f$ [0..range-1] \f$.
  *
  * \sa ptr_eq
  */

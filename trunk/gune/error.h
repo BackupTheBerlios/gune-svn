@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Error logging provisions
+/**
+ * \brief Error reporting and logging interface.
+ *
+ * \file error.h
+ * Error reporting and logging interface.
  */
 #ifndef GUNE_ERROR_H
 #define GUNE_ERROR_H
@@ -41,12 +44,12 @@
 extern "C" {
 #endif
 
-/** The possible warning levels a log message can have */
+/** \brief The possible warning levels a log message can have */
 typedef enum {
-	WARN_DEBUG,
-	WARN_NOTIFY,
-	WARN_WARNING,
-	WARN_ERROR,
+	WARN_DEBUG,			/**< Debug messages */
+	WARN_NOTIFY,			/**< Notifications toward the user */
+	WARN_WARNING,			/**< Warnings */
+	WARN_ERROR,			/**< Serious errors */
 	NUM_WARNLVLS
 } warnlvl;
 

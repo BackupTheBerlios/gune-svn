@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Linked lists
+/**
+ * \brief Linked lists interface.
+ *
+ * \file lists.h
+ * Singly and doubly linked list interface.
  */
 #ifndef GUNE_LISTS_H
 #define GUNE_LISTS_H
@@ -41,10 +44,10 @@
 extern "C" {
 #endif
 
-/** Singly linked list implementation */
+/** \brief Singly linked list implementation */
 typedef struct sll_t {
-	gendata data;
-	struct sll_t *next;
+	gendata data;		/**< The data stored at the current entry */
+	struct sll_t *next;	/**< Pointer to the next entry */
 } sll_t, *sll;
 
 /* SLL creation/deletion functions */
@@ -64,17 +67,18 @@ gendata sll_get_data(sll);
 sll sll_set_data(sll, gendata);
 sll sll_forward(sll, unsigned int);
 
+/** Quick macro to go forward one item in the list */
 #define sll_next(l)	(sll_forward((l), 1))
 
 #ifdef DEBUG
 void sll_dump(sll, const char *);
 #endif
 
-/** Doubly linked list implementation */
+/** \brief Doubly linked list implementation */
 typedef struct dll_t {
-	gendata data;
-	struct dll_t *prev;
-	struct dll_t *next;
+	gendata data;		/**< The data stored at the current entry */
+	struct dll_t *prev;	/**< Pointer to the previous entry */
+	struct dll_t *next;	/**< Pointer to the next entry */
 } dll_t, *dll;
 
 /* DLL creation/deletion functions */
@@ -94,7 +98,9 @@ dll dll_set_data(dll, gendata);
 dll dll_forward(dll, unsigned int);
 dll dll_backward(dll, unsigned int);
 
+/** Quick macro to go forward one item in the list */
 #define dll_next(l)	(dll_forward((l), 1))
+/** Quick macro to go backward one item in the list */
 #define dll_prev(l)	(dll_backward((l), 1))
 
 #ifdef DEBUG

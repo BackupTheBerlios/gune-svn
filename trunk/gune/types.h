@@ -29,36 +29,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Custom types
+/**
+ * \brief Custom types.
+ *
+ * \file types.h
+ * Certain custom (re-usable) types.
  */
 #ifndef GUNE_TYPES_H
 #define GUNE_TYPES_H
 
-/** Generic data type to put in lists, stacks etc. */
+/**
+ * \brief Generic data type to put in lists, stacks etc.
+ *
+ * This data type exists so we can make our functions more generic
+ * without putting the burden of having to malloc() every little integer
+ * or character on the programmer.
+ * Compare:
+ * \code
+ * int x = 10;
+ * gendata d;
+ *
+ * d.num = x;
+ *
+ * stack_push(st, d);
+ * \endcode
+ * to the more error-prone and annoying:
+ * \code
+ * int *x;
+ *
+ * if ((x = malloc(sizeof(int))) == NULL)
+ *	log_entry(WARN_ERROR, "Out of memory for a lousy int!");
+ * *x = 10;
+ * stack_push(st, x);
+ * \endcode
+ * <em>Don't forget to free \p x</em> in the last example.
+ * Also, the last example needs one extra pointer for each \c int you store.
+ */
 /*
  * Note: We can't use the names of C (char, int), so we have to be a little
  * creative here.
  */
 typedef union gendata {
-	int		num;		/* Number */
-	unsigned int	posnum;		/* Positive number */
-	char		sym;		/* Symbol */
-	void *		ptr;		/* Pointer */
+	int		num;			/**< Number */
+	unsigned int	posnum;			/**< Positive number */
+	char		sym;			/**< Symbol */
+	void *		ptr;			/**< Pointer */
 } gendata;
 
-/** Function type to be supplied to the _destroy functions to free data. */
+/**
+ * \brief Function type to be supplied to the _destroy functions to free data.
+ */
 typedef void (*free_func) (void *);
 
 /**
- * Equals predicate function for comparing keys (for association lists,
- * hash tables etc)
+ * \brief Equals predicate function type for comparing keys.
  */
 typedef int (* eq_func) (gendata, gendata);
 
 /**
- * Function for traveling through lists that have (key, value) pairs, like
- *  association lists and hash tables.
+ * \brief Function for traveling through lists that have (key, value) pairs.
  */
 typedef void (* assoc_func) (gendata *, gendata *, gendata);
 

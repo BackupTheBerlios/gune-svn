@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Association List
+/**
+ * \brief Association lists interface
+ *
+ * \file alist.h
+ * Association lists interface.
  */
 #ifndef GUNE_ALIST_H
 #define GUNE_ALIST_H
@@ -42,9 +45,9 @@
 extern "C" {
 #endif
 
-/** Association list implementation */
+/** \brief Association list implementation */
 typedef struct alist_t {
-	sll list;
+	sll list;			/**< The list of (key, value) pairs */
 } alist_t, * alist;
 
 alist alist_create(void);

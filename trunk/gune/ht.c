@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Hash tables implementation.
+ *
  * \file ht.c
- * Hash table implementation
+ * Hash tables implementation.
  */
 #include <assert.h>
 #include <stdlib.h>
@@ -43,13 +45,15 @@ static ht ht_insert_internal(ht, gendata, gendata, eq_func, free_func, int);
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Create a new, empty, hash table.
+ * \brief Create a new empty hash table.
  *
- * \param range  The range of the key function (0 <= x < range).
+ * \param range  The range of the key function (\f$ 0 \le x < range \f$).
  * \param hash   The hashing function to use on keys.
  *
- * \return  A new empty hash table object, or NULL if out of memory.
- *	     errno = ENOMEM if out of memory.
+ * \return  A new empty hash table object, or \c NULL if an error occurred.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa ht_destroy
  */
@@ -97,18 +101,21 @@ ht_create(unsigned int range, hash_func hash)
 
 
 /**
- * Free all memory allocated for a hash table.  The data within the table is
- * freed by calling a user-supplied free function.
+ * \brief Free all memory allocated for a hash table.
+ *
+ * The data within the table is freed by calling a user-supplied free function.
+ *
+ * \note
  * If the same data is included multiple times in the table, the free function
- * gets called that many times. <- XXX This is impossible, currently, unless
- * really strange things have been going on! (like, say, a random hashing
- * function)
+ * gets called that many times.
+ * This is currently impossible, unless really strange things have been
+ * going on. (like, say, a random hashing function)
  *
  * \param t           The hash table to destroy.
  * \param key_free    The function which is used to free the key data, or
- *			NULL if no action should be taken on the key data.
+ *			\c NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
- *			NULL if no action should be taken on the value data.
+ *			\c NULL if no action should be taken on the value data.
  *
  * \sa ht_create
  */
@@ -169,6 +176,8 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
 
 
 /**
+ * \brief Add a (key, value) pair to a hash table (with replace)
+ *
  * Add a data element to the hash table with the given key or replace an
  *  existing element with the same key.
  *
@@ -177,12 +186,14 @@ ht_insert_internal(ht t, gendata key, gendata value, eq_func eq,
  * \param value       The data to insert.
  * \param eq          The equals predicate for two keys.
  * \param free_value  The function used to free the old value's data if it
- *		       needs to be replaced, or NULL if the data does not
+ *		       needs to be replaced, or \c NULL if the data does not
  *		       need to be freed.
  *
- * \return  The original hash table, or NULL if the data could not be
+ * \return  The original hash table, or \c NULL if the data could not be
  *           inserted.  Original hash table is still valid in case of error.
- *	       errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa ht_insert_uniq, ht_delete
  */
@@ -194,8 +205,8 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
 
 
 /**
- * Add a data element to the hash table with the given key or replace an
- *  existing element with the same key.
+ * \brief Add a (key, value) pair to a hash table (no replace)
+ *
  * Add a data element to the hash table with the given key.  If there already
  * is an element with the same key in the table, it is regarded as an error.
  *
@@ -204,10 +215,12 @@ ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
  * \param value       The data to insert.
  * \param eq          The equals predicate for two keys.
  *
- * \return  The original hash table, or NULL if the data could not be
+ * \return  The original hash table, or \c NULL if the data could not be
  *           inserted.  Original hash table is still valid in case of error.
- *             errno = EINVAL if the key is already in the table.
- *	       errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the key is already in the table.
+ * - \b ENOMEM if out of memory.
  *
  * \sa ht_insert, ht_delete
  */
@@ -219,7 +232,7 @@ ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq)
 
 
 /**
- * Lookup an element in the hash table.
+ * \brief Look up an element in a hash table.
  *
  * \param t     The hashtable which contains the element.
  * \param key   The key to the element.
@@ -227,8 +240,10 @@ ht_insert_uniq(ht t, gendata key, gendata value, eq_func eq)
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
- * \return  The hash table, or NULL if the key could not be found.
- *	     errno = EINVAL if the key could not be found.
+ * \return  The hash table, or \c NULL if the key could not be found.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the key could not be found.
  */
 ht
 ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
@@ -257,18 +272,20 @@ ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
 
 
 /**
- * Delete an element from the hash table.
+ * \brief Delete an element from the hash table.
  *
  * \param t           The hashtable which contains the element to delete.
  * \param key         The key to the element to delete.
  * \param eq          The equals predicate for two keys.
  * \param key_free    The function which is used to free the key data, or
- *			NULL if no action should be taken on the key data.
+ *			\c NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
- *			NULL if no action should be taken on the value data.
+ *			\c NULL if no action should be taken on the value data.
  *
- * \return  The hash table, or NULL if the key could not be found.
- *	       errno = EINVAL if the key could not be found.
+ * \return  The hash table, or \c NULL if the key could not be found.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the key could not be found.
  *
  * \sa ht_insert
  */
@@ -300,7 +317,11 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 
 
 /**
+ * \brief Walk through all elements of a hash table.
+ *
  * Walk a hash table, using a user-specified function on the table's pairs.
+ *
+ * \attention
  * While using this function, it is not allowed to remove entries other than
  * the current entry.  It is allowed to change the contents of the key and
  * value, as long as the key's hash will not be affected.

@@ -17,3 +17,8 @@
 - Add conversion functions between the different types.
 - Add sorting functions for the types on which it is meaningful.
 - Implement a tree data type.
+- Find out how to get Doxygen /not/ to make a hyperlink to <gune/string.h>
+   wherever we #include <string.h>
+- Find out if it is possible to make a macro or something for errno values
+   lists for Doxygen.  These things always look the same, so it should be
+   possible if Doxygen supports it.

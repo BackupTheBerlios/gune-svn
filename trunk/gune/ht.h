@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Hash table
+/**
+ * \brief Hash tables interface.
+ *
+ * \file ht.h
+ * Hash tables interface.
  */
 #ifndef GUNE_HT_H
 #define GUNE_HT_H
@@ -43,14 +46,14 @@
 extern "C" {
 #endif
 
-/** Hashing function */
+/** \brief Hashing function type */
 typedef unsigned int (* hash_func) (gendata, unsigned int);
 
-/** Hash table implementation */
+/** \brief Hash table implementation */
 typedef struct ht_t {
-	alist *buckets;
-	unsigned int range;
-	hash_func hash;
+	alist *buckets;		/**< The buckets to which hash values map */
+	unsigned int range;	/**< The number of buckets */
+	hash_func hash;		/**< The hashing function to use */
 } ht_t, *ht;
 
 ht ht_create(unsigned int, hash_func);

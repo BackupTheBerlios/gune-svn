@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Linked lists implementation.
+ *
  * \file lists.c
- * Linked lists implementation
+ * Singly and doubly linked list implementations.
  */
 #include <assert.h>
 #include <errno.h>
@@ -44,7 +46,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Creates a new empty singly linked list.
+ * \brief Create a new empty singly linked list.
  *
  * \return  A new empty singly linked list.
  *
@@ -59,13 +61,17 @@ sll_create(void)
 
 
 /**
+ * \brief Destroy a singly linked list.
+ *
  * Destroy a singly linked list by deleting each element.  The data is freed
- * by calling a user-supplied function on it.
+ * by calling the user-supplied function \p f on it.
+ *
+ * \attention
  * If the same data is included multiple times in the list, the free function
  * gets called that many times.
  *
  * \param ll  The list to destroy.
- * \param f   The function which is used to free the data, or NULL if no
+ * \param f   The function which is used to free the data, or \c NULL if no
  *		action should be taken to free the data.
  *
  * \sa  sll_create dll_destroy
@@ -84,11 +90,11 @@ sll_destroy(sll ll, free_func f)
 
 
 /**
- * Returns the number of elements in the given singly linked list.
+ * \brief Return the number of elements in a singly linked list.
  *
  * \param ll The singly linked list to get the number of elements from.
  *
- * \return  The number of elements as an unsigned int.
+ * \return  The number of elements as an \c unsigned \c int.
  *
  * \sa  dll_count
  */
@@ -106,7 +112,7 @@ sll_count(sll ll)
 
 
 /**
- * Returns whether or not the given linked list is an empty one.
+ * \brief Return whether or not a singly linked list is empty.
  *
  * \param ll  The singly linked list to check.
  *
@@ -124,14 +130,20 @@ sll_empty(sll ll)
 
 
 /**
- * Removes the head from a singly linked list.  The data stored in the linked
- * list is NOT freed.
+ * \brief Remove the head from a singly linked list.
+ *
+ * The data stored in the linked list is \e not freed.
+ *
+ * \attention
+ * The head actually has to be the real \e first item of a linked list, since
+ * there is no way to re-link the \c next element of the item before the
+ * head of the supplied list.
  *
  * XXX: It probably is a good idea to provide an extra free_func arg
  *
  * \param ll  The singly linked list.
  *
- * \return  A pointer to the new singly linked list.
+ * \return  A pointer to the new (headless) singly linked list.
  *
  * \sa  sll_remove_next, dll_remove_head, sll_empty
  */
@@ -154,16 +166,19 @@ sll_remove_head(sll ll)
 
 
 /**
- * Removes the next item after the head from a singly linked list.  The data
- * stored in the linked list is NOT freed.
+ * \brief Remove the next item after the head from a singly linked list.
+ *
+ * The data stored in the linked list is \e not freed.
  *
  * XXX: It probably is a good idea to provide an extra free_func arg
  *
  * \param ll  The singly linked list.
  *
- * \return  A pointer to the new singly linked list, or NULL if the
+ * \return  A pointer to the new singly linked list, or \c NULL if the
  *	     next item does not exist.
- *	     errno = EINVAL if the next item does not exist.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the next item does not exist.
  *
  * \sa  sll_remove_head, sll_empty
  */
@@ -195,14 +210,16 @@ sll_remove_next(sll ll)
 
 
 /**
- * Prepends the given element to the head of the singly linked list.
+ * \brief Prepend an element to the head of a singly linked list.
  *
  * \param ll    The singly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or NULL in case of error.  The old linked
+ * \return  The new linked list or \c NULL in case of error.  The old linked
  *	     list is still valid in case of error.
- *	      errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa  sll_append_head, dll_prepend_head
  */
@@ -225,14 +242,16 @@ sll_prepend_head(sll ll, gendata data)
 
 
 /**
- * Appends the given element at the head of the singly linked list.
+ * \brief Append an element to the head of a singly linked list.
  *
- * \param ll    The singly linked list to append the element at.
+ * \param ll    The singly linked list to append the element to.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or NULL in case of error.  The old
+ * \return  The old(!) linked list or \c NULL in case of error.  The old
  *	      linked list is still valid in case of error.
- *	      errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa  sll_prepend_head dll_append_head
  */
@@ -261,14 +280,16 @@ sll_append_head(sll ll, gendata data)
 
 
 /**
- * Search forward in a singly linked list.
+ * \brief Move forward in a singly linked list.
  *
  * \param ll     The singly linked list to search in.
  * \param nskip  The number of elements to search forward.
  *
- * \return The list at the indexed position, or NULL if the index
+ * \return The list at the indexed position, or \c NULL if the index
  *          is out of bounds.
- *	     errno = EINVAL if the index is out of bounds.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the index is out of bounds.
  *
  * \sa dll_forward
  */
@@ -293,7 +314,7 @@ sll_forward(sll ll, unsigned int nskip)
 
 
 /**
- * Get the data at the current position from a singly linked list.
+ * \brief Get the data at the current position of a singly linked list.
  *
  * \param ll     The singly linked list to look in.
  *
@@ -312,7 +333,7 @@ sll_get_data(sll ll)
 
 
 /**
- * Set the data at the current position from a singly linked list.
+ * \brief Set the data at the current position of a singly linked list.
  *
  * \param ll     The singly linked list to store the data in.
  * \param data   The data to store.
@@ -340,9 +361,12 @@ sll_set_data(sll ll, gendata data)
  */
 #ifdef DEBUG
 /**
- * Prints a dump of a singly linked list.
- * The element data is formatted according to the supplied format string.  This
- * function is intended for testing and debug purposes only.
+ * \brief Print a dump of a singly linked list.
+ *
+ * The element data is formatted according to the supplied format string.
+ *
+ * \note
+ * This function is intended for testing and debugging purposes only.
  *
  * \param ll   The singly linked list to print.
  * \param fmt  The format string in printf(3) format.
@@ -368,7 +392,7 @@ sll_dump(sll ll, const char *fmt)
 
 
 /**
- * Creates a new empty doubly linked list.
+ * \brief Create a new empty doubly linked list.
  *
  * \return  A new empty doubly linked list.
  *
@@ -383,13 +407,17 @@ dll_create(void)
 
 
 /**
- * Destroy a doubly linked list by deleting each element.  The data stored
- * in the linked list is freed by calling a user-supplied function.
+ * \brief Destroy a doubly linked list.
+ *
+ * The data stored in the linked list is freed by calling the user-supplied
+ * function \p f on it.
+ *
+ * \attention
  * If the same data is included multiple times in the list, the free function
  * gets called that many times.
  *
  * \param ll  The list to destroy.
- * \param f   The function which is used to free the data, or NULL if no
+ * \param f   The function which is used to free the data, or \c NULL if no
  *		action should be taken to free the data.
  *
  * \sa  dll_create sll_destroy
@@ -408,11 +436,11 @@ dll_destroy(dll ll, free_func f)
 
 
 /**
- * Returns the number of elements in the given doubly linked list.
+ * \brief Return the number of elements in a doubly linked list.
  *
  * \param ll The doubly linked list to get the number of elements from.
  *
- * \return  The number of elements as an unsigned int.
+ * \return  The number of elements as an \c unsigned \c int.
  *
  * \sa  sll_count
  */
@@ -430,7 +458,7 @@ dll_count(dll ll)
 
 
 /**
- * Returns whether or not the given linked list is an empty one.
+ * \brief Return whether or not a linked list is an empty one.
  *
  * \param ll  The doubly linked list to check.
  *
@@ -448,8 +476,14 @@ dll_empty(dll ll)
 
 
 /**
- * Removes the head from a doubly linked list, honouring the prev element
- *  of the list.
+ * \brief Remove the head from a doubly linked list.
+ *
+ * This function honours the prev element of the list, so the `head' does
+ * not necessarily have to be the first element of a total list.
+ *
+ * The data stored in the linked list is \e not freed.
+ *
+ * XXX: Also, we should possibly have an extra free_func arg.
  *
  * \param ll  The doubly linked list.
  *
@@ -477,14 +511,18 @@ dll_remove_head(dll ll)
 
 
 /**
- * Prepends the given element to the head of the doubly linked list, honouring
- *  the prev element of the list.
+ * \brief Prepend an element to the head of a doubly linked list.
+ *
+ * This function honours the (old) prev element of the list, so the `head'
+ * does not necessarily have to be the first element of a total list.
  *
  * \param ll    The doubly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or NULL in case of error.
- *	      errno = ENOMEM if out of memory.
+ * \return  The new linked list or \c NULL in case of error.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa  dll_append_head sll_prepend_head
  */
@@ -516,14 +554,16 @@ dll_prepend_head(dll ll, gendata data)
 
 
 /**
- * Appends the given element at the head of the doubly linked list.
+ * \brief Append an element at the head of a doubly linked list.
  *
- * \param ll    The doubly linked list to prepend the element at.
+ * \param ll    The doubly linked list to prepend the element to.
  * \param data  The element to append.
  *
- * \return  The old(!) linked list or NULL in case of error.  The old
+ * \return  The old(!) linked list or \c NULL in case of error.  The old
  *	     list is still valid in case of error.
- *	      errno = ENOMEM if out of memory.
+ *
+ * \par Errno values:
+ * - \b ENOMEM if out of memory.
  *
  * \sa  sll_append_head dll_prepend_head
  */
@@ -555,14 +595,16 @@ dll_append_head(dll ll, gendata data)
 
 
 /**
- * Search forward in a doubly linked list.
+ * \brief Move forward in a doubly linked list.
  *
  * \param ll     The doubly linked list to search in.
  * \param nskip  The number of elements to search forward.
  *
- * \return The list at the indexed position, or NULL if the index
+ * \return The list at the indexed position, or \c NULL if the index
  *          is out of bounds.
- *	     errno = EINVAL if the index is out of bounds.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the index is out of bounds.
  *
  * \sa sll_forward dll_backward
  */
@@ -587,14 +629,16 @@ dll_forward(dll ll, unsigned int nskip)
 
 
 /**
- * Search backward in a doubly linked list.
+ * \brief Move backward in a doubly linked list.
  *
  * \param ll     The doubly linked list to search in.
  * \param nskip  The number of elements to search backward.
  *
- * \return The list at the indexed position, or NULL if the index
+ * \return The list at the indexed position, or \c NULL if the index
  *          is out of bounds.
- *	    errno = EINVAL if the index is out of bounds.
+ *
+ * \par Errno values:
+ * - \b EINVAL if the index is out of bounds.
  *
  * \sa dll_forward
  */
@@ -619,7 +663,7 @@ dll_backward(dll ll, unsigned int nskip)
 
 
 /**
- * Get the data at the current position from a doubly linked list.
+ * \brief Get the data at the current position of a doubly linked list.
  *
  * \param ll     The doubly linked list to look in.
  *
@@ -638,7 +682,7 @@ dll_get_data(dll ll)
 
 
 /**
- * Set the data at the current position from a doubly linked list.
+ * \brief Set the data at the current position of a doubly linked list.
  *
  * \param ll     The doubly linked list to store the data in.
  * \param data   The data to store.
@@ -661,9 +705,12 @@ dll_set_data(dll ll, gendata data)
 
 #ifdef DEBUG
 /**
- * Prints a dump of a doubly linked list.
- * The element data is formatted according to the supplied format string.  This
- * function is intended for testing and debug purposes only.
+ * \brief Print a dump of a doubly linked list.
+ *
+ * The element data is formatted according to the supplied format string.
+ *
+ * \note
+ * This function is intended for testing and debug purposes only.
  *
  * \param ll   The doubly linked list to print.
  * \param fmt  The format string in printf(3) format.

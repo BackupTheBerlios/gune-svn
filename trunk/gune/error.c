@@ -30,8 +30,10 @@
  */
 
 /**
+ * \brief Error reporting and logging implementation.
+ *
  * \file error.c
- * Provisions for error reporting
+ * Error reporting and logging implementation.
  */
 
 #include <stdarg.h>
@@ -41,10 +43,8 @@
 
 static FILE *logfile = NULL;
 
-/**
+/*
  * Description strings for the different warning levels
- *
- * \sa warnlvl
  */
 static const char *warnlvl_descr[NUM_WARNLVLS] = {
 	"DEBUG",
@@ -57,9 +57,12 @@ static const char *warnlvl_descr[NUM_WARNLVLS] = {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Specify which file is used to send log messages to. Defaults to stderr.
+ * \brief Set logfile.
  *
- * \param log  The log file to write to.  If this is NULL, nothing is changed.
+ * Specify which file is used to send log messages to. Defaults to \c stderr.
+ *
+ * \param log  The log file to write to.  If this is \c NULL, nothing is
+ *              changed.
  *
  * \sa log_entry
  */
@@ -72,8 +75,10 @@ set_logfile(FILE *log)
 
 
 /**
+ * \brief Create a logfile entry.
+ *
  * Write a message of the specified level to the log file.
- * The default logfile is standard error (stderr).
+ * The default logfile is standard error (\c stderr).
  * This function does not return in case of an WARN_ERROR
  * it exit()s with an exit status of 1.
  *

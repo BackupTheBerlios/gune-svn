@@ -30,18 +30,35 @@
  */
 
 /**
+ * \brief Version macros.
+ *
  * \file version.h
- * Definitions for Gune's version number and version convenience functions.
+ * Definitions for Gune's version number and version convenience macros.
  */
 #ifndef GUNE_VERSION_H
 #define GUNE_VERSION_H
 
-#define GUNE_MINOR_VERSION	1	/** Gune's minor version number */
-#define GUNE_MAJOR_VERSION	0	/** Gune's major version number */
+/** \brief Gune's minor version number */
+#define GUNE_MINOR_VERSION	1
 
-/** Gune's long version number (major, underscore, minor.  Example: 1_0). */
+/** \brief Gune's major version number
+ */
+#define GUNE_MAJOR_VERSION	0
+
+/**
+ * \brief Gune's long version number
+ *
+ * In the format major, underscore, minor.  Example: 1_0.
+ *
+ * \hideinitializer
+ */
 #define GUNE_VERSION		GEN_VERSION(GUNE_MAJOR_VERSION, GUNE_MINOR_VERSION)
 
+/**
+ * \brief Gune's version, as a string.
+ *
+ * \hideinitializer
+ */
 #define GUNE_VERSION_STRING	\
 		GEN_VERSION_STR(GUNE_MAJOR_VERSION, GUNE_MINOR_VERSION)
 
@@ -50,13 +67,24 @@
  * and the minor version number, which can both be proprocessor definitions.
  *
  * Example:
+ * \code
  * #define MYAPP_MAJOR		1
  * #define MYAPP_MINOR		0
- * #define MYAPP_VERSION GEN_VERSION(MYAPP_MAJOR, MYAPP_MINOR)
+ * #define MYAPP_VERSION		GEN_VERSION(MYAPP_MAJOR, MYAPP_MINOR)
+ * \endcode
  * is identical to:
- * #define MYAPP_VERSION	1_0
+ * \code
+ * #define MYAPP_MAJOR		1
+ * #define MYAPP_MINOR		0
+ * #define MYAPP_VERSION		1_0
+ * \endcode
+ * This is especially useful when passing minor and major versions around
+ * with \c make to the C compiler.
  *
- * XXX: Check if this looks ok in Doxygen's output.
+ * \param a  The major version number
+ * \param b  The minor version number
+ *
+ * \hideinitializer
  */
 #define GEN_VERSION(a, b)	GEN_VERSION_INTERN(a, b)
 
@@ -68,8 +96,19 @@
 #define GEN_VERSION_INTERN(a, b)	a##_##b
 
 
-/** Get the string value of a token.  Example: PP_STR(1) => "1". */
-#define PP_STR(a)			PP_STR_INTERN(a)
+/**
+ * Get the string value of a token.
+ *
+ * Example:
+ * \code
+ * PP_STR(1) => "1"
+ * \endcode
+ *
+ * \param s  The string to get the value of.
+ *
+ * \hideinitializer
+ */
+#define PP_STR(s)			PP_STR_INTERN(s)
 
 /* Again, we need internal PP_STR if the parameter is a macro definition. */
 #define PP_STR_INTERN(a)		#a
@@ -78,7 +117,14 @@
  * Generate a version string from two integers using the preprocessor.
  *
  * Example:
+ * \code
  * GEN_VERSION_STR(1, 0)	==> ("1.0")
+ * \endcode
+ *
+ * \param a  The major version number
+ * \param b  The minor version number
+ *
+ * \hideinitializer
  */
 #define GEN_VERSION_STR(a, b)		(PP_STR(a) "." PP_STR(b))
 

@@ -17,4 +17,9 @@ LINTFLAGS+=	-I.. ${DEFS}
 doc:
 	doxygen
 
+install: includes
+
+includes:
+	${INSTALL_DIR} ${INCSDIR}
+
 .include <bsd.lib.mk>

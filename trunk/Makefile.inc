@@ -13,6 +13,7 @@ PREFIX?=	/usr/local
 LIBDIR=		${PREFIX}/lib
 MANDIR=		${PREFIX}/share/man
 HTMLDIR=	${PREFIX}/share/doc
+INCSDIR=	${PREFIX}/include/gune
 
 # Uncomment this to install HTML files too (currently not implemented)
 #INSTALL_HTML=yes

@@ -102,7 +102,7 @@ maketar ()
 	getrepos
 	getversion
 	cd ..
-	svn export "${REPOS}/tags/${BASENAME}" "${BASENAME}"
+	svn export "${REPOS}/trunk" "${BASENAME}"
 	${CREATE_TAR} "${BASENAME}.tar.gz" "${BASENAME}"
 
 	cd ${BASENAME}

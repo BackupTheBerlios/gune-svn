@@ -14,7 +14,7 @@ testall: all
 	test/test -a
 
 doc:
-	cd gune && ${MAKE} doc
+	cd gune && ${MAKE} doc && ./mklinks.sh
 
 release: doc
 

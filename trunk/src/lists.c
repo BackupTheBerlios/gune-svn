@@ -59,7 +59,7 @@ const queue_t * const ERROR_QUEUE = (const void *)&list_error_ptr;
 /**
  * Creates a new empty singly linked list.
  *
- * \return  The pointer to the new empty singly linked list.
+ * \return  A new empty singly linked list.
  *
  * \sa sll_destroy dll_create
  */
@@ -151,8 +151,7 @@ sll_remove_head(sll ll)
  * \param ll    The singly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or ERROR_SLL in case of error.  Old linked list
- *          has become invalid, unless an error occurred.
+ * \return  The new linked list or ERROR_SLL in case of error.
  *
  * \sa  sll_append_head dll_prepend_head
  */
@@ -168,6 +167,33 @@ sll_prepend_head(sll ll, void *data)
 
 	/* Prepend to the current list */
 	new->next = ll;
+	return (sll)new;
+}
+
+
+/**
+ * Appends the given element at the head of the singly linked list.
+ *
+ * \param ll    The singly linked list to append the element at.
+ * \param data  The element to append.
+ *
+ * \return  The old(!) linked list or ERROR_SLL in case of error.
+ *
+ * \sa  sll_prepend_head dll_append_head
+ */
+sll
+sll_append_head(sll ll, void *data)
+{
+	sll_t *new;
+
+	/* Allocate the new element */
+	if ((new = malloc(sizeof(sll_t))) == NULL)
+		return (sll)ERROR_SLL;
+	new->data = data;
+	new->next = ll->next;
+
+	/* Append at the current list */
+	ll->next = new;
 	return (sll)new;
 }
 
@@ -244,7 +270,7 @@ sll_dump(sll ll, char *fmt)
 /**
  * Creates a new empty doubly linked list.
  *
- * \return  The pointer to the new empty doubly linked list.
+ * \return  A new empty doubly linked list.
  *
  * \sa dll_destroy sll_create
  */
@@ -327,13 +353,13 @@ dll_remove_head(dll ll)
 
 
 /**
- * Prepends the given element to the head of the doubly linked list.
+ * Prepends the given element to the head of the doubly linked list, honouring
+ *  the prev element of the list.
  *
  * \param ll    The doubly linked list to prepend the element to.
  * \param data  The element to prepend.
  *
- * \return  The new linked list or NULL in case of error.  Old linked list
- *          has become invalid, unless an error occurred.
+ * \return  The new linked list or NULL in case of error.
  *
  * \sa  dll_append sll_prepend_head
  */
@@ -346,9 +372,35 @@ dll_prepend_head(dll ll, void *data)
 		return NULL;
 	new->data = data;
 	new->next = ll;
-	new->prev = NULL;
+	new->prev = ll->prev;
 	ll->prev = new;
 	return (dll)new;
+}
+
+
+/**
+ * Appends the given element at the head of the doubly linked list.
+ *
+ * \param ll    The doubly linked list to prepend the element at.
+ * \param data  The element to append.
+ *
+ * \return  The old(!) linked list or NULL in case of error.
+ *
+ * \sa  dll_append sll_prepend_head
+ */
+dll
+dll_append_head(dll ll, void *data)
+{
+	dll_t *new;
+
+	if ((new = malloc(sizeof(dll_t))) == NULL)
+		return NULL;
+	new->data = data;
+	new->next = ll->next;
+	new->next->prev = new;
+	new->prev = ll;
+	ll->next = new;
+	return ll;
 }
 
 
@@ -464,8 +516,7 @@ dll_dump(dll ll, char *fmt)
 /**
  * Create a new, empty, stack.
  *
- * \return  The pointer to the new stack object, or ERROR_STACK if out of
- *           memory.
+ * \return  A new empty stack object, or ERROR_STACK if out of memory.
  */
 stack
 stack_create(void)
@@ -500,6 +551,7 @@ stack_pop(stack s)
 	void *res;
 
 	assert(s != ERROR_STACK && s != NULL);
+	assert(s->top != ERROR_SLL);
 
 	if (stack_is_empty(s))
 		log_entry(WARN_ERROR, "Cannot pop from an empty stack.");
@@ -594,22 +646,25 @@ stack_destroy(stack s)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * Create a new queue object and returns a pointer to it.
+ * Create a new, empty, queue.
  *
- * \return  A pointer to the new queue object or ERROR_QUEUE if there is
- *           not enough memory available.
+ * \return  A new empty queue object, or ERROR_QUEUE if out of memory.
  */
 queue
-queue_new(void)
+queue_create(void)
 {
 	queue_t *q;
 
 	if ((q = malloc(sizeof(queue_t))) == NULL)
 		return (queue)ERROR_QUEUE;
 
-	q->bgn = NULL;
-	q->end = NULL;
-	q->count = 0;
+	q->head = sll_create();
+	if (q->head == ERROR_SLL) {
+		free(q);
+		return (queue)ERROR_QUEUE;
+	}
+		
+	q->tail = q->head;
 	return (queue)q;
 }
 
@@ -619,31 +674,28 @@ queue_new(void)
  * following the FIFO principle.
  *
  * \param q     The given queue.
- * \param data  The data to add to the queue.
+ * \param data  The data to add to the tail of the queue.
  *
  * \return	The queue given as input, or ERROR_QUEUE if out of memory.
  */
 queue
 queue_enqueue(queue q, void *data)
 {
-	queue_t *new;
+	sll new;
 
 	assert(q != ERROR_QUEUE && q != NULL);
+	assert(q->head != ERROR_SLL && q->tail != ERROR_SLL);
 
-	if ((new = malloc(sizeof(queue_t))) == NULL)
+	new = sll_append_head(q->tail, data);
+
+	if (new == ERROR_SLL)
 		return (queue)ERROR_QUEUE;
 
-	new->data = data;
-	/*
-	 * The next statement is not necessary, since `new' will become the
-	 *  new q->end.
-	 */
-	/* new->next = NULL */
+	q->tail = new;
 
-	assert(q->end != NULL);
-	q->end->next = new;
-	q->end = new;
-	++q->count;
+	/* If we were empty before, we now have a head again */
+	if (sll_is_empty(q->head))
+		q->head = q->tail;
 
 	return q;
 }
@@ -664,20 +716,22 @@ void *
 queue_dequeue(queue q)
 {
 	void *res;
-	queue_t *old;
 
 	assert(q != ERROR_QUEUE && q != NULL);
 
 	if (queue_is_empty(q))
 		log_entry(WARN_ERROR, "Cannot dequeue from an empty queue.");
 
-	old = q->bgn;
-	assert(old != NULL);
+	res = (sll_get_data(q->head));
 
-	res = old->data;
-	q->bgn = q->bgn->next;
-	free(old);
-	--q->count;
+	q->head = sll_remove_head(q->head);
+
+	/*
+	 * Make sure our tail pointer doesn't cling to some old list that
+	 * doesn't exist after we remove the last element from the list
+	 */
+	if (sll_is_empty(q->head))
+		q->tail = q->head;
 
 	return res;
 }
@@ -710,9 +764,9 @@ queue_peek(queue q)
 		log_entry(WARN_ERROR, "Cannot peek at the head of an "
 			   "empty queue.");
 
-	assert(q->bgn != NULL);
+	assert(q->head != NULL);
 
-	return q->bgn->data;
+	return sll_get_data(q->head);
 }
 
 
@@ -728,7 +782,11 @@ queue_is_empty(queue q)
 {
 	assert(q != ERROR_QUEUE && q != NULL);
 
-	return q->count == 0;
+	/*
+	 * If the queue's head is an empty list, we sure as hell don't have
+	 * a tail, so the queue is empty.  Otherwise we're not empty.
+	 */
+	return sll_is_empty(q->head);
 }
 
 
@@ -743,8 +801,7 @@ queue_destroy(queue q)
 {
 	assert(q != ERROR_QUEUE && q != NULL);
 
-	while (!queue_is_empty(q))
-		queue_dequeue(q);
+	sll_destroy(q->head);
 
 	free((queue_t *)q);
 }

@@ -59,6 +59,7 @@ bool sll_is_empty(sll);
 /* SLL exceptions for head */
 sll sll_remove_head(sll);
 sll sll_prepend_head(sll, void *);
+sll sll_append_head(sll, void *);
 
 /* Accessor functions */
 void *sll_get_data(sll);
@@ -87,6 +88,7 @@ bool dll_is_empty(dll);
 /* DLL exceptions for head */
 dll dll_remove_head(dll);
 dll dll_prepend_head(dll, void *);
+dll dll_append_head(dll, void *);
 
 /* Accessor functions */
 void *dll_get_data(dll);
@@ -117,9 +119,8 @@ void stack_destroy(stack);
 /** Queue implementation */
 typedef struct queue_t {
 	void *data;
-	struct queue_t *bgn;
-	struct queue_t *end;
-	int count;
+	sll head;
+	sll tail;
 } queue_t, *queue;
 
 /** Invalid queue, used as error return value */

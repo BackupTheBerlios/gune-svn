@@ -11,4 +11,7 @@ SUBDIR=		gune test docs
 testall: all
 	test/test -a
 
+doc:
+	cd gune && ${MAKE} doc
+
 .include <bsd.subdir.mk>

@@ -41,87 +41,48 @@
 extern "C" {
 #endif
 
-/** Elements for use in singly linked lists */
-typedef struct sll_elem_t {
-	void *data;
-	struct sll_elem *next;
-} *sll_elem;
-
 /** Singly linked list implementation */
 typedef struct sll_t {
 	void *data;
-	sll_elem next;
-} *sll;
-
-typedef sll_elem *sll_iter;
+	struct sll_t *next;
+} sll_t, *sll;
 
 /** Invalid linked list, used as error return value */
-extern const struct sll_t * const ERROR_SLL;
+extern const sll_t * const ERROR_SLL;
 
-/** SLL creation/deletion functions */
+/* SLL creation/deletion functions */
 sll sll_create(void);
 void sll_destroy(sll);
 unsigned int sll_count(sll);
 bool sll_is_empty(sll);
 
-/** SLL exceptions for head */
+/* SLL exceptions for head */
 sll sll_remove_head(sll);
 sll sll_prepend_head(sll, void *);
-
-/** SLL iterator functions */
-bool sll_eof(sll_iter);
-sll_iter sll_at(sll, unsigned int);
-sll_iter sll_first(sll);
-sll_iter sll_last(sll);
-sll_iter sll_next(sll_iter);
-sll_iter sll_append(sll_iter, void *);
-void sll_remove_next(sll_iter);
-void *sll_get_data(sll_iter);
-void sll_set_data(sll_iter);
 
 #ifdef DEBUG
 void sll_dump(sll, char *);
 #endif
 
-/** Elements for use in doubly linked lists */
-typedef struct dll_elem_t {
-	void *data;
-	struct dll_elem *prev;
-	struct dll_elem *next;
-} *dll_elem;
-
 /** Doubly linked list implementation */
 typedef struct dll_t {
 	void *data;
-	struct dll_elem *prev;
-	struct dll_elem *next;
-} *dll;
-
-typedef dll_elem *dll_iter;
+	struct dll_t *prev;
+	struct dll_t *next;
+} dll_t, *dll;
 
 /** Invalid linked list, used as error return value */
-extern const struct dll_t *const ERROR_DLL;
+extern const dll_t * const ERROR_DLL;
 
-/** DLL creation/deletion functions */
+/* DLL creation/deletion functions */
 dll dll_create(void);
 void dll_destroy(dll);
 unsigned int dll_count(dll);
 bool dll_is_empty(dll);
 
-/** DLL exceptions for head */
+/* DLL exceptions for head */
 dll dll_remove_head(dll);
 dll dll_prepend_head(dll, void *);
-
-/** DLL iterator functions */
-bool dll_eof(dll_iter);
-dll_iter dll_at(dll, unsigned int);
-dll_iter dll_first(dll);
-dll_iter dll_last(dll);
-dll_iter dll_next(dll_iter);
-dll_iter dll_append(dll_iter, void *);
-void dll_remove_next(dll_iter);
-void *dll_get_data(dll_iter);
-void dll_set_data(dll_iter);
 
 #ifdef DEBUG
 void dll_dump(dll, char *);
@@ -132,7 +93,7 @@ void dll_dump(dll, char *);
 typedef struct stack_t {
 	void *data;
 	struct stack_t *head;
-} stack_t, *stack, * const stack_c;
+} stack_t, *stack;
 
 /** Invalid stack, used as error return value */
 extern const stack_t * const ERROR_STACK;

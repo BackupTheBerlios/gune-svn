@@ -48,18 +48,16 @@ ht_t * const ERROR_HT = (void *)error_dummy_func;
  *
  * \param range  The range of the key function (0 <= x < range).
  * \param hash   The hashing function to use on keys.
- * \param eq     The equals predicate for two keys.
  *
  * \return       A new empty hash table object, or ERROR_HT if out of memory.
  */
 ht
-ht_create(unsigned int range, hash_func hash, eq_func eq)
+ht_create(unsigned int range, hash_func hash)
 {
 	ht_t *t;
 	unsigned int i, j;
 
 	assert(hash != NULL);
-	assert(eq != NULL);
 
 	if ((t = malloc(sizeof(ht_t))) == NULL)
 		return (ht)ERROR_HT;
@@ -82,7 +80,7 @@ ht_create(unsigned int range, hash_func hash, eq_func eq)
 	 * not be the bottleneck of any sane program.
 	 */
 	for (i = 0; i < range; ++i) {
-		if ((*(t->buckets + i) = alist_create(eq)) == ERROR_ALIST) {
+		if ((*(t->buckets + i) = alist_create()) == ERROR_ALIST) {
 			/* Creation went wrong halfway?  Destroy all previous */
 			for (j = 0; j < i; ++j)
 				alist_destroy(*(t->buckets + j), NULL, NULL);
@@ -132,6 +130,7 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
  * \param t           The hash table to insert the data in.
  * \param key         The key of the data.
  * \param value       The data to insert.
+ * \param eq          The equals predicate for two keys.
  * \param free_value  The function used to free the old value's data if it
  *		       needs to be replaced, or NULL if the data does not
  *		       need to be freed.
@@ -140,7 +139,7 @@ ht_destroy(ht t, free_func key_free, free_func value_free)
  *               inserted.  Original hash table is still valid in case of error.
  */
 ht
-ht_insert(ht t, gendata key, gendata value, free_func free_value)
+ht_insert(ht t, gendata key, gendata value, eq_func eq, free_func free_value)
 {
 	unsigned int bucketnr;
 	alist al;
@@ -148,6 +147,7 @@ ht_insert(ht t, gendata key, gendata value, free_func free_value)
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 	assert(t->hash != NULL);
+	assert(eq != NULL);
 
 	bucketnr = t->hash(key, t->range);
 
@@ -158,7 +158,7 @@ ht_insert(ht t, gendata key, gendata value, free_func free_value)
 #endif
 
 	al = *(t->buckets + bucketnr);
-	al = alist_insert(al, key, value, free_value);
+	al = alist_insert(al, key, value, eq, free_value);
 
 	if (al == ERROR_ALIST)
 		t = ERROR_HT;
@@ -175,13 +175,14 @@ ht_insert(ht t, gendata key, gendata value, free_func free_value)
  *
  * \param t     The hashtable which contains the element.
  * \param key   The key to the element.
+ * \param eq    The equals predicate for two keys.
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
  * \return      0 if the element could not be found, nonzero if it could.
  */
 int
-ht_lookup(ht t, gendata key, gendata *data)
+ht_lookup(ht t, gendata key, eq_func eq, gendata *data)
 {
 	unsigned int bucketnr;
 	alist al;
@@ -189,6 +190,7 @@ ht_lookup(ht t, gendata key, gendata *data)
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 	assert(t->hash != NULL);
+	assert(eq != NULL);
 
 	bucketnr = t->hash(key, t->range);
 
@@ -199,7 +201,7 @@ ht_lookup(ht t, gendata key, gendata *data)
 #endif
 
 	al = *(t->buckets + bucketnr);
-	return alist_lookup(al, key, data);
+	return alist_lookup(al, key, eq, data);
 }
 
 
@@ -208,6 +210,7 @@ ht_lookup(ht t, gendata key, gendata *data)
  *
  * \param t           The hashtable which contains the element to delete.
  * \param key         The key to the element to delete.
+ * \param eq          The equals predicate for two keys.
  * \param key_free    The function which is used to free the key data, or
  *			NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
@@ -216,7 +219,8 @@ ht_lookup(ht t, gendata key, gendata *data)
  * \return      0 if the element could not be found, nonzero if it was deleted.
  */
 int
-ht_delete(ht t, gendata key, free_func key_free, free_func value_free)
+ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
+	  free_func value_free)
 {
 	unsigned int bucketnr;
 	alist al;
@@ -224,6 +228,7 @@ ht_delete(ht t, gendata key, free_func key_free, free_func value_free)
 	assert(t != ERROR_HT);
 	assert(t != NULL);
 	assert(t->hash != NULL);
+	assert(eq != NULL);
 
 	bucketnr = t->hash(key, t->range);
 
@@ -234,5 +239,5 @@ ht_delete(ht t, gendata key, free_func key_free, free_func value_free)
 #endif
 
 	al = *(t->buckets + bucketnr);
-	return alist_delete(al, key, key_free, value_free);
+	return alist_delete(al, key, eq, key_free, value_free);
 }

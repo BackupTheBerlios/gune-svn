@@ -45,17 +45,16 @@ extern "C" {
 /** Association list implementation */
 typedef struct alist_t {
 	sll list;
-	eq_func eq;
-} alist_t, *alist;
+} alist_t, * alist;
 
 /** Invalid association list, used as error return value */
 extern alist_t * const ERROR_ALIST;
 
-alist alist_create(eq_func);
+alist alist_create(void);
 void alist_destroy(alist, free_func, free_func);
-alist alist_insert(alist, gendata, gendata, free_func);
-int alist_lookup(alist, gendata, gendata *);
-int alist_delete(alist, gendata, free_func, free_func);
+alist alist_insert(alist, gendata, gendata, eq_func, free_func);
+int alist_lookup(alist, gendata, eq_func, gendata *);
+int alist_delete(alist, gendata, eq_func, free_func, free_func);
 
 #ifdef __cplusplus
 }

@@ -54,21 +54,16 @@ alist_t * const ERROR_ALIST = (void *)error_dummy_func;
 /**
  * Create a new, empty, association list.
  *
- * \param eq     The equals predicate for two keys.
- *
  * \return       A new empty alist object, or ERROR_ALIST if out of memory.
  */
 alist
-alist_create(eq_func eq)
+alist_create(void)
 {
 	alist_t *al;
-
-	assert(eq != NULL);
 
 	if ((al = malloc(sizeof(alist_t))) == NULL)
 		return (alist)ERROR_ALIST;
 
-	al->eq = eq;
 	al->list = sll_create();
 
 	return (alist)al;
@@ -122,6 +117,7 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
  * \param al	      The association list to insert the data in.
  * \param key	      The key of the data.
  * \param value	      The data to insert.
+ * \param eq          The equals predicate for two keys.
  * \param free_value  The function used to free the old value's data if it
  *		       needs to be replaced, or NULL if the data does not
  *		       need to be freed.
@@ -130,7 +126,8 @@ alist_destroy(alist al, free_func key_free, free_func value_free)
  *               inserted.  Original alist is still valid in case of error.
  */
 alist
-alist_insert(alist al, gendata key, gendata value, free_func free_value)
+alist_insert(alist al, gendata key, gendata value, eq_func eq,
+	     free_func free_value)
 {
 	sll new_head;
 	alist_entry e;
@@ -139,6 +136,7 @@ alist_insert(alist al, gendata key, gendata value, free_func free_value)
 
 	assert(al != ERROR_ALIST);
 	assert(al != NULL);
+	assert(eq != NULL);
 
 	/*
 	 * We'll have to check if there's already a value with the same key.
@@ -146,7 +144,7 @@ alist_insert(alist al, gendata key, gendata value, free_func free_value)
 	 */
 	while (!sll_empty(l = al->list)) {
 		e = sll_get_data(l).ptr;
-		if (al->eq(key, e->key)) {
+		if (eq(key, e->key)) {
 			/* Free old data */
 			if (free_value != NULL)
 				free_value(sll_get_data(l).ptr);
@@ -182,26 +180,27 @@ alist_insert(alist al, gendata key, gendata value, free_func free_value)
  *
  * \param al    The association list which contains the element.
  * \param key   The key to the element.
+ * \param eq    The equals predicate for two keys.
  * \param data  A pointer to the location where the element is stored, if
  *               it was found.
  *
  * \return      0 if the element could not be found, nonzero if it could.
  */
 int
-alist_lookup(alist al, gendata key, gendata *data)
+alist_lookup(alist al, gendata key, eq_func eq, gendata *data)
 {
 	sll l;
 	alist_entry e;
 
 	assert(al != ERROR_ALIST);
 	assert(al != NULL);
-	assert(al->eq != NULL);
+	assert(eq != NULL);
 
 	l = al->list;
 
 	while (!sll_empty(l)) {
 		e = sll_get_data(l).ptr;
-		if (al->eq(key, e->key)) {
+		if (eq(key, e->key)) {
 			*data = e->value;
 			return 1;
 		}
@@ -217,6 +216,7 @@ alist_lookup(alist al, gendata key, gendata *data)
  *
  * \param al          The association list which contains the element to delete.
  * \param key         The key to the element to delete.
+ * \param eq          The equals predicate for two keys.
  * \param key_free    The function which is used to free the key data, or
  *			NULL if no action should be taken on the key data.
  * \param value_free  The function which is used to free the value data, or
@@ -225,14 +225,15 @@ alist_lookup(alist al, gendata key, gendata *data)
  * \return     0 if the element could not be found, nonzero if it was deleted.
  */
 int
-alist_delete(alist al, gendata key, free_func key_free, free_func value_free)
+alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
+	     free_func value_free)
 {
 	sll l, n;
 	alist_entry e;
 
 	assert(al != ERROR_ALIST);
 	assert(al != NULL);
-	assert(al->eq != NULL);
+	assert(eq != NULL);
 
 	l = al->list;
 
@@ -244,7 +245,7 @@ alist_delete(alist al, gendata key, free_func key_free, free_func value_free)
 	 *  be easier, but it's not convenience we are after in here.
 	 */
 	e = sll_get_data(l).ptr;
-	if (al->eq(key, e->key)) {
+	if (eq(key, e->key)) {
 		if (key_free != NULL)
 			key_free(e->key.ptr);
 		if (value_free != NULL)
@@ -256,7 +257,7 @@ alist_delete(alist al, gendata key, free_func key_free, free_func value_free)
 
 	while (!sll_empty(n)) {
 		e = sll_get_data(n).ptr;
-		if (al->eq(key, e->key)) {
+		if (eq(key, e->key)) {
 			sll_remove_next(l);
 			return 1;
 		}

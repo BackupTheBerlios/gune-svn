@@ -61,6 +61,7 @@ ht ht_insert(ht, gendata, gendata, eq_func, free_func);
 ht ht_insert_uniq(ht, gendata, gendata, eq_func);
 ht ht_lookup(ht, gendata, eq_func, gendata *);
 ht ht_delete(ht, gendata, eq_func, free_func, free_func);
+int ht_empty(ht);
 void ht_walk(ht, assoc_func, gendata);
 
 #ifdef __cplusplus

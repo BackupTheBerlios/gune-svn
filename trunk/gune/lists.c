@@ -183,10 +183,8 @@ sll_remove_next(sll ll, free_func f)
 	sll begin;
 	
 	assert(ll != NULL);
+	assert(ll->next != NULL);
 	assert(!sll_empty(ll));
-
-	if (f != NULL)
-		f(ll->data.ptr);
 
 	/* Move the ll pointer to the next element */
 	begin = ll;
@@ -197,6 +195,9 @@ sll_remove_next(sll ll, free_func f)
 		errno = EINVAL;
 		return NULL;
 	}
+
+	if (f != NULL)
+		f(ll->data.ptr);
 
 	begin->next = ll->next;
 

@@ -316,6 +316,28 @@ ht_delete(ht t, gendata key, eq_func eq, free_func key_free,
 
 
 /**
+ * \brief Return whether or not a hash table is empty.
+ *
+ * \param t  The hash table to check.
+ *
+ * \return  Non-zero if the hash table is empty, 0 if it is not.
+ */
+int
+ht_empty(ht t)
+{
+	unsigned int i;
+
+	assert(t != NULL);
+
+	for (i = 0; i < t->range; ++i)
+		if (!alist_empty(t->buckets[i]))
+			return 0;
+
+	return 1;
+}
+
+
+/**
  * \brief Walk through all elements of a hash table.
  *
  * Walk a hash table, using a user-specified function on the table's pairs.

@@ -63,15 +63,70 @@ void * const CONST_PTR = (void *)constant_ptr_dummy_func;
 /**
  * \brief Pointer comparison function for hash tables and association lists.
  *
- * \param p1  The pointer to compare to p2.
- * \param p2  The pointer to compare to p1.
+ * \param p1  The pointer to compare to \p p2.
+ * \param p2  The pointer to compare to \p p1.
  *
- * \return  0 if pointer string is not equal, 1 if it is equal.
+ * \return  0 if pointer values are not equal, nonzero if they are equal.
+ *
+ * \sa ptr_hash, num_eq, posnum_eq, sym_eq
  */
 int
 ptr_eq(gendata p1, gendata p2)
 {
 	return (p1.ptr == p2.ptr);
+}
+
+
+/**
+ * \brief Signed integer comparison function for hash tables and
+ *	   association lists.
+ *
+ * \param n1  The number to compare to \p n2.
+ * \param n2  The number to compare to \p n1.
+ *
+ * \return  0 if numbers are not equal, nonzero if they are equal.
+ *
+ * \sa num_hash, ptr_eq, posnum_eq, sym_eq
+ */
+int
+num_eq(gendata n1, gendata n2)
+{
+	return (n1.num == n2.num);
+}
+
+
+/**
+ * \brief Unsigned integer comparison function for hash tables and
+ *	   association lists.
+ *
+ * \param n1  The number to compare to \p n2.
+ * \param n2  The number to compare to \p n1.
+ *
+ * \return  0 if numbers are not equal, nonzero if they are equal.
+ *
+ * \sa posnum_hash, ptr_eq, num_eq, sym_eq
+ */
+int
+posnum_eq(gendata n1, gendata n2)
+{
+	return (n1.posnum == n2.posnum);
+}
+
+
+/**
+ * \brief Character comparison function for hash tables and association lists.
+ *
+ * \param c1  The character to compare to \p c2.
+ * \param c2  The character to compare to \p c1.
+ *
+ * \return  0 if characters are not equal, nonzero if they are equal.
+ *
+ * \sa sym_hash, ptr_eq, num_eq, posnum_eq
+ */
+int
+sym_eq(gendata c1, gendata c2)
+{
+	return (c1.sym == c2.sym);
 }
 
 
@@ -96,7 +151,7 @@ ptr_eq(gendata p1, gendata p2)
  * \return  The hash of the supplied pointer, in the range
  *           \f$ [0..range-1] \f$.
  *
- * \sa ptr_eq
+ * \sa ptr_eq, num_hash, posnum_hash, sym_hash
  */
 unsigned int
 ptr_hash(gendata key, unsigned int range)
@@ -110,4 +165,78 @@ ptr_hash(gendata key, unsigned int range)
 	unsigned int p = (unsigned int)key.ptr;
 
 	return p % range;
+}
+
+
+/**
+ * \brief Calculate hash from a signed integer.
+ *
+ * \attention
+ * The range may \b not be larger than the maximum value of a signed
+ * integer on the target machine.  In practice, this restriction will
+ * rarely matter.
+ *
+ * \param key    The number to hash.
+ * \param range  The range of the hash table.  This should be a prime value
+ *		  for this function to ensure all hash table buckets are
+ *		  used equally much.
+ *
+ * \return  The hash of the supplied number, in the range
+ *           \f$ [0..range-1] \f$.
+ *
+ * \sa num_eq, ptr_hash, posnum_hash, sym_hash
+ */
+unsigned int
+num_hash(gendata key, unsigned int range)
+{
+	return (unsigned int)(key.num % range);
+}
+
+
+/**
+ * \brief Calculate hash from an unsigned integer.
+ *
+ * \attention
+ * The range may \b not be larger than the maximum value of an unsigned
+ * integer on the target machine.  In practice, this restriction will
+ * rarely matter.
+ *
+ * \param key    The number to hash.
+ * \param range  The range of the hash table.  This should be a prime value
+ *		  for this function to ensure all hash table buckets are
+ *		  used equally much.
+ *
+ * \return  The hash of the supplied number, in the range
+ *           \f$ [0..range-1] \f$.
+ *
+ * \sa posnum_eq, ptr_hash, num_hash, sym_hash
+ */
+unsigned int
+posnum_hash(gendata key, unsigned int range)
+{
+	return key.posnum % range;
+}
+
+
+/**
+ * \brief Calculate hash from a character (symbol).
+ *
+ * \attention
+ * The range may \b not be larger than the maximum value of a character
+ * on the target machine.  In general, characters are between 0 and 255.
+ *
+ * \param key    The number to hash.
+ * \param range  The range of the hash table.  This should be a prime value
+ *		  for this function to ensure all hash table buckets are
+ *		  used equally much.
+ *
+ * \return  The hash of the supplied number, in the range
+ *           \f$ [0..range-1] \f$.
+ *
+ * \sa sym_eq, ptr_hash, num_hash, posnum_hash
+ */
+unsigned int
+sym_hash(gendata key, unsigned int range)
+{
+	return (unsigned int)key.sym % range;
 }

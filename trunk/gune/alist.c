@@ -328,7 +328,8 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 			key_free(e->key.ptr);
 		if (value_free != NULL)
 			value_free(e->value.ptr);
-		sll_remove_head(l, free);
+		/* We are removing the first entry from the list! */
+		al->list = sll_remove_head(l, free);
 		return al;
 	}
 
@@ -346,12 +347,28 @@ alist_delete(alist al, gendata key, eq_func eq, free_func key_free,
 			return al;
 		}
 		l = sll_next(l);
-		n = sll_next(l);
+		n = sll_next(n);
 	}
 
 	/* If we got here, we obviously didn't find the entry. */
 	errno = EINVAL;
 	return NULL;
+}
+
+
+/**
+ * \brief Return whether or not an association list is empty.
+ *
+ * \param al  The association list to check.
+ *
+ * \return  Non-zero if the list is empty, 0 if it is not.
+ */
+int
+alist_empty(alist al)
+{
+	assert(al != NULL);
+
+	return sll_empty(al->list);
 }
 
 

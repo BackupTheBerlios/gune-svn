@@ -82,7 +82,13 @@
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 
 int ptr_eq(gendata, gendata);
+int num_eq(gendata, gendata);
+int posnum_eq(gendata, gendata);
+int sym_eq(gendata, gendata);
 unsigned int ptr_hash(gendata, unsigned int);
+unsigned int num_hash(gendata, unsigned int);
+unsigned int posnum_hash(gendata, unsigned int);
+unsigned int sym_hash(gendata, unsigned int);
 
 extern void * const CONST_PTR;
 

@@ -56,6 +56,92 @@ err_tester(warnlvl wrn)
 
 
 void
+walker(gendata *key, gendata *value, gendata customdata)
+{
+	customdata.ptr = NULL;			/* Shut up compiler */
+	assert(key->num == value->num);
+}
+
+void
+stress_test_alist(int amt)
+{
+	alist al;
+	int i;
+	gendata x, y;
+
+	al = alist_create();
+	assert(alist_empty(al));
+
+	printf("Creating an association list with %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = y.num = i;
+		al = alist_insert_uniq(al, x, y, num_eq);
+
+		assert(!alist_empty(al));
+
+		alist_lookup(al, x, num_eq, &y);
+		assert(x.num == y.num);
+	}
+
+	y.ptr = NULL;
+	printf("Walking an association list of %d items...\n", amt);
+	alist_walk(al, walker, y);
+
+	printf("Deleting %d items from the association list...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		/* Inserting an item that's already there should fail */
+		x.num = i;
+		y.num = i;			/* Value does not matter */
+		assert(alist_insert_uniq(al, x, y, num_eq) == NULL);
+
+		al = alist_delete(al, x, num_eq, NULL, NULL);
+	}
+	assert(alist_empty(al));
+	alist_destroy(al, NULL, NULL);
+}
+
+
+void
+stress_test_ht(int amt)
+{
+	ht t;
+	int i;
+	gendata x, y;
+
+	/* Just take a modulo somewhere around amt/4. */
+	t = ht_create((unsigned int)(amt / 4.0), num_hash);
+	assert(ht_empty(t));
+
+	printf("Creating a hash table with %d items...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		x.num = y.num = i;
+		t = ht_insert_uniq(t, x, y, num_eq);
+
+		assert(!ht_empty(t));
+
+		ht_lookup(t, x, num_eq, &y);
+		assert(x.num == y.num);
+	}
+
+	y.ptr = NULL;
+	printf("Walking a hash table of %d items...\n", amt);
+	ht_walk(t, walker, y);
+
+	printf("Deleting %d items from the hash table...\n", amt);
+	for (i = 0; i < amt; ++i) {
+		/* Inserting an item that's already there should fail */
+		x.num = i;
+		y.num = i;			/* Value does not matter */
+		assert(ht_insert_uniq(t, x, y, num_eq) == NULL);
+
+		t = ht_delete(t, x, num_eq, NULL, NULL);
+	}
+	assert(ht_empty(t));
+	ht_destroy(t, NULL, NULL);
+}
+
+
+void
 stress_test_array(int amt)
 {
 	array arr; /* matey! */
@@ -278,7 +364,7 @@ void
 usage(void)
 {
 	printf("usage: test [-a] [-n num] [-l log] [-s amt | -e lvl | "
-		"-d amt | -q amt | -r amt | -S amt]\n");
+		"-d amt | -q amt | -r amt | -S amt | -A amt | -h amt]\n");
 	printf("-n num	Perform selected tests `num' times. Default is 10.\n");
 	printf("-a      Perform every test, using %i for `amt'\n", DEFNUM);
 	printf("-s amt	Do a stack stress test on `amt' stack items.\n");
@@ -286,6 +372,8 @@ usage(void)
 	printf("-q amt  Do a queue stress test.\n");
 	printf("-r amt  Do an array stress test.\n");
 	printf("-S amt  Do a Singly Linked List (sll) stress test.\n");
+	printf("-A amt  Do an Association List (alist) stress test.\n");
+	printf("-h amt  Do a Hash Table (ht) stress test.\n");
 	printf("-e lvl  Print an error on the specified level (0-3).\n");
 	printf("-l log  Use log as a file to write messages to.\n");
 	printf("-c str  Test string copy routines.\n");
@@ -301,7 +389,7 @@ main(int argc, char **argv)
 	int ch;
 	extern char *malloc_options;
 	int i, loop, stack_test, queue_test, dll_test, sll_test, err_test;
-	int strcat_test, array_test, idle;
+	int strcat_test, array_test, alist_test, ht_test, idle;
 
 	warnlvl wrn = WARN_NOTIFY;
 
@@ -315,7 +403,7 @@ main(int argc, char **argv)
 
 	/* Default options */
 	stack_test = dll_test = err_test = strcat_test = queue_test = 0;
-	array_test = sll_test = 0;
+	array_test = sll_test = alist_test = ht_test = 0;
 	loop = DEFLOOPCOUNT;
 	idle = 1;	/* Set idle, unless a test should be run */
 
@@ -324,11 +412,16 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	while ((ch = getopt(argc, argv, "ac:d:e:l:n:q:r:s:S:v")) != -1)
+	while ((ch = getopt(argc, argv, "aA:c:d:e:h:l:n:q:r:s:S:v")) != -1)
 		switch ((char)ch) {
 			case 'a':
 				dll_test = stack_test = queue_test = DEFNUM;
-				array_test = sll_test = DEFNUM;
+				array_test = sll_test = alist_test = DEFNUM;
+				ht_test = DEFNUM;
+				idle = 0;
+				break;
+			case 'A':
+				alist_test = atoi(optarg);
 				idle = 0;
 				break;
 			case 'c':
@@ -352,6 +445,10 @@ main(int argc, char **argv)
 				}
 				idle = 0;
 				err_test = 1;
+				break;
+			case 'h':
+				ht_test = atoi(optarg);
+				idle = 0;
 				break;
 			case 'l':
 				set_logfile(fopen(optarg, "a"));
@@ -391,6 +488,14 @@ main(int argc, char **argv)
 	if (idle == 0)
 		for (i = 0; i < loop; ++i) {
 			printf("========= RUNNING TEST %d =========\n", i + 1);
+			if (alist_test > 0) {
+				printf("\n----> ALIST <----\n");
+				stress_test_alist(alist_test);
+			}
+			if (ht_test > 0) {
+				printf("\n----> HASH TABLE <----\n");
+				stress_test_ht(ht_test);
+			}
 			if (dll_test > 0) {
 				printf("\n----> DLL <----\n");
 				stress_test_dll(dll_test);

@@ -46,7 +46,7 @@ ht_t * const ERROR_HT = (void *)error_dummy_func;
 /**
  * Create a new, empty, hash table.
  *
- * \range   The range of the key function.
+ * \range   The range of the key function (0 <= x < range).
  *
  * \return  A new empty hash table object, or ERROR_HT if out of memory.
  */

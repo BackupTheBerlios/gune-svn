@@ -8,6 +8,8 @@
 
 SUBDIR=		gune test docs
 
+.PHONY: testall doc
+
 testall: all
 	test/test -a
 

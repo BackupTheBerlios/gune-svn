@@ -11,6 +11,8 @@ SRCS=	error.c lists.c string.c stack.c queue.c array.c ht.c alist.c misc.c
 CFLAGS+=	-I.. ${DEFS}
 LINTFLAGS+=	-I.. ${DEFS}
 
+.PHONY: doc
+
 # For developers who have Doxygen only
 doc:
 	doxygen
